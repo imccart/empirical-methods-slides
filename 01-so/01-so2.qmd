@@ -59,11 +59,17 @@ Let's work with the [HCRIS GitHub repository](https://github.com/imccart/HCRIS).
 
 ## The Data
 
-```{r eval=T, include=F}
+```{r}
+#| include: false
+#| eval: true
 hcris.data <- read_rds(here("data/HCRIS_Data.rds"))
 ```
 
-```{r hospital-count, eval=FALSE, warning=FALSE}
+```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+#| fig-align: center
+
 hcris.data %>% 
   ggplot(aes(x=as.factor(year))) + 
   geom_bar() +
@@ -74,21 +80,16 @@ hcris.data %>%
   ) + theme_bw() +
   theme(axis.text.x = element_text(angle = 90, hjust=1))
 ```
-.plot-callout[
-```{r hospital-count-callout, ref.label="hospital-count", fig.callout=TRUE, warning=FALSE}
-```
-]
+
 
 
 ---
-# Number of hospitals
 
-```{r hospital-count-output, ref.label="hospital-count", fig.callout=TRUE, warning=FALSE}
-```
+## Estimating hospital prices
 
----
-# Estimating hospital prices
-```{r price-calc}
+```{r}
+#| include: true
+#| eval: true
 hcris.data <- hcris.data %>%
   mutate( discount_factor = 1-tot_discounts/tot_charges,
           price_num = (ip_charges + icu_charges + ancillary_charges)*discount_factor - tot_mcare_payment,
@@ -97,10 +98,14 @@ hcris.data <- hcris.data %>%
 ```
 
 ---
-# Estimating hospital prices
 
-.left-code[
-```{r price-plot1, fig.show="hide"}
+## Estimating hospital prices
+
+```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+#| fig-align: center
+
 hcris.data %>% group_by(year) %>% 
   filter(price_denom>10, !is.na(price_denom), 
          price_num>0, !is.na(price_num)) %>%  
@@ -115,18 +120,17 @@ hcris.data %>% group_by(year) %>%
   ) + scale_y_continuous(labels=comma) +
   theme_bw() + theme(axis.text.x = element_text(angle = 90, hjust=1))
 ```
-]
-
-.right-plot[
-![](`r knitr::fig_chunk("price-plot1","png")`)
-]
 
 
 ---
-# Estimating hospital prices
 
-.left-code[
-```{r price-plot2, fig.show="hide"}
+## Removing very high prices
+
+```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+#| fig-align: center
+
 hcris.data %>% group_by(year) %>% 
   filter(price_denom>100, !is.na(price_denom), 
          price_num>0, !is.na(price_num),
@@ -142,11 +146,4 @@ hcris.data %>% group_by(year) %>%
   ) + scale_y_continuous(labels=comma) +
   theme_bw() + theme(axis.text.x = element_text(angle = 90, hjust=1))
 ```
-]
-
-.right-plot[
-![](`r knitr::fig_chunk("price-plot2","png")`)
-]
-
-
 

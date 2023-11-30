@@ -20,7 +20,7 @@ execute:
 #| include: false
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(tidyverse, ggplot2, lubridate, gapminder, scales,
-               hrbrthemes, gganimate, OECD, here)
+               hrbrthemes, gganimate, OECD, here, readxl)
 ```
 
 ## Motivating question
@@ -35,7 +35,7 @@ Let's motivate the course with this simple question...does health care spending 
 
 ```{r}
 #| include: false
-source(here("00-introduction/DartmouthAtlas.R"))
+source(here("00-intro/DartmouthAtlas.R"))
 ```
 
 
@@ -131,5 +131,5 @@ ggplot(data = (dartmouth.data %>% filter(Year==2015)),
 | Component                           | Weight |
 |:-|-:|
 | 5 × homework assignments (15% each) | 75% |
-| Peer review                   	  | 20% |
-| Participation  					  | 5%  |
+| 4 x peer review (5% each)           | 20% |
+| Participation  					            | 5%  |

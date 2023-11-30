@@ -29,7 +29,7 @@ pacman::p_load(tidyverse, ggplot2, lubridate, gapminder, scales,
 Defining characteristic of hospital services: *it's complicated!*
 
 ::: {.fragment}
-![](pics/BillExample.jpg)
+![](images/BillExample.jpg)
 :::
 
 
@@ -52,7 +52,7 @@ Price $\neq$ charge $\neq$ cost $\neq$ patient out-of-pocket spending
 
 ## What is a hospital price?
 
-![](pics/DifferentPrices.jpg)
+![](images/DifferentPrices.jpg)
 
 ::: {.aside}
 Source: [Health Care Pricing Project](https://healthcarepricingproject.org/)
@@ -101,11 +101,11 @@ A few empirical facts:
 :::: {.columns}
 
 ::: {.column width="50%"}
-![](pics/HC_var_withinmkt_hip_ga_atlanta.png)
+![](images/HC_var_withinmkt_hip_ga_atlanta.png)
 :::
 
 ::: {.column width="50%"}
-![](pics/HC_var_withinmkt_kmri_ga_atlanta.png)
+![](images/HC_var_withinmkt_kmri_ga_atlanta.png)
 :::
 
 ::::

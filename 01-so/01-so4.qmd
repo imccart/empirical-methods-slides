@@ -1,0 +1,505 @@
+---
+title: "Matching and Weighting IRL"
+author: "Ian McCarthy | Emory University"
+format: 
+  revealjs:
+    theme: [moon]
+    preview-links: auto
+    chalkboard:
+      boardmarker-width: 5
+    slide-number: true
+    width: 1600
+    height: 900    
+#    embed-resources: true
+from: markdown+emoji
+execute: 
+  echo: true
+---
+
+```{r}
+#| include: false
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, ggplot2, lubridate, gapminder, scales,
+               hrbrthemes, gganimate, OECD, here, MatchIt, cobalt)
+```
+
+
+## Penalized hospitals
+
+```{r}
+#| code-fold: true
+#| code-summary: "Find Penalized Hospitals"
+hcris.data <- read_rds(here("data/HCRIS_Data.rds"))
+
+hcris.data <- hcris.data %>%
+  mutate( discount_factor = 1-tot_discounts/tot_charges,
+          price_num = (ip_charges + icu_charges + ancillary_charges)*discount_factor - tot_mcare_payment,
+          price_denom = tot_discharges - mcare_discharges,
+          price = price_num/price_denom)
+
+final.hcris <- hcris.data %>% ungroup() %>%
+  filter(price_denom>100, !is.na(price_denom), 
+         price_num>0, !is.na(price_num),
+         price<100000, 
+         beds>30, year==2012) %>%  #<<
+  mutate( hvbp_payment = ifelse(is.na(hvbp_payment),0,hvbp_payment),
+          hrrp_payment = ifelse(is.na(hrrp_payment),0,abs(hrrp_payment)), #<<
+    penalty = (hvbp_payment-hrrp_payment<0)) #<<
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Mean Prices by Penalty"
+mean.pen <- round(mean(final.hcris$price[which(final.hcris$penalty==1)]),2)
+mean.nopen <- round(mean(final.hcris$price[which(final.hcris$penalty==0)]),2)
+```
+
+---
+
+## Summary stats
+
+Always important to look at your data before doing any formal analysis. Ask yourself a few questions:
+
+1. Are the magnitudes reasonable?
+2. Are there lots of missing values?
+3. Are there clear examples of misreporting?
+
+---
+
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{r}
+summary(hcris.data$price)
+plot(density(hcris.data$price, na.rm=TRUE))
+```
+
+:::
+
+::: {.column width="50%"}
+
+```{r}
+summary(final.hcris$price)
+plot(density(final.hcris$price))
+```
+:::
+
+::::
+
+---
+
+## Dealing with problems
+
+We've adopted a very brute force way to deal with outlier prices. Other approaches include:
+
+1. Investigate very closely the hospitals with extreme values
+2. Winsorize at certain thresholds (replace extreme values with pre-determined thresholds)
+3. Impute prices for extreme hospitals
+
+---
+
+## Differences among penalized hospitals
+
+- Mean price among penalized hospitals: `r format(mean.pen, big.mark=",")`
+- Mean price among non-penalized hospitals: `r format(mean.nopen, big.mark=",")`
+- Mean difference: `r format(mean.pen-mean.nopen, big.mark=",")`
+
+---
+
+## Comparison of hospitals
+Are penalized hospitals sufficiently similar to non-penalized hospitals?
+
+::: {.fragment}
+Let's look at covariate balance using a love plot, part of the `library(cobalt)` package.
+:::
+
+---
+
+## Love plots without adjustment
+
+```{r}
+#| code-fold: true
+#| code-summary: "Subset Data"
+lp.vars <- final.hcris %>% 
+  select(beds, mcaid_discharges, penalty, ip_charges, 
+         mcare_discharges, tot_mcare_payment, price) %>%
+  filter(complete.cases(.))
+lp.covs <- lp.vars %>% select(-c("penalty","price"))
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Love Plot"
+#| fig-align: center
+love.plot(bal.tab(lp.covs,treat=lp.vars$penalty), colors="black", shapes="circle", threshold=0.1) + 
+  theme_bw() + theme(legend.position="none")
+```
+
+
+---
+
+## Using matching to improve balance
+
+Some things to think about:
+
+- exact versus nearest neighbor
+- with or without ties (and how to break ties)
+- measure of distance
+
+---
+
+## 1. Exact Matching
+
+```{r}
+#| code-fold: true
+#| code-summary: "Exact Matching"
+m.exact <- Matching::Match(Y=lp.vars$price,
+                           Tr=lp.vars$penalty,
+                           X=lp.covs,
+                           M=1,
+                           exact=TRUE) #<<
+print(m.exact)
+```
+
+---
+
+## 1. Exact Matching (on a subset)
+
+```{r}
+#| code-fold: true
+#| code-summary: "Exact Matching"
+lp.covs2 <- lp.covs %>% select(beds, mcaid_discharges)
+m.exact <- Matching::Match(Y=lp.vars$price,
+                           Tr=lp.vars$penalty,
+                           X=lp.covs2,
+                           M=1,
+                           exact=TRUE,
+                           estimand="ATE") #<<
+```
+
+---
+
+## 1. Exact Matching (on a subset)
+```{r}
+#| code-fold: true
+#| code-summary: "Exact Matching Plot"
+#| fig-align: center
+love.plot(bal.tab(m.exact, covs = lp.covs2, treat = lp.vars$penalty),  
+          threshold=0.1, 
+          grid=FALSE, sample.names=c("Unmatched", "Matched"),
+          position="top", shapes=c("circle","triangle"),
+          colors=c("black","blue")) + 
+  theme_bw()
+```
+
+
+---
+
+## 2. Nearest neighbor matching (inverse variance)
+
+```{r}
+#| code-fold: true
+#| code-summary: "Nearest Neighbor Matching, Multiple Match"
+m.nn.var <- Matching::Match(Y=lp.vars$price,
+                            Tr=lp.vars$penalty,
+                            X=lp.covs,
+                            M=4,  #<<
+                            Weight=1,
+                            estimand="ATE")
+
+v.name=data.frame(new=c("Beds","Medicaid Discharges", "Inaptient Charges",
+                   "Medicare Discharges", "Medicare Payments"))
+```
+
+---
+
+## 2. Nearest neighbor matching (inverse variance)
+
+```{r}
+#| code-fold: true
+#| code-summary: "Nearest Neighbor Matching Plot"
+#| fig-align: center
+love.plot(bal.tab(m.nn.var, covs = lp.covs, treat = lp.vars$penalty), 
+          threshold=0.1, 
+          var.names=v.name,
+          grid=FALSE, sample.names=c("Unmatched", "Matched"),
+          position="top", shapes=c("circle","triangle"),
+          colors=c("black","blue")) + 
+  theme_bw()
+```
+
+
+
+---
+
+## 2. Nearest neighbor matching (inverse variance)
+
+```{r}
+#| code-fold: true
+#| code-summary: "Nearest Neighbor Matching, Single Match"
+m.nn.var2 <- Matching::Match(Y=lp.vars$price,
+                             Tr=lp.vars$penalty,
+                             X=lp.covs,
+                             M=1,   #<<
+                             Weight=1,
+                             estimand="ATE")
+```
+
+---
+
+## 2. Nearest neighbor matching (inverse variance)
+
+```{r}
+#| code-fold: true
+#| code-summary: "Nearest Neighbor Matching Plot"
+love.plot(bal.tab(m.nn.var2, covs = lp.covs, treat = lp.vars$penalty), 
+          threshold=0.1, 
+          var.names=v.name,
+          grid=FALSE, sample.names=c("Unmatched", "Matched"),
+          position="top", shapes=c("circle","triangle"),
+          colors=c("black","blue")) + 
+  theme_bw()
+```
+
+
+---
+
+## 2. Nearest neighbor matching (Mahalanobis)
+
+```{r}
+#| code-fold: true
+#| code-summary: "Nearest Neighbor Matching"
+m.nn.md <- Matching::Match(Y=lp.vars$price,
+                           Tr=lp.vars$penalty,
+                           X=lp.covs,
+                           M=1,
+                           Weight=2,
+                           estimand="ATE")                           
+```
+
+---
+
+## 2. Nearest neighbor matching (Mahalanobis)
+
+```{r}
+#| code-fold: true
+#| code-summary: "Nearest Neighbor Matching Plot, Mahalanobis"
+#| fig-align: center
+love.plot(bal.tab(m.nn.md, covs = lp.covs, treat = lp.vars$penalty), 
+          threshold=0.1, 
+          var.names=v.name,
+          grid=FALSE, sample.names=c("Unmatched", "Matched"),
+          position="top", shapes=c("circle","triangle"),
+          colors=c("black","blue")) + 
+  theme_bw()
+```
+
+
+---
+
+## 2. Nearest neighbor matching (propensity score)
+
+```{r}
+#| code-fold: true
+#| code-summary: "Nearest Neighbor Matching, PS" 
+logit.model <- glm(penalty ~ beds + mcaid_discharges + ip_charges + mcare_discharges +
+            tot_mcare_payment, family=binomial, data=lp.vars)
+ps <- fitted(logit.model)
+m.nn.ps <- Matching::Match(Y=lp.vars$price,
+                           Tr=lp.vars$penalty,
+                           X=ps,
+                           M=1,
+                           estimand="ATE")
+```
+
+---
+
+## 2. Nearest neighbor matching (propensity score)
+
+```{r}
+#| code-fold: true
+#| code-summary: "Nearest Neighbor Matching Plot, PS"
+#| fig-align: center
+love.plot(bal.tab(m.nn.ps, covs = lp.covs, treat = lp.vars$penalty), 
+          threshold=0.1, 
+          var.names=v.name,
+          grid=FALSE, sample.names=c("Unmatched", "Matched"),
+          position="top", shapes=c("circle","triangle"),
+          colors=c("black","blue")) + 
+  theme_bw()
+```
+
+---
+
+## 3. Weighting
+
+```{r}
+#| code-fold: true
+#| code-summary: "Propensity Weights"
+#| fig-align: center
+ggplot(lp.vars, aes(x=ps)) + geom_histogram() + 
+  facet_wrap(~ penalty, ncol=1) +
+  theme_bw()
+```
+
+---
+
+## Results: Exact matching
+
+```{r}
+#| echo: false
+summary(m.exact)
+```
+
+
+---
+
+## Results: Nearest neighbor
+
+- Inverse variance
+```{r}
+#| echo: false
+summary(m.nn.var2)
+```
+
+---
+
+## Results: Nearest neighbor
+
+- Mahalanobis
+```{r}
+#| echo: false
+summary(m.nn.md)
+```
+
+---
+
+## Results: Nearest neighbor
+
+- Propensity score
+```{r}
+#| echo: false
+summary(m.nn.ps)
+```
+
+
+---
+
+## Results: IPW weighting
+
+```{r}
+#| code-fold: true
+#| code-summary: "IPW Weights"
+lp.vars <- lp.vars %>%
+  mutate(ipw = case_when(
+    penalty==1 ~ 1/ps,
+    penalty==0 ~ 1/(1-ps),
+    TRUE ~ NA_real_
+  ))
+mean.t1 <- lp.vars %>% filter(penalty==1) %>%
+  select(price, ipw) %>% summarize(mean_p=weighted.mean(price,w=ipw))
+mean.t0 <- lp.vars %>% filter(penalty==0) %>%
+  select(price, ipw) %>% summarize(mean_p=weighted.mean(price,w=ipw))
+mean.t1$mean_p - mean.t0$mean_p
+```
+
+---
+
+## Results: IPW weighting with regression
+
+```{r}
+#| code-fold: true
+#| code-summary: "IPW Regression"
+ipw.reg <- lm(price ~ penalty, data=lp.vars, weights=ipw)
+summary(ipw.reg)
+```
+
+---
+
+## Results: Regression
+
+```{r}
+#| code-fold: true
+#| code-summary: "Two-step Regression"
+reg1.dat <- lp.vars %>% filter(penalty==1, complete.cases(.))
+reg1 <- lm(price ~ beds+ mcaid_discharges + ip_charges + mcare_discharges +
+            tot_mcare_payment, data=reg1.dat)
+
+reg0.dat <- lp.vars %>% filter(penalty==0, complete.cases(.))
+reg0 <- lm(price ~ beds + mcaid_discharges + ip_charges + mcare_discharges +
+            tot_mcare_payment, data=reg0.dat)
+pred1 <- predict(reg1,new=lp.vars)
+pred0 <- predict(reg0,new=lp.vars)
+mean(pred1-pred0)
+```
+
+---
+
+## Results: Regression in one step
+
+```{r}
+#| code-fold: true
+#| code-summary: "One-step Regression"
+reg.dat <- lp.vars %>% ungroup() %>% filter(complete.cases(.)) %>%
+  mutate(beds_diff = penalty*(beds - mean(beds)),
+         mcaid_diff = penalty*(mcaid_discharges - mean(mcaid_discharges)),
+         ip_diff = penalty*(ip_charges - mean(ip_charges)),
+         mcare_diff = penalty*(mcare_discharges - mean(mcare_discharges)),
+         mpay_diff = penalty*(tot_mcare_payment - mean(tot_mcare_payment)))
+reg <- lm(price ~ penalty + beds + mcaid_discharges + ip_charges + mcare_discharges + tot_mcare_payment + 
+            beds_diff + mcaid_diff + ip_diff + mcare_diff + mpay_diff,
+          data=reg.dat)
+summary(reg)
+```
+
+
+---
+
+## Summary of ATEs
+
+1. Exact matching: `r round(m.exact$est[1],2)`
+2. NN matching, inverse variance: `r round(m.nn.var2$est[1],2)`
+3. NN matching, mahalanobis: `r round(m.nn.md$est[1],2)`
+4. NN matching, pscore: `r round(m.nn.ps$est[1],2)`
+5. Inverse pscore weighting: `r round(mean.t1$mean_p - mean.t0$mean_p,2)`
+6. IPW regression: `r round(ipw.reg$coeff[2],2)`
+7. Regression: `r round(mean(pred1-pred0),2)`
+8. Regression 1-step: `r round(reg$coeff[2],2)`
+
+
+---
+
+## Summary of ATEs
+
+Why such large differences between linear (unweighted) regression and other approaches?
+
+
+::: {.fragment}
+Problem is due to common support. Without weighting, the treated group looks very different than the control group, and standard OLS (without weights) doesn't do anything to account for this.
+:::
+
+
+# So what have we learned?
+
+
+---
+
+## Key assumptions for causal inference so far
+
+1. Selection on observables
+2. Common support
+
+
+---
+
+## Causal effect assuming selection on observables
+
+If we assume selection on observables holds, then we only need to condition on the relevant covariates to identify a causal effect. But we still need to ensure common support.
+
+::: {.fragment}
+1. Matching
+2. Reweighting
+3. Regression
+:::

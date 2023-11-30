@@ -20,14 +20,14 @@ execute:
 #| include: false
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(tidyverse, ggplot2, lubridate, gapminder, scales,
-               hrbrthemes, gganimate, OECD, here)
+               hrbrthemes, gganimate, OECD, here, readxl)
 ```
 
 ## Why causal inference?
 
 ```{r}
 #| include: false
-source(here("00-introduction/DartmouthAtlas.R"))
+source(here("00-intro/DartmouthAtlas.R"))
 ```
 
 
@@ -128,13 +128,13 @@ Assumes **SUTVA** (stable unit treatment value assumption)...no interference acr
 :::: {.columns}
 
 ::: {.column width="50%"}
-![](pics/EmoryPicture.jpg)
+![](images/EmoryPicture.jpg)
 :::
 
 $Y_{1}$= \$75,000
 
 ::: {.column width="50%"}
-![](pics/UNTPicture.jpg)
+![](images/UNTPicture.jpg)
 
 $Y_{0}$= \$60,000
 :::
@@ -153,7 +153,7 @@ Single-year earnings due to Emory = $Y_{1}-Y_{0}$ = \$15,000
 
 ::: {.column width="50%"}
 
-![](pics/EmoryPicture.jpg)
+![](images/EmoryPicture.jpg)
 
 $Y_{1}$= \$75,000
 
@@ -161,7 +161,7 @@ $Y_{1}$= \$75,000
 
 ::: {.column width="50%"}
 
-![](pics/UNTPicture.jpg)
+![](images/UNTPicture.jpg)
 
 $Y_{0}$= ?
 :::
