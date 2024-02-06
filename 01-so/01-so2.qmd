@@ -50,6 +50,9 @@ Healthcare Cost Report Information System ('cost reports')
 
 Let's work with the [HCRIS GitHub repository](https://github.com/imccart/HCRIS).
 
+- Database structure (alphanumeric, numeric, report info)
+- Understanding where to find variables of interest
+- Quirks in versions and duplicate reports
 
 ---
 
