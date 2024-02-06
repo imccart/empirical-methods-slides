@@ -41,18 +41,14 @@ Healthcare Cost Report Information System ('cost reports')
 
 ## Hospital Cost Reports
 
-![](pics/HCRIS.png)
+![](../images/HCRIS.png)
 
 
 ---
 
 ## The Data
 
-Let's work with the [HCRIS GitHub repository](https://github.com/imccart/HCRIS). But forming the dataset is up to you this time.
-
-::: {.fragment}
-![](https://media.giphy.com/media/26DNdV3b6dqn1jzR6/giphy.gif)
-:::
+Let's work with the [HCRIS GitHub repository](https://github.com/imccart/HCRIS).
 
 
 ---
