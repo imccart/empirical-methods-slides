@@ -196,7 +196,7 @@ anim.p <- animate(p,nframes=200)
 anim_save("images/match_animate.gif", anim.p)
 ```
 
-![](images/match_animate.gif)
+![](../images/match_animate.gif)
 
 
 ---
@@ -215,13 +215,28 @@ anim_save("images/match_animate.gif", anim.p)
 
 ## Weighting
 
-1. Estimate propensity score `ps <- glm(D~X, family=binomial, data)`, denoted $\hat{\pi}(X_{i})$
+1. Estimate propensity score, denoted $\hat{\pi}(X_{i})$
 2. Weight by inverse of propensity score
-$\hat{\mu}_{1} = \frac{ \sum_{i=1}^{N} \frac{Y_{i} D_{i}}{\hat{\pi}(X_{i})} }{ \sum_{i=1}^{N} \frac{D_{i}}{\hat{\pi}(X_{i})} }$ and 
-$\hat{\mu}_{0} = \frac{ \sum_{i=1}^{N} \frac{Y_{i} (1-D_{i})}{1-\hat{\pi}(X_{i})} }{ \sum_{i=1}^{N} \frac{1-D_{i}}{1-\hat{\pi}(X_{i})} }$
+$$\hat{\mu}_{1} = \frac{ \sum_{i=1}^{N} \frac{Y_{i} D_{i}}{\hat{\pi}(X_{i})} }{ \sum_{i=1}^{N} \frac{D_{i}}{\hat{\pi}(X_{i})} } \text{ and } 
+$\hat{\mu}_{0} = \frac{ \sum_{i=1}^{N} \frac{Y_{i} (1-D_{i})}{1-\hat{\pi}(X_{i})} }{ \sum_{i=1}^{N} \frac{1-D_{i}}{1-\hat{\pi}(X_{i})} }$$
 
 3. Form "inverse-propensity weighted" ATE:
-$\hat{\delta}^{IPW} = \hat{\mu}_{1} - \hat{\mu}_{0}$
+$$\hat{\delta}^{IPW} = \hat{\mu}_{1} - \hat{\mu}_{0}$$
+
+---
+
+## What is the propensity score?
+
+- Want to estimate the probability of being in the treatment group given covariates
+- Need probabilities to be between 0 and 1
+- Latent utility setup:
+  - $u_{i} = \beta x_{i} + \varepsilon_{i}$
+  - $D_{i} = 1$ if $u_{i} > 0$
+  - $D_{i} = 0$ if $u_{i} \leq 0$
+  - $\text{Pr}(D_{i}=1|x_{i}) = \text{Pr}(\beta x_{i} + \varepsilon_{i} > 0|x_{i}) = \text{Pr}(\varepsilon_{i} > -\beta x_{i}|x_{i}) = F(-\beta x_{i})$
+  - Requires a distributional assumption on $\varepsilon_{i}$, e.g., logistic or normal
+  - Estimated via maximum likelihood or other methods
+  - In R: `ps <- glm(D~X, family=binomial, data)`
 
 ---
 
@@ -295,7 +310,7 @@ anim.reg <- animate(p,nframes=200)
 anim_save("images/reg_animate.gif", anim.reg)
 ```
 
-![](images/reg_animate.gif)
+![](../images/reg_animate.gif)
 
 
 ---
