@@ -1,0 +1,97 @@
+---
+title: "CDC Data on Smoking and Cigarette Prices"
+author: "Ian McCarthy | Emory University"
+format: 
+  revealjs:
+    theme: [moon]
+    preview-links: auto
+    chalkboard:
+      boardmarker-width: 5
+    slide-number: true
+    width: 1600
+    height: 900    
+#    embed-resources: true
+from: markdown+emoji
+execute: 
+  echo: true
+---
+
+```{r}
+#| include: false
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, ggplot2, lubridate, gapminder, scales,
+               hrbrthemes, gganimate, OECD, here)
+```
+
+
+## The Data
+
+```{r}
+#| eval: TRUE
+#| include: FALSE
+
+cig.data <- read_rds(here("data/TaxBurden_Data.rds"))
+```
+
+- Data from [CDC Tax Burden on Tobacco](https://data.cdc.gov/Policy/The-Tax-Burden-on-Tobacco-1970-2018/7nwe-3aj9/data)
+- Visit GitHub repository for other info: [Tobacco GitHub repository](https://github.com/imccart/CDC-Tobacco)
+- Supplement with CPI data, also in GitHub repo.
+
+---
+
+## Summary stats
+
+We're interested in cigarette prices and sales, so let's focus our summaries on those two variables
+```{r, results="asis"}
+stargazer(as.data.frame(cig.data %>% select(sales_per_capita, price_cpi, cost_per_pack)), type="html")
+```
+
+
+---
+# Cigarette Sales
+```{r cig-sales, eval=FALSE, warning=FALSE}
+cig.data %>% 
+  ggplot(aes(x=Year,y=sales_per_capita)) + 
+  stat_summary(fun.y="mean",geom="line") +
+  labs(
+    x="Year",
+    y="Packs per Capita",
+    title="Cigarette Sales"
+  ) + theme_bw() +
+  scale_x_continuous(breaks=seq(1970, 2020, 5))
+```
+.plot-callout[
+```{r cig-sales-callout, ref.label="cig-sales", fig.callout=TRUE, warning=FALSE}
+```
+]
+
+---
+# Cigarette Sales
+
+```{r cig-sales-output, ref.label="cig-sales", fig.callout=TRUE, warning=FALSE}
+```
+
+---
+# Cigarette Prices
+```{r cig-price, eval=FALSE, warning=FALSE}
+cig.data %>% 
+  ggplot(aes(x=Year,y=price_cpi)) + 
+  stat_summary(fun.y="mean",geom="line") +
+  labs(
+    x="Year",
+    y="Price per Pack ($)",
+    title="Cigarette Prices in 2010 Real Dollars"
+  ) + theme_bw() +
+  scale_x_continuous(breaks=seq(1970, 2020, 5))
+```
+.plot-callout[
+```{r cig-price-callout, ref.label="cig-price", fig.callout=TRUE, warning=FALSE}
+```
+]
+
+---
+# Cigarette Prices
+
+```{r cig-price-output, ref.label="cig-price", fig.callout=TRUE, warning=FALSE}
+```
+
