@@ -1,0 +1,355 @@
+---
+title: "CDC Data on Smoking and Cigarette Prices"
+author: "Ian McCarthy | Emory University"
+format: 
+  revealjs:
+    theme: [moon]
+    preview-links: auto
+    chalkboard:
+      boardmarker-width: 5
+    slide-number: true
+    width: 1600
+    height: 900    
+#    embed-resources: true
+from: markdown+emoji
+execute: 
+  echo: true
+---
+
+```{r}
+#| include: false
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, readr, readxl, hrbrthemes,
+               scales, plotly, gganimate, cobalt, fixest, modelsummary, ggthemes, here)
+```
+
+
+# Formal IV Assumptions
+
+---
+
+## Key assumptions
+
+1. *Exclusion:* Instrument is uncorrelated with the error term
+2. *Validity:* Instrument is correlated with the endogenous variable
+3. *Monotonicity:* Treatment more (less) likely for those with higher (lower) values of the instrument
+
+::: {.fragment}
+Assumptions 1 and 2 sometimes grouped into an *only through* condition.
+:::
+
+---
+
+## Exclusion
+
+Conley et al (2010) and "plausible exogeneity", union of confidence intervals approach
+
+- Suppose extent of violation is known in $y_{i} = \beta x_{i} + \gamma z_{i} + \varepsilon_{i}$, so that $\gamma = \gamma_{0}$
+- IV/TSLS applied to $y_{i} - \gamma_{0}z_{i} = \beta x_{i} + \varepsilon_{i}$ works
+- With $\gamma_{0}$ unknown...do this a bunch of times!
+    - Pick $\gamma=\gamma^{b}$ for $b=1,...,B$
+    - Obtain $(1-\alpha)$ % confidence interval for $\beta$, denoted $CI^{b}(1-\alpha)$
+    - Compute final CI as the union of all $CI^{b}$
+
+---
+
+## Exclusion
+
+Kippersluis and Rietveld (2018), "Beyond Plausibly Exogenous"
+
+- "zero-first-stage" test
+- Focus on subsample for which your instrument is not correlated with the endogenous variable of interest
+    1. Regress the outcome on all covariates and the instruments among this subsample
+    2. Coefficient on the instruments captures any potential direct effect of the instruments on the outcome (since the correlation with the endogenous variable is 0 by assumption). 
+
+
+---
+
+## Validity
+
+Just says that your instrument is correlated with the endogenous variable, but what about the **strength** of the correlation?
+
+![](https://media.giphy.com/media/3oFzlXvco5Wt2gnMcg/giphy.gif)
+
+---
+
+## Why we care about instrument strength
+
+Recall our schooling and wages equation, $$y = \beta S + \epsilon.$$ Bias in IV can be represented as:
+
+$$Bias_{IV} \approx \frac{Cov(S, \epsilon)}{V(S)} \frac{1}{F+1} = Bias_{OLS} \frac{1}{F+1}$$
+
+- Bias in IV may be close to OLS, depending on instrument strength
+- **Bigger problem:** Bias could be bigger than OLS if exclusion restriction not *fully* satisfied
+
+
+---
+
+## Testing strength of instruments
+
+**Single endogenous variable**
+
+- Stock & Yogo (2005) test based on first-stage F-stat (homoskedasticity only)
+    - Critical values in tables, based on number of instruments
+    - Rule-of-thumb of 10 with single instrument (higher with more instruments)
+    - Lee et al (2022): With first-stage F-stat of 10, standard "95% confidence interval" for second stage is really an 85% confidence interval
+    - Over-reliance on "rules of thumb", as seen in [Anders and Kasy (2019)](https://www.aeaweb.org/articles?id=10.1257/aer.20180310)
+
+
+---
+
+## Testing strength of instruments
+
+**Single endogenous variable**
+
+- Stock & Yogo (2005) test based on first-stage F-stat (homoskedasticity only)
+- Kleibergen & Paap (2007) Wald statistic
+- Effective F-statistic from Olea & Pflueger (2013)
+
+
+---
+
+## Testing strength of instruments: First-stage
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Single endogenous variable**
+
+1. Homoskedasticity
+    - Stock & Yogo, effective F-stat
+2. Heteroskedasticity
+    - Effective F-stat
+:::
+
+::: {.column width="50%"}
+
+**Many endogenous variables**
+
+1. Homoskedasticity
+    - Stock & Yogo with Cragg & Donald statistic, Sanderson & Windmeijer (2016), effective F-stat
+2. Heteroskedasticity
+    - Kleibergen & Papp Wald is robust analog of Cragg & Donald statistic, effective F-stat
+:::
+
+::::
+
+
+---
+
+## Making sense of all of this...
+
+- Test first-stage using effective F-stat (inference is harder and beyond this class)
+- Many endogenous variables problematic because strength of instruments for one variable need not imply strength of instruments for others
+
+
+
+# IV with Simulated Data
+
+
+---
+
+## Animation for IV
+
+```{r} 
+#| include: false
+#| messages: false
+#| warning: false
+
+df <- data.frame(Z = as.integer(1:200>100),
+                 W = rnorm(200)) %>%
+  mutate(X = .5+2*W +2*Z+ rnorm(200)) %>%
+  mutate(Y = -X + 4*W + 1 + rnorm(200),time="1") %>%
+  group_by(Z) %>%
+  mutate(mean_X=mean(X),mean_Y=mean(Y),YL=NA,XL=NA) %>%
+  ungroup()
+
+#Calculate correlations
+before_cor <- paste("1. Start with raw data. Correlation between X and Y: ",round(cor(df$X,df$Y),3),sep='')
+afterlab <- '6. Draw a line between the points. The slope is the effect of X on Y.'
+
+dffull <- rbind(
+  #Step 1: Raw data only
+  df %>% mutate(mean_X=NA,mean_Y=NA,time=before_cor),
+  #Step 2: Add x-lines
+  df %>% mutate(mean_Y=NA,time='2. Figure out what differences in X are explained by Z'),
+  #Step 3: X de-meaned 
+  df %>% mutate(X = mean_X,mean_Y=NA,time="3. Remove everything in X not explained by Z"),
+  #Step 4: Remove X lines, add Y
+  df %>% mutate(X = mean_X,mean_X=NA,time="4. Figure out what differences in Y are explained by Z"),
+  #Step 5: Y de-meaned
+  df %>% mutate(X = mean_X,Y = mean_Y,mean_X=NA,time="5. Remove everything in Y not explained by Z"),
+  #Step 6: Raw demeaned data only
+  df %>% mutate(X =  mean_X,Y =mean_Y,mean_X=NA,mean_Y=NA,YL=mean_Y,XL=mean_X,time=afterlab))
+
+#Get line segments
+endpts <- df %>%
+  group_by(Z) %>%
+  summarize(mean_X=mean(mean_X),mean_Y=mean(mean_Y))
+
+p <- ggplot(dffull,aes(y=Y,x=X,color=as.factor(Z)))+geom_point()+
+  geom_vline(aes(xintercept=mean_X,color=as.factor(Z)))+
+  geom_hline(aes(yintercept=mean_Y,color=as.factor(Z)))+
+  guides(color=guide_legend(title="Z"))+
+  geom_segment(aes(x=ifelse(time==afterlab,endpts$mean_X[1],NA),
+                   y=endpts$mean_Y[1],xend=endpts$mean_X[2],
+                   yend=endpts$mean_Y[2]),size=1,color='blue')+
+  scale_color_colorblind()+
+  labs(title = 'The Relationship between Y and X, With Binary Z as an Instrumental Variable \n{next_state}')+
+  transition_states(time,transition_length=c(6,16,6,16,6,6),state_length=c(50,22,12,22,12,50),wrap=FALSE)+
+  ease_aes('sine-in-out')+
+  exit_fade()+enter_fade()
+
+anim.iv <- animate(p,nframes=175)
+anim_save("images/iv_animate.gif", anim.iv)
+```
+
+![](../images/iv_animate.gif)
+
+
+---
+
+## Simulated data
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{r}
+n <- 5000
+b.true <- 5.25
+iv.dat <- tibble(
+  z = rnorm(n,0,2),
+  eps = rnorm(n,0,1),
+  d = (z + 1.5*eps + rnorm(n,0,1) >0.25),
+  y = 2.5 + b.true*d + eps + rnorm(n,0,0.5)
+)
+```
+:::
+
+::: {.column width="50%"}
+
+- endogenous `eps`: affects treatment and outcome
+- `z` is an instrument: affects treatment but no direct effect on outcome
+:::
+
+::::
+
+---
+
+## Results with simulated data
+
+Recall that the *true* treatment effect is `r b.true`
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+summary(lm(y~d, data=iv.dat))
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+summary(feols(y ~ 1 | d ~ z, data=iv.dat))
+```
+:::
+
+::::
+
+---
+
+## Checking instrument
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+- Check the 'first stage'
+```{r}
+#| echo: false
+summary(lm(d~z, data=iv.dat))
+```
+:::
+
+::: {.column width="50%"}
+
+- Check the 'reduced form'
+```{r}
+#| echo: false
+summary(lm(y~z, data=iv.dat))
+```
+:::
+
+::::
+
+
+---
+
+## Two-stage equivalence
+```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+step1 <- lm(d ~ z, data=iv.dat)
+d.hat <- predict(step1)
+step2 <- lm(y ~ d.hat, data=iv.dat)
+summary(step2)
+```
+
+
+
+# Interpretation
+
+
+
+---
+
+## Heterogenous TEs
+
+- In constant treatment effects, $Y_{i}(1) - Y_{i}(0) = \delta_{i} = \delta, \text{ } \forall i$
+- Heterogeneous effects, $\delta_{i} \neq \delta$
+- With IV, what parameter did we just estimate? Need **monotonicity** assumption to answer this
+
+
+---
+
+## Monotonicity
+
+Assumption: Denote the effect of our instrument on treatment by $\pi_{1i}$. Monotonicity states that $\pi_{1i} \geq 0$ or $\pi_{1i} \leq 0,  \text{ } \forall i$.
+
+- Allows for $\pi_{1i}=0$ (no effect on treatment for some people)
+- All those affected by the instrument are affected in the same "direction"
+- With heterogeneous ATE and monotonicity assumption, IV provides a "Local Average Treatment Effect" (LATE)
+
+---
+
+## LATE and IV Interpretation
+
+- LATE is the effect of treatment among those affected by the instrument (compliers only).
+- Recall original Wald estimator:
+
+$$\delta_{IV} = \frac{E[Y_{i} | Z_{i}=1] - E[Y_{i} | Z_{i}=0]}{E[D_{i} | Z_{i}=1] - E[D_{i} | Z_{i}=0]}=E[Y_{i}(1) - Y_{i}(0) | \text{complier}]$$
+
+- Practically, monotonicity assumes there are no defiers and restricts us to learning only about compliers
+
+---
+
+## Is LATE meaningful?
+
+- Learn about average treatment effect for compliers
+- Different estimates for different compliers
+    - IV based on merit scholarships
+    - IV based on financial aid
+    - Same compliers? Probably not
+
+---
+
+## LATE with defiers
+
+- In presence of defiers, IV estimates a weighted difference between effect on compliers and defiers (in general)
+- LATE can be restored if subgroup of compliers accounts for the same percentage as defiers and has same LATE
+- Offsetting behavior of compliers and defiers, so that remaining compliers dictate LATE
+
