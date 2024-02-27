@@ -11,7 +11,7 @@
   <meta name="generator" content="quarto-1.3.450">
 
   <meta name="author" content="Ian McCarthy | Emory University">
-  <title>CDC Data on Smoking and Cigarette Prices</title>
+  <title>Instrumental Variables: Part I</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -392,7 +392,7 @@
     <div class="slides">
 
 <section id="title-slide" class="quarto-title-block center">
-  <h1 class="title">CDC Data on Smoking and Cigarette Prices</h1>
+  <h1 class="title">Instrumental Variables: Part I</h1>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -562,18 +562,18 @@ lm(formula = y ~ d, data = iv.dat)
 
 Residuals:
     Min      1Q  Median      3Q     Max 
--4.6146 -0.6882 -0.0030  0.7026  3.6417 
+-3.8321 -0.6666 -0.0163  0.6960  3.2710 
 
 Coefficients:
             Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)  2.09145    0.02006   104.3   &lt;2e-16 ***
-dTRUE        6.11516    0.02929   208.8   &lt;2e-16 ***
+(Intercept)  2.08349    0.01936   107.6   &lt;2e-16 ***
+dTRUE        6.15342    0.02887   213.2   &lt;2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 1.034 on 4998 degrees of freedom
-Multiple R-squared:  0.8971,    Adjusted R-squared:  0.8971 
-F-statistic: 4.358e+04 on 1 and 4998 DF,  p-value: &lt; 2.2e-16</code></pre>
+Residual standard error: 1.015 on 4998 degrees of freedom
+Multiple R-squared:  0.9009,    Adjusted R-squared:  0.9009 
+F-statistic: 4.544e+04 on 1 and 4998 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
 </div>
 </div><div class="column" style="width:50%;">
@@ -583,14 +583,14 @@ F-statistic: 4.358e+04 on 1 and 4998 DF,  p-value: &lt; 2.2e-16</code></pre>
 Second stage: Dep. Var.: y
 Observations: 5,000 
 Standard-errors: IID 
-            Estimate Std. Error  t value  Pr(&gt;|t|)    
-(Intercept)  2.48909   0.029188  85.2776 &lt; 2.2e-16 ***
-fit_dTRUE    5.26732   0.052333 100.6492 &lt; 2.2e-16 ***
+            Estimate Std. Error t value  Pr(&gt;|t|)    
+(Intercept)  2.49826   0.028810 86.7151 &lt; 2.2e-16 ***
+fit_dTRUE    5.23088   0.053642 97.5145 &lt; 2.2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-RMSE: 1.11673   Adj. R2: 0.879844
-F-test (1st stage), dTRUE: stat = 2,883.1, p &lt; 2.2e-16, on 1 and 4,998 DoF.
-               Wu-Hausman: stat =   534.9, p &lt; 2.2e-16, on 1 and 4,997 DoF.</code></pre>
+RMSE: 1.11415   Adj. R2: 0.880626
+F-test (1st stage), dTRUE: stat = 2,677.0, p &lt; 2.2e-16, on 1 and 4,998 DoF.
+               Wu-Hausman: stat =   614.1, p &lt; 2.2e-16, on 1 and 4,997 DoF.</code></pre>
 </div>
 </div>
 </div>
@@ -611,18 +611,18 @@ lm(formula = d ~ z, data = iv.dat)
 
 Residuals:
      Min       1Q   Median       3Q      Max 
--1.09614 -0.33066 -0.01077  0.32837  1.14479 
+-1.00680 -0.33096 -0.02621  0.33441  1.12780 
 
 Coefficients:
             Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept) 0.469739   0.005621   83.56   &lt;2e-16 ***
-z           0.147750   0.002752   53.70   &lt;2e-16 ***
+(Intercept) 0.451323   0.005678   79.48   &lt;2e-16 ***
+z           0.147650   0.002854   51.74   &lt;2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 0.3975 on 4998 degrees of freedom
-Multiple R-squared:  0.3658,    Adjusted R-squared:  0.3657 
-F-statistic:  2883 on 1 and 4998 DF,  p-value: &lt; 2.2e-16</code></pre>
+Residual standard error: 0.4015 on 4998 degrees of freedom
+Multiple R-squared:  0.3488,    Adjusted R-squared:  0.3487 
+F-statistic:  2677 on 1 and 4998 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
 </div>
 </div><div class="column" style="width:50%;">
@@ -637,18 +637,18 @@ lm(formula = y ~ z, data = iv.dat)
 
 Residuals:
     Min      1Q  Median      3Q     Max 
--8.1813 -2.1418 -0.0605  2.1620  8.6393 
+-7.8509 -2.2071 -0.0964  2.1609  8.1848 
 
 Coefficients:
             Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)  4.96335    0.03964  125.21   &lt;2e-16 ***
-z            0.77825    0.01940   40.11   &lt;2e-16 ***
+(Intercept)  4.85908    0.04011  121.16   &lt;2e-16 ***
+z            0.77234    0.02016   38.32   &lt;2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 2.803 on 4998 degrees of freedom
-Multiple R-squared:  0.2435,    Adjusted R-squared:  0.2433 
-F-statistic:  1609 on 1 and 4998 DF,  p-value: &lt; 2.2e-16</code></pre>
+Residual standard error: 2.836 on 4998 degrees of freedom
+Multiple R-squared:  0.2271,    Adjusted R-squared:  0.2269 
+F-statistic:  1468 on 1 and 4998 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
 </div>
 </div>
@@ -671,18 +671,18 @@ lm(formula = y ~ d.hat, data = iv.dat)
 
 Residuals:
     Min      1Q  Median      3Q     Max 
--8.1813 -2.1418 -0.0605  2.1620  8.6393 
+-7.8509 -2.2071 -0.0964  2.1609  8.1848 
 
 Coefficients:
             Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)  2.48909    0.07325   33.98   &lt;2e-16 ***
-d.hat        5.26732    0.13133   40.11   &lt;2e-16 ***
+(Intercept)  2.49826    0.07332   34.08   &lt;2e-16 ***
+d.hat        5.23088    0.13651   38.32   &lt;2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 2.803 on 4998 degrees of freedom
-Multiple R-squared:  0.2435,    Adjusted R-squared:  0.2433 
-F-statistic:  1609 on 1 and 4998 DF,  p-value: &lt; 2.2e-16</code></pre>
+Residual standard error: 2.836 on 4998 degrees of freedom
+Multiple R-squared:  0.2271,    Adjusted R-squared:  0.2269 
+F-statistic:  1468 on 1 and 4998 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
 </div>
 </section></section>

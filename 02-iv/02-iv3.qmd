@@ -1,5 +1,5 @@
 ---
-title: "CDC Data on Smoking and Cigarette Prices"
+title: "Instrumental Variables: Part I"
 author: "Ian McCarthy | Emory University"
 format: 
   revealjs:
