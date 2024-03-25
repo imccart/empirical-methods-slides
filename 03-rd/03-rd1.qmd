@@ -115,4 +115,6 @@ Eligible plans may receive two bonuses:
 
 ## Quality Ratings as Information Disclosure
 
-
+- Health insurance is a complicated product with many dimensions
+- Strong empirical evidence of "bad" choices in health insurance
+- Quality disclosure might help consumers make better choices

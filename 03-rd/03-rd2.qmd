@@ -26,7 +26,7 @@ pacman::p_load(tidyverse, ggplot2, lubridate, gapminder, scales,
 
 ## Medicare Advantage Data
 
-- Recall the Medicare Advantage repository, [Medicare Advantage GitHub repository](https://github.com/imccart-test/ma)
+- Recall the Medicare Advantage repository, [Medicare Advantage GitHub repository](https://github.com/imccart/ma-class)
 
 ::: {.fragment}
 - Now we need to work with the **final** dataset, 'final_ma_data'
