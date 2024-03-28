@@ -18,25 +18,33 @@ execute:
 
 ```{r}
 #| include: false
+
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(tidyverse, ggplot2, lubridate, gapminder, scales,
-               hrbrthemes, gganimate, OECD, here)
+               hrbrthemes, gganimate, OECD, here, modelsummary, 
+               rddensity, rdrobust, MatchIt, cobalt)
 ```
 
 
-# MA Data
-```{r eval=T, include=T}
-ma.data <- read_rds(here("data/final_ma_data.rds"))
-```
+## MA Data
 
 ```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+
+ma.data <- read_rds(here("data/final_ma_data.rds"))
 ma.data.clean <- ma.data %>%
   filter(!is.na(avg_enrollment) & year==2009 & !is.na(partc_score)) #<<
 ```
 
 ---
-# Calculate raw average rating
+
+## Calculate raw average rating
+
 ```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+
 ma.data.clean <- ma.data.clean %>%
   mutate(raw_rating=rowMeans(
     cbind(breastcancer_screen,rectalcancer_screen,cv_cholscreen,diabetes_cholscreen,
@@ -50,17 +58,20 @@ ma.data.clean <- ma.data.clean %>%
           copd_test,betablocker,bladder,falling,appeals_timely,
           appeals_review),
     na.rm=T)) %>%
-  select(contractid, planid, fips, avg_enrollment, first_enrollment,
-         last_enrollment, state, county, raw_rating, partc_score,
+  select(contractid, planid, fips, avg_enrollment, state, county, raw_rating, partc_score,
          avg_eligibles, avg_enrolled, premium_partc, risk_ab, Star_Rating,
          bid, avg_ffscost, ma_rate)
 ```
 
 
 ---
-# Distribution of star ratings
 
-```{r rating-count, eval=FALSE, warning=FALSE}
+## Distribution of star ratings
+
+```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+
 ma.data.clean %>% 
   ggplot(aes(x=as.factor(Star_Rating))) + 
   geom_bar() +
@@ -70,27 +81,24 @@ ma.data.clean %>%
     title="Frequency Distribution of Star Ratings"
   ) + theme_bw()
 ```
-.plot-callout[
-```{r rating-count-callout, ref.label="rating-count", fig.callout=TRUE, warning=FALSE}
-```
-]
 
 
 ---
-# Distribution of star ratings
 
-```{r rating-count-output, ref.label="rating-count", fig.callout=TRUE, warning=FALSE}
-```
+## Enrollments and star ratings
 
----
-# Enrollments and star ratings
-```{r, echo=FALSE}
+```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+
 summary(lm(avg_enrollment~factor(Star_Rating), data=ma.data.clean))
 ```
 
 
 ---
-# Problems
+
+## Problems
+
 - Certainly not the effect of a higher rating...
 - Lots of things unobserved, like
   - actual quality
@@ -98,16 +106,21 @@ summary(lm(avg_enrollment~factor(Star_Rating), data=ma.data.clean))
   - prices
   
 ---
-# Effect of 3-star rating
 
-.left-code[
+## Effect of 3-star rating
+
+:::: {.columns}
+
+::: {.column width=50%}
+
 ```{r}
 ma.rd1 <- ma.data.clean %>%
   filter(Star_Rating==2 | Star_Rating==2.5)
 ```
-]
+:::
 
-.right-plot[
+::: {.column width=50%}
+
 ```{r}
 ma.rd1 %>% ggplot(aes(x=raw_rating)) + 
   geom_bar(width=.025) + theme_bw() +
@@ -117,17 +130,27 @@ ma.rd1 %>% ggplot(aes(x=raw_rating)) +
     title="Distribution of Raw Scores"
   ) 
 ```
-]
+:::
+
+::::
 
 ---
-# Note about scores
+
+## Note about scores
+
 CMS does more than just an average...
+
 - variance across individual metrics
 - high variance is punished, low variance rewarded
 
 ---
-# RD estimates
+
+## RD estimates
+
 ```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+
 ma.rd1 <- ma.rd1 %>%
   mutate(score = raw_rating - 2.25,
          treat = (score>=0),
@@ -144,26 +167,25 @@ est1 <- as.numeric(star25.1$coef[3])
 est2 <- as.numeric(star25.2$coef[3])
 est3 <- as.numeric(star25.3$coef[3])
 est4 <- as.numeric(star25.4$coef[3])
-```
 
----
-# RD estimates
-```{r echo=FALSE, results="asis"}
-stargazer(star25.1, star25.2, star25.3, star25.4,
-          type="html",
-          keep=c("score","treat"),           
-          keep.stat=c("n"),
-          model.names=FALSE,
-          dep.var.caption="",
-          font.size="scriptsize",
-          no.space=TRUE,
-          add.lines=list(c("Bandwith","0.5","0.175","0.175.","0.125")),
-          covariate.labels = c("Raw Score","Treatment", "Score x Treat"))
+rows <- tribble(~term, ~ m1, ~ m2, ~ m3 , ~ m4,
+                'Bandwidth', "0.25", "0.175", "0.175", "0.125")
+attr(rows, 'position')  <- 7
+
+modelsummary(list(star25.1, star25.2, star25.3, star25.4),
+          keep=c("score", "treatTRUE", "score_treat"),
+          coef_map=c("score"="Raw Score", 
+                    "treatTRUE"="Treatment",
+                    "score_treat"="Score x Treat"),
+          gof_map=c("nobs", "r.squared"),
+          add_rows=rows)
+          
 ```
 
 
 ---
-# Interpretation
+
+## Interpretation
 
 - OLS on full sample: `r round(est1,3)*100`% increase in market shares among 2.5-star plans versus 2-star plan
 - RD on 0.175 bandwidth: `r round(est2,3)*100`% increase when imposing constant slopes, `r round(est3,3)*100`% increase when allowing for differential slopes
@@ -171,60 +193,56 @@ stargazer(star25.1, star25.2, star25.3, star25.4,
 
 
 ---
-# Built-in RD packages
-```{r rd-ma-plot1, eval=FALSE, warning=FALSE}
+
+## Built-in RD packages
+
+```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+
 library(rdrobust)
 rdplot(y=ma.rd1$mkt_share, x=ma.rd1$score, binselect="es",
        title="RD Plot: Market Share", x.label="Summary Score",
        y.label="Market Share", masspoints="off")
 ```
 
-.plot-callout[
-```{r rd-ma-plot-callout, ref.label="rd-ma-plot1", fig.callout=TRUE, warning=FALSE, message=FALSE}
-```
-]
-
 ---
-# RD Plot
 
-```{r rd-ma-plot-output, ref.label="rd-ma-plot1", fig.callout=TRUE, warning=FALSE, message=FALSE}
-```
-
-
----
-# Estimates from RD package
+## Estimates from RD package
 ```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+
 est1 <- rdrobust(y=ma.rd1$mkt_share, x=ma.rd1$score, c=0,
                  h=0.125, p=1, kernel="uniform", vce="hc0",
                  masspoints="off")
-```
-
-
----
-# Estimates from RD package
-```{r echo=FALSE}
 summary(est1)
 ```
 
+
 ---
-# Optimal bandwidth
+
+## Optimal bandwidth
 
 ```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+
 estopt <- rdrobust(y=ma.rd1$mkt_share, x=ma.rd1$score, c=0,
                  p=1, kernel="uniform", vce="hc0",
                  masspoints="off")
-```
-
----
-# Estimates with optimal bandwidth
-```{r echo=FALSE}
-summary(estopt)
+summary(estopt)                 
 ```
 
 
 ---
-# Estimates for other rating thresholds
-```{r include=FALSE}
+
+## Estimates for other rating thresholds (2.25)
+
+```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+
 ma.rd225 <- ma.data.clean %>%
   filter(Star_Rating==2 | Star_Rating==2.5) %>%
   mutate(score = raw_rating - 2.25,
@@ -234,6 +252,20 @@ ma.rd225 <- ma.data.clean %>%
          mkt_share = avg_enrollment/avg_eligibles,
          ln_share = log(mkt_share),
          score_treat=score*treat)
+
+est225 <- rdrobust(y=ma.rd225$mkt_share, x=ma.rd225$score, c=0,
+                 h=0.125, p=1, kernel="uniform", vce="hc0",
+                 masspoints="off")
+summary(est225)
+```
+
+---
+
+## Estimates for other rating thresholds (2.75)
+
+```{r}
+#| code-fold: true
+#| code-summary: "R Code"
 
 ma.rd275 <- ma.data.clean %>%
   filter(Star_Rating==2.5 | Star_Rating==3) %>%
@@ -245,6 +277,21 @@ ma.rd275 <- ma.data.clean %>%
          ln_share = log(mkt_share),
          score_treat=score*treat)
 
+est275 <- rdrobust(y=ma.rd275$mkt_share, x=ma.rd275$score, c=0,
+                 h=0.125, p=1, kernel="uniform", vce="hc0",
+                 masspoints="off")
+
+summary(est275)
+```
+
+---
+
+## Estimates for other rating thresholds (3.25)
+
+```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+
 ma.rd325 <- ma.data.clean %>%
   filter(Star_Rating==3 | Star_Rating==3.5) %>%
   mutate(score = raw_rating - 3.25,
@@ -254,6 +301,20 @@ ma.rd325 <- ma.data.clean %>%
          mkt_share = avg_enrollment/avg_eligibles,
          ln_share = log(mkt_share),
          score_treat=score*treat)
+
+est325 <- rdrobust(y=ma.rd325$mkt_share, x=ma.rd325$score, c=0,
+                 h=0.125, p=1, kernel="uniform", vce="hc0",
+                 masspoints="off")
+summary(est325)
+```
+
+---
+
+## Estimates for other rating thresholds (3.75)
+
+```{r}
+#| code-fold: true
+#| code-summary: "R Code"
 
 ma.rd375 <- ma.data.clean %>%
   filter(Star_Rating==3.5 | Star_Rating==4) %>%
@@ -265,79 +326,51 @@ ma.rd375 <- ma.data.clean %>%
          ln_share = log(mkt_share),
          score_treat=score*treat)
 
-est225 <- rdrobust(y=ma.rd225$mkt_share, x=ma.rd225$score, c=0,
-                 h=0.125, p=1, kernel="uniform", vce="hc0",
-                 masspoints="off")
-
-est275 <- rdrobust(y=ma.rd275$mkt_share, x=ma.rd275$score, c=0,
-                 h=0.125, p=1, kernel="uniform", vce="hc0",
-                 masspoints="off")
-
-est325 <- rdrobust(y=ma.rd325$mkt_share, x=ma.rd325$score, c=0,
-                 h=0.125, p=1, kernel="uniform", vce="hc0",
-                 masspoints="off")
-
 est375 <- rdrobust(y=ma.rd375$mkt_share, x=ma.rd375$score, c=0,
                  h=0.125, p=1, kernel="uniform", vce="hc0",
                  masspoints="off")
-```
-
-
-
-```{r}
-summary(est225)
-```
-
----
-# Estimates for other rating thresholds
-
-```{r}
-summary(est275)
-```
-
----
-# Estimates for other rating thresholds
-
-```{r}
-summary(est325)
-```
-
----
-# Estimates for other rating thresholds
-
-```{r}
 summary(est375)
+
 ```
 
+---
+
+## Manipulation of the running variable
+
+
+![](https://media.giphy.com/media/5669bWEI7TS3S/giphy.gif)
+
 
 ---
-# Manipulation of the running variable
 
-.center[
-![:scale 75%](https://media.giphy.com/media/5669bWEI7TS3S/giphy.gif)
-]
-
-
----
-# Manipulation of the running variable
+## Manipulation of the running variable
 
 ```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+
 dens225 <- rddensity(ma.rd225$score, c=0)
 rdplotdensity(dens225, ma.rd225$score)
 ```
 
 ---
-# Manipulation of the running variable
+
+## Manipulation of the running variable
 
 ```{r}
-summary(dens275)
+#| echo: false
+summary(dens225)
 ```
 
 
 ---
-# Covariate balance
 
-```{r echo=T, results='hide'}
+## Covariate balance
+
+```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+
 match.dat <- matchit(treat~premium_partc + ma_rate, 
                      data=ma.rd225 %>% 
                        filter(window2==TRUE, 
@@ -345,19 +378,13 @@ match.dat <- matchit(treat~premium_partc + ma_rate,
                               !is.na(premium_partc), 
                               !is.na(ma_rate)),
                      method=NULL, distance="mahalanobis")
+love.plot(match.dat, abs=TRUE)                     
 ```
 
 
 ---
-# Covariate balance
 
-```{r echo=FALSE}
-love.plot(match.dat, abs=TRUE)
-```
-
-
----
-# RD with discrete variables
+## RD with discrete variables
 
 - Allow for fewer mass points
 - Assume random assignment between mass points
