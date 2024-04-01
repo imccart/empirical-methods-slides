@@ -498,8 +498,8 @@ Ian McCarthy | Emory University
 <section id="different-averages" class="slide level2">
 <h2>Different averages</h2>
 <ul>
-<li>Mean difference around threshold of 0.2, 3.97 - 2.2 = 1.77</li>
-<li>Mean overall difference, 3.75 - 1.45 = 2.3</li>
+<li>Mean difference around threshold of 0.2, 3.94 - 2.24 = 1.7</li>
+<li>Mean overall difference, 3.75 - 1.45 = 2.29</li>
 </ul>
 </section>
 <section id="more-generally" class="slide level2">
@@ -573,29 +573,21 @@ Ian McCarthy | Emory University
 <span id="cb4-5"><a href="#cb4-5"></a>                    <span class="at">x.label=</span><span class="st">"Running Variable"</span>, </span>
 <span id="cb4-6"><a href="#cb4-6"></a>                    <span class="at">y.label=</span><span class="st">"Outcome"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output-display">
-<p><img data-src="03-rd3_files/figure-revealjs/unnamed-chunk-7-1.png" width="960"></p>
-</div>
+
 <details>
 <summary>R Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>bin.avg <span class="ot">&lt;-</span> <span class="fu">as_tibble</span>(rd.result<span class="sc">$</span>vars_bins)</span>
-<span id="cb5-2"><a href="#cb5-2"></a></span>
-<span id="cb5-3"><a href="#cb5-3"></a>plot.bin <span class="ot">&lt;-</span> bin.avg <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>rdplot_mean_x,<span class="at">y=</span>rdplot_mean_y)) <span class="sc">+</span> </span>
-<span id="cb5-4"><a href="#cb5-4"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
-<span id="cb5-5"><a href="#cb5-5"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept=</span><span class="dv">1</span>),<span class="at">linetype=</span><span class="st">'dashed'</span>) <span class="sc">+</span></span>
-<span id="cb5-6"><a href="#cb5-6"></a>  <span class="fu">scale_x_continuous</span>(</span>
-<span id="cb5-7"><a href="#cb5-7"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(.<span class="dv">5</span>, <span class="fl">1.5</span>),</span>
-<span id="cb5-8"><a href="#cb5-8"></a>    <span class="at">label =</span> <span class="fu">c</span>(<span class="st">"Untreated"</span>, <span class="st">"Treated"</span>)</span>
-<span id="cb5-9"><a href="#cb5-9"></a>  ) <span class="sc">+</span></span>
-<span id="cb5-10"><a href="#cb5-10"></a>  <span class="fu">xlab</span>(<span class="st">"Running Variable"</span>) <span class="sc">+</span> <span class="fu">ylab</span>(<span class="st">"Outcome"</span>)</span>
-<span id="cb5-11"><a href="#cb5-11"></a></span>
-<span id="cb5-12"><a href="#cb5-12"></a>plot.bin</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-2"><a href="#cb5-2"></a>plot.bin <span class="ot">&lt;-</span> bin.avg <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>rdplot_mean_x,<span class="at">y=</span>rdplot_mean_y)) <span class="sc">+</span> </span>
+<span id="cb5-3"><a href="#cb5-3"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb5-4"><a href="#cb5-4"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept=</span><span class="dv">1</span>),<span class="at">linetype=</span><span class="st">'dashed'</span>) <span class="sc">+</span></span>
+<span id="cb5-5"><a href="#cb5-5"></a>  <span class="fu">scale_x_continuous</span>(</span>
+<span id="cb5-6"><a href="#cb5-6"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(.<span class="dv">5</span>, <span class="fl">1.5</span>),</span>
+<span id="cb5-7"><a href="#cb5-7"></a>    <span class="at">label =</span> <span class="fu">c</span>(<span class="st">"Untreated"</span>, <span class="st">"Treated"</span>)</span>
+<span id="cb5-8"><a href="#cb5-8"></a>  ) <span class="sc">+</span></span>
+<span id="cb5-9"><a href="#cb5-9"></a>  <span class="fu">xlab</span>(<span class="st">"Running Variable"</span>) <span class="sc">+</span> <span class="fu">ylab</span>(<span class="st">"Outcome"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output-display">
-<p><img data-src="03-rd3_files/figure-revealjs/unnamed-chunk-7-2.png" width="960"></p>
 </div>
-</div>
-</section>
+<img data-src="03-rd3_files/figure-revealjs/unnamed-chunk-7-1.png" width="960" class="r-stretch"></section>
 <section id="with-and-without-binning" class="slide level2">
 <h2>With and without binning</h2>
 <div class="columns">
@@ -732,8 +724,8 @@ Ian McCarthy | Emory University
 </div>
 <ul>
 <li>True effect: 1.5</li>
-<li>Standard linear regression with same slopes: 1.64</li>
-<li>RD (linear with same slopes): 1.69</li>
+<li>Standard linear regression with same slopes: 1.51</li>
+<li>RD (linear with same slopes): 1.18</li>
 </ul>
 </section>
 <section id="rd-with-built-in-commands" class="slide level2">
@@ -756,20 +748,20 @@ BW type                       mserd
 Kernel                   Triangular
 VCE method                       NN
 
-Number of Obs.                  520          480
-Eff. Number of Obs.             198          199
+Number of Obs.                  504          496
+Eff. Number of Obs.             159          144
 Order est. (p)                    1            1
 Order bias  (q)                   2            2
-BW est. (h)                   0.399        0.399
-BW bias (b)                   0.608        0.608
-rho (h/b)                     0.657        0.657
-Unique Obs.                     520          480
+BW est. (h)                   0.326        0.326
+BW bias (b)                   0.568        0.568
+rho (h/b)                     0.574        0.574
+Unique Obs.                     504          496
 
 =============================================================================
         Method     Coef. Std. Err.         z     P&gt;|z|      [ 95% C.I. ]       
 =============================================================================
-  Conventional     1.616     0.132    12.281     0.000     [1.358 , 1.873]     
-        Robust         -         -    10.019     0.000     [1.303 , 1.936]     
+  Conventional     1.327     0.122    10.899     0.000     [1.089 , 1.566]     
+        Robust         -         -     9.145     0.000     [1.009 , 1.559]     
 =============================================================================</code></pre>
 </div>
 </div>

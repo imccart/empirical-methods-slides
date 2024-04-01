@@ -273,7 +273,6 @@ rd.result <- rdplot(rd.dat$Y, rd.dat$X,
                     x.label="Running Variable", 
                     y.label="Outcome")
 bin.avg <- as_tibble(rd.result$vars_bins)
-
 plot.bin <- bin.avg %>% ggplot(aes(x=rdplot_mean_x,y=rdplot_mean_y)) + 
   geom_point() + theme_bw() +
   geom_vline(aes(xintercept=1),linetype='dashed') +
@@ -282,8 +281,6 @@ plot.bin <- bin.avg %>% ggplot(aes(x=rdplot_mean_x,y=rdplot_mean_y)) +
     label = c("Untreated", "Treated")
   ) +
   xlab("Running Variable") + ylab("Outcome")
-
-plot.bin
 ```
 
 ---
