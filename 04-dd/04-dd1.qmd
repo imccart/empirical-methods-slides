@@ -1,0 +1,319 @@
+---
+title: "Background on Medicaid Expansion and the ACA"
+author: "Ian McCarthy | Emory University"
+format: 
+  revealjs:
+    theme: [moon]
+    preview-links: auto
+    chalkboard:
+      boardmarker-width: 5
+    slide-number: true
+    width: 1600
+    height: 900    
+#    embed-resources: true
+from: markdown+emoji
+execute: 
+  echo: true
+---
+
+```{r}
+#| include: false
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, ggplot2, lubridate, gapminder, scales,
+               hrbrthemes, gganimate, OECD, here, modelsummary, plotly)
+```
+
+# Affordable Care Act
+
+---
+
+![](https://media.giphy.com/media/Awb1k8lX8a3Re/giphy.gif)
+
+
+---
+
+## Background
+
+1. What percent of people are uninsured?
+
+```{r}
+#| code-fold: TRUE
+#| code-summary: "R Code"
+
+ins.dat <- read_tsv("../data/acs_medicaid.txt")
+
+ins.dat <- ins.dat %>%
+  mutate(perc_private = (ins_employer + ins_direct)/adult_pop,
+         perc_public = (ins_medicare + ins_medicaid)/adult_pop,
+         perc_ins = (adult_pop - uninsured)/adult_pop,
+         perc_unins = uninsured/adult_pop,
+         perc_employer = ins_employer/adult_pop,
+         perc_medicaid = ins_medicaid/adult_pop,
+         perc_medicare = ins_medicare/adult_pop,
+         perc_direct = ins_direct/adult_pop)
+
+ins.dat %>% group_by(year) %>% summarize(mean=mean(perc_unins)) %>%
+  ggplot(aes(x=year,y=mean)) + geom_line() + geom_point() + theme_bw() +
+  labs(
+    x="Year",
+    y="Fraction Uninsured",
+    title="Share of Uninsured over Time"
+  ) +
+  geom_vline(xintercept=2013.5, color="red")
+```
+
+---
+
+## Background
+
+1. What percent of people are uninsured?
+
+2. How do people get health insurance?
+
+```{r}
+#| code-fold: TRUE
+#| code-summary: "R Code"
+
+ins.dat %>%
+  filter(year==2012) %>% pivot_longer(c("perc_employer","perc_direct","perc_medicaid")) %>%
+  select(State, name, value) %>%
+  group_by(name) %>% summarize(mean=mean(value)) %>%
+  ggplot(aes(x=name, y=mean)) +
+  geom_col() + ylim(0,0.65) + 
+  labs(
+    x="Source of Insurance",
+    y="Percent",
+    title="Source of Health Insurance in 2012"
+  ) + theme_bw() + scale_x_discrete(labels=c('perc_direct'='Direct Purchase',
+                                             'perc_employer'='Employer-provided',
+                                             'perc_medicaid'='Medicaid'))
+```
+
+---
+
+## Employer provided insurance
+
+The U.S. still relies heavily on private insurance provided by employers. 
+
+::: {.fragment}
+Any thoughts on why?
+:::
+
+---
+
+## Employer provided insurance
+
+1. Stabalization act of 1942 (wages frozen but not benefits)
+
+2. Tax exclusion for insurance expenditures (1954)
+
+---
+
+## How did the ACA change things?
+
+- Create health insurance exchanges
+    - Individual mandate (since set to $0)
+    - Premium and cost-sharing subsidies (some unpaid by Trump administration)
+    - Insurance subsidies (removed before intended)
+    - Decision assistance
+    - Minimum benefits and community ratings
+- Stay on parent's plan to 26
+
+---
+
+## How did the ACA change things?
+
+- Medicaid Expansion
+    - Originally tied to federal funding
+    - Made voluntary by supreme court ruling
+    - Higher initial federal match rate, decreasing over time
+- Pay-for-performance measures
+    - Hospital value-based purchasing
+    - Hospital readmission reduction
+    - Medicare Advantage quality improvement program
+    - Bundled payments and ACOs (related)
+
+---
+
+## Change in Insurance Type over Time
+
+```{r}
+#| code-fold: TRUE
+#| code-summary: "R Code"
+
+## Count of plans by type (across years)
+mean.dat <- ins.dat %>%
+  pivot_longer(c("perc_employer","perc_direct","perc_medicaid", "perc_medicare")) %>%
+  select(State, name, value, year) %>%
+  group_by(name, year) %>% summarize(mean=mean(value)) %>% ungroup()
+
+mean.dat <- mean.dat %>%
+  mutate(name = as.factor(name)) %>%
+  mutate(name = fct_recode(name,
+                           "Direct Purchase" = "perc_direct",
+                           "Employer-provided" = "perc_employer",
+                           "Medicaid" = "perc_medicaid",
+                           "Medicare" = "perc_medicare"))
+
+plot_ly(mean.dat,
+        y=~name, 
+        x=~mean, 
+        frame=~as.factor(year), 
+        type='bar',
+        width=800,
+        height=400) %>%
+  animation_slider(
+    currentvalue = list(prefix = "Year ", font = list(color="blue"))
+  ) %>%
+  layout(xaxis = list(title = "Fraction of Population"), 
+         yaxis = list(title = ""))
+```
+
+
+# Data for this (final!) homework assignment
+
+---
+
+## Data sources
+
+We'll use two main data sources here:
+
+1. Data on which states expanded Medicaid (and when
+ - Available from *Kaiser Family Foundation*
+
+2. Data on insurance status and source of health insurance by state
+ - Available from the *American Community Survey*
+ - These data can be tricky to work with due to their size, but there are some handy tricks in `R`
+
+---
+
+## Data sources
+
+Code and links available at the [Insurance Access GitHub repository](https://github.com/imccart-test/insurance-access)
+
+---
+
+## Medicaid Expansion
+
+- Directly downloaded from KFF website
+- Just a raw .csv file
+
+---
+
+## Insurance status and source
+
+- Data from the American Community Survey
+- CPS data also available but questions changed in 2014
+- Easiest way to access ACS data is through a Census API and the `acs` package...details on the *GitHub* repo
+
+---
+
+## What is an API?
+
+- Stands for application programming interface
+- An official way for one computer to request information from another
+- Often requires a code for external program/server to validate the request
+
+
+
+---
+
+## Describing the data
+
+First let's take a look at the final dataset
+```{r}
+head(ins.dat %>% arrange(year, State))
+```
+
+---
+
+## Summary stats
+
+And now for some basic summary stats (pooling all years):
+
+```{r}
+#| code-fold: TRUE
+#| code-summary: "R Code"
+
+sum.vars <- ins.dat %>% select('Uninsured'=perc_unins, 'Direct Purchase'=perc_direct, 'Medicaid'=perc_medicaid)
+
+datasummary(All(sum.vars) ~ Mean + SD + Histogram, data=sum.vars)
+```
+
+---
+
+## Uninsurance over time
+
+```{r}
+#| code-fold: TRUE
+#| code-summary: "R Code"
+
+ins.dat %>% group_by(year) %>% summarize(mean=mean(perc_unins)) %>%
+  ggplot(aes(x=year,y=mean)) + geom_line() + geom_point() + theme_bw() +
+  labs(
+    x="Year",
+    y="Fraction Uninsured",
+    title="Share of Uninsured over Time"
+  ) +
+  geom_vline(xintercept=2013.5, color="red")
+```
+
+
+---
+
+## Direct purchase over time
+
+```{r}
+#| code-fold: TRUE
+#| code-summary: "R Code"
+
+ins.dat %>% group_by(year) %>% summarize(mean=mean(perc_direct)) %>%
+  ggplot(aes(x=year,y=mean)) + geom_line() + geom_point() + theme_bw() +
+  labs(
+    x="Year",
+    y="Fraction with Direct Purchase",
+    title="Share of Direct Purchase Insurance over Time"
+  ) +
+  geom_vline(xintercept=2013.5, color="red")
+```
+
+
+---
+
+## Medicaid over time
+
+```{r}
+#| code-fold: TRUE
+#| code-summary: "R Code"
+
+ins.dat %>% group_by(year) %>% summarize(mean=mean(perc_medicaid)) %>%
+  ggplot(aes(x=year,y=mean)) + geom_line() + geom_point() + theme_bw() +
+  labs(
+    x="Year",
+    y="Fraction with Medicaid",
+    title="Share of Medicaid Insurance over Time"
+  ) +
+  geom_vline(xintercept=2013.5, color="red")
+```
+
+
+---
+
+## Main takeaways
+
+1. Large reduction in uninsured population following ACA
+2. Biggest gains going to direct purchase (exchanges) and Medicaid (expansion)
+
+::: {.fragment}
+But what amount of extra insurance is *due to* Medicaid expansion? In other words, who got insurance through Medicaid that wouldn't have gotten it otherwise?
+:::
+
+---
+
+## What does the literature say
+
+The *Kaiser Family Foundation* has some great info on this...
+
+- [KFF Medicaid Coverage](https://www.kff.org/medicaid/)
+- [KFF Report on ACA Expansion](https://www.kff.org/medicaid/issue-brief/the-effects-of-medicaid-expansion-under-the-aca-updated-findings-from-a-literature-review-august-2019/)
+- [Health Insurance and Mortality](https://www.nber.org/papers/w26533) (not what we're discussing here but still important)
