@@ -389,14 +389,14 @@ Estimate $E[Y_{1}(1)|D=1] - E[Y_{0}(1)|D=1]$ using $E[Y_{0}(1)|D=0] - E[Y_{0}(0)
 
 ## Graphically
 
-![Basic DD Graph](../images/standard-dd.png){}
+![Basic DD Graph](../images/standard-dd.png)
 
 
 ---
 
 ## Animations
 
-![Basic DD Graph, Animated](../images/dd_animate.gif){}
+![Basic DD Graph, Animated](../images/dd_animate.gif)
 
 ---
 
