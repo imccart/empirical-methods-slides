@@ -910,11 +910,11 @@ Ian McCarthy | Emory University
 <section id="graphically" class="slide level2">
 <h2>Graphically</h2>
 
-<img data-src="/images/standard-dd.png" class="r-stretch quarto-figure-center"><p class="caption">Basic DD Graph</p></section>
+<img data-src="../images/standard-dd.png" class="r-stretch quarto-figure-center"><p class="caption">Basic DD Graph</p></section>
 <section id="animations" class="slide level2">
 <h2>Animations</h2>
 
-<img data-src="/images/dd_animate.gif" class="r-stretch quarto-figure-center"><p class="caption">Basic DD Graph, Animated</p></section>
+<img data-src="../images/dd_animate.gif" class="r-stretch quarto-figure-center"><p class="caption">Basic DD Graph, Animated</p></section>
 <section id="ate-estimates-with-dd" class="slide level2">
 <h2>ATE Estimates with DD</h2>
 <p>Key identifying assumption is that of <em>parallel trends</em></p>
@@ -1007,22 +1007,22 @@ E[Y_{1}(1) - Y_{0}(1)|D=1] &amp;=&amp; \left( E[Y(1)|D=1] - E[Y(1)|D=0] \right) 
 <tr class="odd">
 <td style="text-align: left;">Control</td>
 <td style="text-align: left;">Pre</td>
-<td style="text-align: right;">1.520007</td>
+<td style="text-align: right;">1.489911</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Control</td>
 <td style="text-align: left;">Post</td>
-<td style="text-align: right;">2.979673</td>
+<td style="text-align: right;">3.007465</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Treated</td>
 <td style="text-align: left;">Pre</td>
-<td style="text-align: right;">4.520797</td>
+<td style="text-align: right;">4.514062</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Treated</td>
 <td style="text-align: left;">Post</td>
-<td style="text-align: right;">11.996953</td>
+<td style="text-align: right;">11.998547</td>
 </tr>
 </tbody>
 </table>
@@ -1035,11 +1035,11 @@ E[Y_{1}(1) - Y_{0}(1)|D=1] &amp;=&amp; \left( E[Y(1)|D=1] - E[Y(1)|D=0] \right) 
 <h2>Mean differences</h2>
 <p>In this example:</p>
 <ul>
-<li><span class="math inline">\(E[Y(1)|D=1] - E[Y(1)|D=0]\)</span> is 9.0172804</li>
-<li><span class="math inline">\(E[Y(0)|D=1] - E[Y(0)|D=0]\)</span> is 3.0007896</li>
+<li><span class="math inline">\(E[Y(1)|D=1] - E[Y(1)|D=0]\)</span> is 8.9910818</li>
+<li><span class="math inline">\(E[Y(0)|D=1] - E[Y(0)|D=0]\)</span> is 3.0241509</li>
 </ul>
 <div class="fragment">
-<p>So the ATT is 6.0164908</p>
+<p>So the ATT is 5.9669309</p>
 </div>
 </section>
 <section id="regression-estimator" class="slide level2">
@@ -1062,7 +1062,7 @@ E[Y_{1}(1) - Y_{0}(1)|D=1] &amp;=&amp; \left( E[Y(1)|D=1] - E[Y(1)|D=0] \right) 
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">dTRUE</td>
-<td style="text-align: center;">3.001</td>
+<td style="text-align: center;">3.024</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;"></td>
@@ -1070,7 +1070,7 @@ E[Y_{1}(1) - Y_{0}(1)|D=1] &amp;=&amp; \left( E[Y(1)|D=1] - E[Y(1)|D=0] \right) 
 </tr>
 <tr class="odd">
 <td style="text-align: left;">tTRUE</td>
-<td style="text-align: center;">1.460</td>
+<td style="text-align: center;">1.518</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;"></td>
@@ -1078,11 +1078,11 @@ E[Y_{1}(1) - Y_{0}(1)|D=1] &amp;=&amp; \left( E[Y(1)|D=1] - E[Y(1)|D=0] \right) 
 </tr>
 <tr class="odd">
 <td style="text-align: left;">dTRUE × tTRUE</td>
-<td style="text-align: center;">6.016</td>
+<td style="text-align: center;">5.967</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;"></td>
-<td style="text-align: center;">(0.040)</td>
+<td style="text-align: center;">(0.039)</td>
 </tr>
 </tbody>
 </table>

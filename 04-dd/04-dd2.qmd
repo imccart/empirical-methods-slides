@@ -19,12 +19,6 @@ execute:
 ```{r}
 #| include: false
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(tidyverse, ggplot2, lubridate, gapminder, scales,
-               hrbrthemes, gganimate, OECD, here, modelsummary, plotly)
-```
-```{r}
-#| include: false
-if (!require("pacman")) install.packages("pacman")
 pacman::p_load(tidyverse, ggplot2, lubridate, gapminder, scales, lmtest, DIDmultiplegt,
                hrbrthemes, gganimate, OECD, causaldata, fixest, modelsummary, plm)
 ```
@@ -395,14 +389,14 @@ Estimate $E[Y_{1}(1)|D=1] - E[Y_{0}(1)|D=1]$ using $E[Y_{0}(1)|D=0] - E[Y_{0}(0)
 
 ## Graphically
 
-![Basic DD Graph](/images/standard-dd.png){}
+![Basic DD Graph](../images/standard-dd.png){}
 
 
 ---
 
 ## Animations
 
-![Basic DD Graph, Animated](/images/dd_animate.gif){}
+![Basic DD Graph, Animated](../images/dd_animate.gif){}
 
 ---
 
