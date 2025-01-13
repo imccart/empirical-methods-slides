@@ -1,0 +1,135 @@
+---
+title: "Welcome to the Class"
+author: "Ian McCarthy | Emory University"
+format: 
+  revealjs:
+    theme: [moon]
+    preview-links: auto
+    chalkboard:
+      boardmarker-width: 5
+    slide-number: true
+    width: 1600
+    height: 900    
+#    embed-resources: true
+from: markdown+emoji
+execute: 
+  echo: true
+---
+
+```{r}
+#| include: false
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, ggplot2, lubridate, gapminder, scales,
+               hrbrthemes, gganimate, OECD, here, readxl)
+```
+
+## Motivating question
+
+**Does health care spending improve health?**
+
+Let's motivate the course with this simple question...does health care spending improve our health?
+
+---
+
+## Spending and Health
+
+```{r}
+#| include: false
+source(here("00-intro/DartmouthAtlas.R"))
+```
+
+
+```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+#| fig-align: center
+ggplot(data = (dartmouth.data %>% filter(Year==2015)), 
+       mapping = aes(x = Expenditures, y = Total_Mortality)) + 
+  geom_point(size = 1) + theme_bw() + scale_x_continuous(label = comma) +
+  geom_smooth(method="lm", se=FALSE, color="blue", size=1/2) +
+  labs(x = "Spending Per Capita ($US)",
+       y = "Mortality Rate",
+       title = "Mortality and Health Care Spending")
+```
+
+
+---
+
+## Spending and Health
+
+- Does medical spending make us sicker?
+- What else might explain this relationship?
+
+
+---
+
+## Goals of this course.
+
+1. Understand and implement selected methods for causal inference
+2. Along the way...data management and version control with real data
+3. Summarize, visualize, and explain research results
+
+
+# Syllabus highlights
+
+
+---
+
+## Why this course?
+
+1. Major problems that need solutions
+2. Need good, convincing empirical work for policy
+3. Working with data is hard, particularly health care data
+4. Your work should be transparent and reproducible
+
+---
+
+## Structure
+
+- Very applied in nature
+- *Methods* for causal inference
+  - Selection on observables (regression, re-weighting, matching, propensity scores)
+  - Instrumental variables
+  - Regression discontinuity
+  - Difference-in-differences
+
+
+---
+
+## Structure
+
+- *Substantive* areas
+  - Hospital pricing, policy, and competition
+  - Cigarette taxes and demand
+  - Medicare Advantage and quality disclosure
+  - Medicaid expansion and health insurance
+
+
+---
+
+## Structure
+
+- *Datasets* from the real world
+  - Hospital Cost Report Information System (HCRIS)
+  - Centers for Disease Control (CDC)
+  - Medicare Advantage data
+  - Behavioral Risk Factor Surveillance System (BRFSS), Medicaid, Health Insurance Exchanges
+  
+  
+---
+
+## Assignments
+
+- Homework (x5)
+- Peer Reviews (x4)
+- Participation
+
+---
+
+## Grading
+
+| Component                           | Weight |
+|:-|-:|
+| 5 × homework assignments (15% each) | 75% |
+| 4 x peer review (5% each)           | 20% |
+| Participation  					            | 5%  |

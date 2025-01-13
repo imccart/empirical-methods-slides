@@ -1,0 +1,114 @@
+---
+title: "Software Setup"
+author: "Ian McCarthy | Emory University"
+format: 
+  revealjs:
+    theme: [moon]
+    preview-links: auto
+    chalkboard:
+      boardmarker-width: 5
+    slide-number: true
+    width: 1600
+    height: 900    
+#    embed-resources: true
+from: markdown+emoji
+execute: 
+  echo: true
+---
+
+```{r}
+#| include: false
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, ggplot2, lubridate, gapminder, scales,
+               hrbrthemes, gganimate, OECD, here)
+```
+
+## Software Installation
+
+1. Download [R](https://www.r-project.org/)
+2. Download [Visual Studio Code](https://code.visualstudio.com/)
+3. Download [Git](https://git-scm.com/downloads)
+4. Create an account on [GitHub](https://github.com/)
+
+---
+
+## Checklist
+
+- Do you have the most recent version of R?
+```{r}
+version$version.string
+```
+
+- Have you installed the proper extensions in VS Code?
+  - GitHub Copilot and GitHub Copilot Chat
+  - Python and Jupyter
+  - Quarto
+  - R and R Extension Pack
+
+- If using R, have you updated all of your R packages? 
+```{r}
+update.packages(ask = FALSE, checkBuilt = TRUE, repos='https://cran.us.r-project.org')
+```
+  
+
+---
+
+## Checklist
+
+- Which version of Git have you installed?
+```{bash}
+#| include: false
+git --version
+```
+
+- Did you introduce yourself to Git? (Substitute in your details.)
+```{bash}
+#| eval: false
+git config --global user.name 'Ian McCarthy'
+git config --global user.email 'ian.mccarthy@emory.edu'
+git config --global --list
+```
+
+- Did you register an account in GitHub?
+
+
+
+# Practice with Git and VS Code
+
+
+---
+
+## For the rest of today (and before next class)
+
+1. Download [R](https://www.r-project.org/)
+2. Download [VS Code](https://code.visualstudio.com/)
+3. Download [Git](https://git-scm.com/downloads)
+4. Create an account on [GitHub](https://github.com/)
+5. Start/clone/fork a repository for this class 
+
+
+---
+
+## Setting things up
+
+Now we're going to clone a GitHub repository (repo) using Git. 
+
+---
+
+## Some common mistakes for windows users
+
+- Windows folders are *not* files...there is no content without a file. You can't commit or push changes without content.
+- If you're working across devices on your own repo, be sure to pull before starting and push afterward.
+- Avoid spaces in file names. Avoid them at all costs. *DO NOT PUT SPACES IN YOUR FILE NAMES.*
+
+>*"A space in a file name is a space in your soul."*
+
+
+---
+
+## Ideal workflow
+
+Until you are a Git(Hub) expert...
+
+1. Start project on GitHub (fork from another repo if needed)
+2. Clone to local computer with Git (or GitHub Desktop)

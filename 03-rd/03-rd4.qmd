@@ -1,0 +1,391 @@
+---
+title: "Regression Discontinuity: Part II"
+author: "Ian McCarthy | Emory University"
+format: 
+  revealjs:
+    theme: [moon]
+    preview-links: auto
+    chalkboard:
+      boardmarker-width: 5
+    slide-number: true
+    width: 1600
+    height: 900    
+#    embed-resources: true
+from: markdown+emoji
+execute: 
+  echo: true
+---
+
+```{r}
+#| include: false
+
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, ggplot2, lubridate, gapminder, scales,
+               hrbrthemes, gganimate, OECD, here, modelsummary, 
+               rddensity, rdrobust, MatchIt, cobalt)
+```
+
+
+## MA Data
+
+```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+
+ma.data <- read_rds(here("data/final_ma_data.rds"))
+ma.data.clean <- ma.data %>%
+  filter(!is.na(avg_enrollment) & year==2009 & !is.na(partc_score)) #<<
+```
+
+---
+
+## Calculate raw average rating
+
+```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+
+ma.data.clean <- ma.data.clean %>%
+  mutate(raw_rating=rowMeans(
+    cbind(breastcancer_screen,rectalcancer_screen,cv_cholscreen,diabetes_cholscreen,
+          glaucoma_test,monitoring,flu_vaccine,pn_vaccine,physical_health,
+          mental_health,osteo_test,physical_monitor,primaryaccess,
+          hospital_followup,depression_followup,nodelays,carequickly,
+          overallrating_care,overallrating_plan,calltime,
+          doctor_communicate,customer_service,osteo_manage,
+          diabetes_eye,diabetes_kidney,diabetes_bloodsugar,
+          diabetes_chol,antidepressant,bloodpressure,ra_manage,
+          copd_test,betablocker,bladder,falling,appeals_timely,
+          appeals_review),
+    na.rm=T)) %>%
+  select(contractid, planid, fips, avg_enrollment, state, county, raw_rating, partc_score,
+         avg_eligibles, avg_enrolled, premium_partc, risk_ab, Star_Rating,
+         bid, avg_ffscost, ma_rate)
+```
+
+
+---
+
+## Distribution of star ratings
+
+```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+
+ma.data.clean %>% 
+  ggplot(aes(x=as.factor(Star_Rating))) + 
+  geom_bar() +
+  labs(
+    x="Star Rating",
+    y="Count of Plans",
+    title="Frequency Distribution of Star Ratings"
+  ) + theme_bw()
+```
+
+
+---
+
+## Enrollments and star ratings
+
+```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+
+summary(lm(avg_enrollment~factor(Star_Rating), data=ma.data.clean))
+```
+
+
+---
+
+## Problems
+
+- Certainly not the effect of a higher rating...
+- Lots of things unobserved, like
+  - actual quality
+  - perceived quality
+  - prices
+  
+---
+
+## Effect of 3-star rating
+
+:::: {.columns}
+
+::: {.column width=50%}
+
+```{r}
+ma.rd1 <- ma.data.clean %>%
+  filter(Star_Rating==2 | Star_Rating==2.5)
+```
+:::
+
+::: {.column width=50%}
+
+```{r}
+ma.rd1 %>% ggplot(aes(x=raw_rating)) + 
+  geom_bar(width=.025) + theme_bw() +
+  labs(
+    x="Running Variable",
+    y="Number of Plans",
+    title="Distribution of Raw Scores"
+  ) 
+```
+:::
+
+::::
+
+---
+
+## Note about scores
+
+CMS does more than just an average...
+
+- variance across individual metrics
+- high variance is punished, low variance rewarded
+
+---
+
+## RD estimates
+
+```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+
+ma.rd1 <- ma.rd1 %>%
+  mutate(score = raw_rating - 2.25,
+         treat = (score>=0),
+         window1 = (score>=-.175 & score<=.175),
+         window2 = (score>=-.125 & score<=.125),
+         mkt_share = avg_enrollment/avg_eligibles,
+         ln_share = log(mkt_share),
+         score_treat=score*treat)
+star25.1 <- lm(mkt_share ~ score + treat, data=ma.rd1)
+star25.2 <- lm(mkt_share ~ score + treat, data= (ma.rd1 %>% filter(window1==TRUE)))
+star25.3 <- lm(mkt_share ~ score + treat + score_treat, data= (ma.rd1 %>% filter(window1==TRUE)))
+star25.4 <- lm(mkt_share ~ score + treat + score_treat, data= (ma.rd1 %>% filter(window2==TRUE)))
+est1 <- as.numeric(star25.1$coef[3])
+est2 <- as.numeric(star25.2$coef[3])
+est3 <- as.numeric(star25.3$coef[3])
+est4 <- as.numeric(star25.4$coef[3])
+
+rows <- tribble(~term, ~ m1, ~ m2, ~ m3 , ~ m4,
+                'Bandwidth', "0.25", "0.175", "0.175", "0.125")
+attr(rows, 'position')  <- 7
+
+modelsummary(list(star25.1, star25.2, star25.3, star25.4),
+          keep=c("score", "treatTRUE", "score_treat"),
+          coef_map=c("score"="Raw Score", 
+                    "treatTRUE"="Treatment",
+                    "score_treat"="Score x Treat"),
+          gof_map=c("nobs", "r.squared"),
+          add_rows=rows)
+          
+```
+
+
+---
+
+## Interpretation
+
+- OLS on full sample: `r round(est1,3)*100`% increase in market shares among 2.5-star plans versus 2-star plan
+- RD on 0.175 bandwidth: `r round(est2,3)*100`% increase when imposing constant slopes, `r round(est3,3)*100`% increase when allowing for differential slopes
+- RD on 0.125 bandwidth: `r round(est4,3)*100`% increase (again allowing for differential slopes)
+
+
+---
+
+## Built-in RD packages
+
+```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+
+library(rdrobust)
+rdplot(y=ma.rd1$mkt_share, x=ma.rd1$score, binselect="es",
+       title="RD Plot: Market Share", x.label="Summary Score",
+       y.label="Market Share", masspoints="off")
+```
+
+---
+
+## Estimates from RD package
+```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+
+est1 <- rdrobust(y=ma.rd1$mkt_share, x=ma.rd1$score, c=0,
+                 h=0.125, p=1, kernel="uniform", vce="hc0",
+                 masspoints="off")
+summary(est1)
+```
+
+
+---
+
+## Optimal bandwidth
+
+```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+
+estopt <- rdrobust(y=ma.rd1$mkt_share, x=ma.rd1$score, c=0,
+                 p=1, kernel="uniform", vce="hc0",
+                 masspoints="off")
+summary(estopt)                 
+```
+
+
+---
+
+## Estimates for other rating thresholds (2.25)
+
+```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+
+ma.rd225 <- ma.data.clean %>%
+  filter(Star_Rating==2 | Star_Rating==2.5) %>%
+  mutate(score = raw_rating - 2.25,
+         treat = (score>=0),
+         window1 = (score>=-.175 & score<=.175),
+         window2 = (score>=-.125 & score<=.125),
+         mkt_share = avg_enrollment/avg_eligibles,
+         ln_share = log(mkt_share),
+         score_treat=score*treat)
+
+est225 <- rdrobust(y=ma.rd225$mkt_share, x=ma.rd225$score, c=0,
+                 h=0.125, p=1, kernel="uniform", vce="hc0",
+                 masspoints="off")
+summary(est225)
+```
+
+---
+
+## Estimates for other rating thresholds (2.75)
+
+```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+
+ma.rd275 <- ma.data.clean %>%
+  filter(Star_Rating==2.5 | Star_Rating==3) %>%
+  mutate(score = raw_rating - 2.75,
+         treat = (score>=0),
+         window1 = (score>=-.175 & score<=.175),
+         window2 = (score>=-.125 & score<=.125),
+         mkt_share = avg_enrollment/avg_eligibles,
+         ln_share = log(mkt_share),
+         score_treat=score*treat)
+
+est275 <- rdrobust(y=ma.rd275$mkt_share, x=ma.rd275$score, c=0,
+                 h=0.125, p=1, kernel="uniform", vce="hc0",
+                 masspoints="off")
+
+summary(est275)
+```
+
+---
+
+## Estimates for other rating thresholds (3.25)
+
+```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+
+ma.rd325 <- ma.data.clean %>%
+  filter(Star_Rating==3 | Star_Rating==3.5) %>%
+  mutate(score = raw_rating - 3.25,
+         treat = (score>=0),
+         window1 = (score>=-.175 & score<=.175),
+         window2 = (score>=-.125 & score<=.125),
+         mkt_share = avg_enrollment/avg_eligibles,
+         ln_share = log(mkt_share),
+         score_treat=score*treat)
+
+est325 <- rdrobust(y=ma.rd325$mkt_share, x=ma.rd325$score, c=0,
+                 h=0.125, p=1, kernel="uniform", vce="hc0",
+                 masspoints="off")
+summary(est325)
+```
+
+---
+
+## Estimates for other rating thresholds (3.75)
+
+```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+
+ma.rd375 <- ma.data.clean %>%
+  filter(Star_Rating==3.5 | Star_Rating==4) %>%
+  mutate(score = raw_rating - 3.75,
+         treat = (score>=0),
+         window1 = (score>=-.175 & score<=.175),
+         window2 = (score>=-.125 & score<=.125),
+         mkt_share = avg_enrollment/avg_eligibles,
+         ln_share = log(mkt_share),
+         score_treat=score*treat)
+
+est375 <- rdrobust(y=ma.rd375$mkt_share, x=ma.rd375$score, c=0,
+                 h=0.125, p=1, kernel="uniform", vce="hc0",
+                 masspoints="off")
+summary(est375)
+
+```
+
+---
+
+## Manipulation of the running variable
+
+
+![](https://media.giphy.com/media/5669bWEI7TS3S/giphy.gif)
+
+
+---
+
+## Manipulation of the running variable
+
+```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+
+dens225 <- rddensity(ma.rd225$score, c=0)
+rdplotdensity(dens225, ma.rd225$score)
+```
+
+---
+
+## Manipulation of the running variable
+
+```{r}
+#| echo: false
+summary(dens225)
+```
+
+
+---
+
+## Covariate balance
+
+```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+
+match.dat <- matchit(treat~premium_partc + ma_rate, 
+                     data=ma.rd225 %>% 
+                       filter(window2==TRUE, 
+                              !is.na(treat), 
+                              !is.na(premium_partc), 
+                              !is.na(ma_rate)),
+                     method=NULL, distance="mahalanobis")
+love.plot(match.dat, abs=TRUE)                     
+```
+
+
+---
+
+## RD with discrete variables
+
+- Allow for fewer mass points
+- Assume random assignment between mass points
+- Inference using Fisher's exact test
