@@ -86,6 +86,16 @@ git config --global --list
 4. Create an account on [GitHub](https://github.com/)
 5. Start/clone/fork a repository for this class 
 
+---
+
+## If using Python
+
+1. Download [Python](https://www.python.org/). During installation, ensure the option **Add Python to PATH** is checked
+2. Install Python Extension in VS Code
+3. Set Python Interpreter in VS Code (e.g., the version installed in step 1)
+   - Open a Python file
+   - Click on the Python interpreter selector in the bottom-left corner of the VS Code window (or use `Ctrl+Shift+P` and search for **"Python: Select Interpreter"**).
+4. Install python libraries, `pip install <library>` from terminal
 
 ---
 
