@@ -407,10 +407,11 @@ Ian McCarthy | Emory University
 <section id="software-installation" class="slide level2">
 <h2>Software Installation</h2>
 <ol type="1">
-<li>Download <a href="https://www.r-project.org/">R</a></li>
+<li>Download <a href="https://www.r-project.org/">R</a> and/or <a href="https://www.python.org/">Python</a></li>
 <li>Download <a href="https://code.visualstudio.com/">Visual Studio Code</a></li>
 <li>Download <a href="https://git-scm.com/downloads">Git</a></li>
 <li>Create an account on <a href="https://github.com/">GitHub</a></li>
+<li>Download <a href="https://desktop.github.com/download/">GitHub Desktop</a>, <a href="https://docs.github.com/en/desktop/installing-and-authenticating-to-github-desktop/authenticating-to-github-in-github-desktop">authenticate</a> your account, and <a href="https://docs.github.com/en/desktop/configuring-and-customizing-github-desktop/configuring-git-for-github-desktop">configure</a> Git for GitHub Desktop</li>
 </ol>
 </section>
 <section id="checklist" class="slide level2">
@@ -425,6 +426,16 @@ Ian McCarthy | Emory University
 </div>
 </div>
 <ul>
+<li>What version of Python do you have?</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href=""></a><span class="im">import</span> sys</span>
+<span id="cb3-2"><a href=""></a><span class="bu">print</span>(<span class="ss">f"Python version: </span><span class="sc">{</span>sys<span class="sc">.</span>version<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Python version: 3.10.11 (tags/v3.10.11:7d4cc5a, Apr  5 2023, 00:38:17) [MSC v.1929 64 bit (AMD64)]</code></pre>
+</div>
+</div>
+<ul>
 <li>Have you installed the proper extensions in VS Code?
 <ul>
 <li>GitHub Copilot and GitHub Copilot Chat</li>
@@ -435,41 +446,11 @@ Ian McCarthy | Emory University
 <li>If using R, have you updated all of your R packages?</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a><span class="fu">update.packages</span>(<span class="at">ask =</span> <span class="cn">FALSE</span>, <span class="at">checkBuilt =</span> <span class="cn">TRUE</span>, <span class="at">repos=</span><span class="st">'https://cran.us.r-project.org'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href=""></a><span class="fu">update.packages</span>(<span class="at">ask =</span> <span class="cn">FALSE</span>, <span class="at">checkBuilt =</span> <span class="cn">TRUE</span>, <span class="at">repos=</span><span class="st">'https://cran.us.r-project.org'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="checklist-1" class="slide level2">
-<h2>Checklist</h2>
-<ul>
-<li><p>Which version of Git have you installed?</p></li>
-<li><p>Did you introduce yourself to Git? (Substitute in your details.)</p></li>
-</ul>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href=""></a><span class="fu">git</span> config <span class="at">--global</span> user.name <span class="st">'Ian McCarthy'</span></span>
-<span id="cb4-2"><a href=""></a><span class="fu">git</span> config <span class="at">--global</span> user.email <span class="st">'ian.mccarthy@emory.edu'</span></span>
-<span id="cb4-3"><a href=""></a><span class="fu">git</span> config <span class="at">--global</span> <span class="at">--list</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<ul>
-<li>Did you register an account in GitHub?</li>
-</ul>
-</section>
-<section>
-<section id="practice-with-git-and-vs-code" class="title-slide slide level1 center">
-<h1>Practice with Git and VS Code</h1>
-
-</section>
-<section id="for-the-rest-of-today-and-before-next-class" class="slide level2">
-<h2>For the rest of today (and before next class)</h2>
-<ol type="1">
-<li>Download <a href="https://www.r-project.org/">R</a></li>
-<li>Download <a href="https://code.visualstudio.com/">VS Code</a></li>
-<li>Download <a href="https://git-scm.com/downloads">Git</a></li>
-<li>Create an account on <a href="https://github.com/">GitHub</a></li>
-<li>Start/clone/fork a repository for this class</li>
-</ol>
-</section>
-<section id="if-using-python" class="slide level2">
-<h2>If using Python</h2>
+<section id="checklist-for-python" class="slide level2">
+<h2>Checklist (for Python)</h2>
 <ol type="1">
 <li>Download <a href="https://www.python.org/">Python</a>. During installation, ensure the option <strong>Add Python to PATH</strong> is checked</li>
 <li>Install Python Extension in VS Code</li>
@@ -481,9 +462,29 @@ Ian McCarthy | Emory University
 <li>Install python libraries, <code>pip install &lt;library&gt;</code> from terminal</li>
 </ol>
 </section>
-<section id="setting-things-up" class="slide level2">
-<h2>Setting things up</h2>
-<p>Now we’re going to clone a GitHub repository (repo) using Git.</p>
+<section id="checklist-1" class="slide level2">
+<h2>Checklist</h2>
+<ul>
+<li><p>Which version of Git have you installed?</p></li>
+<li><p>Did you register an account in GitHub?</p></li>
+<li><p>Did you <a href="https://docs.github.com/en/desktop/installing-and-authenticating-to-github-desktop/authenticating-to-github-in-github-desktop">authenticate</a> your account and <a href="https://docs.github.com/en/desktop/configuring-and-customizing-github-desktop/configuring-git-for-github-desktop">configure</a> your local Git for GitHub Desktop?</p></li>
+</ul>
+</section>
+<section>
+<section id="practice-with-git-github-vs-code-and-github-desktop" class="title-slide slide level1 center">
+<h1>Practice with Git, GitHub, VS Code, and GitHub Desktop</h1>
+
+</section>
+<section class="slide level2">
+
+<ol type="1">
+<li>Start a repository on GitHub</li>
+<li>Clone repository to your local computer</li>
+<li>Create a basic folder structure</li>
+<li>Create a ReadMe and a gitignore file in VS Code</li>
+<li>Commit changes to git</li>
+<li>Push changes to GitHub</li>
+</ol>
 </section>
 <section id="some-common-mistakes-for-windows-users" class="slide level2">
 <h2>Some common mistakes for windows users</h2>
@@ -501,8 +502,33 @@ Ian McCarthy | Emory University
 <p>Until you are a Git(Hub) expert…</p>
 <ol type="1">
 <li>Start project on GitHub (fork from another repo if needed)</li>
-<li>Clone to local computer with Git (or GitHub Desktop)</li>
+<li>Clone to local computer with GitHub Desktop</li>
+<li>Set up structure and basic files</li>
 </ol>
+</section>
+<section id="recommended-structure" class="slide level2">
+<h2>Recommended Structure</h2>
+<pre><code>homework1
+|
+|   README.md
+|   .gitignore
+|
+|---data (not tracked in git or pushed to github)
+|   |   input (symbolic links)
+|   |   output (analytic data sets)
+|
+|---submission1
+|   |---data-code
+|   |---analysis
+|   |---results
+|   |   mccarthy-i-hwk1-1.pdf
+|
+|---submission2
+|   |---data-code
+|   |---analysis
+|   |---results
+|   |   mccarthy-i-hwk1-2.pdf
+|</code></pre>
 <div class="quarto-auto-generated-content">
 <div class="footer footer-default">
 
@@ -931,4 +957,59 @@ Ian McCarthy | Emory University
       }
       const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
       for (var i=0; i<noterefs.length; i++) {
-        const ref = no
+        const ref = noterefs[i];
+        tippyHover(ref, function() {
+          // use id or data attribute instead here
+          let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+          try { href = new URL(href).hash; } catch {}
+          const id = href.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note) {
+            return note.innerHTML;
+          } else {
+            return "";
+          }
+        });
+      }
+      const findCites = (el) => {
+        const parentEl = el.parentElement;
+        if (parentEl) {
+          const cites = parentEl.dataset.cites;
+          if (cites) {
+            return {
+              el,
+              cites: cites.split(' ')
+            };
+          } else {
+            return findCites(el.parentElement)
+          }
+        } else {
+          return undefined;
+        }
+      };
+      var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+      for (var i=0; i<bibliorefs.length; i++) {
+        const ref = bibliorefs[i];
+        const citeInfo = findCites(ref);
+        if (citeInfo) {
+          tippyHover(citeInfo.el, function() {
+            var popup = window.document.createElement('div');
+            citeInfo.cites.forEach(function(cite) {
+              var citeDiv = window.document.createElement('div');
+              citeDiv.classList.add('hanging-indent');
+              citeDiv.classList.add('csl-entry');
+              var biblioDiv = window.document.getElementById('ref-' + cite);
+              if (biblioDiv) {
+                citeDiv.innerHTML = biblioDiv.innerHTML;
+              }
+              popup.appendChild(citeDiv);
+            });
+            return popup.innerHTML;
+          });
+        }
+      }
+    });
+    </script>
+    
+
+</body></html>

@@ -20,15 +20,16 @@ execute:
 #| include: false
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(tidyverse, ggplot2, lubridate, gapminder, scales,
-               hrbrthemes, gganimate, OECD, here)
+               hrbrthemes, gganimate, OECD, here, reticulate)
 ```
 
 ## Software Installation
 
-1. Download [R](https://www.r-project.org/)
+1. Download [R](https://www.r-project.org/) and/or [Python](https://www.python.org/)
 2. Download [Visual Studio Code](https://code.visualstudio.com/)
 3. Download [Git](https://git-scm.com/downloads)
 4. Create an account on [GitHub](https://github.com/)
+5. Download [GitHub Desktop](https://desktop.github.com/download/), [authenticate](https://docs.github.com/en/desktop/installing-and-authenticating-to-github-desktop/authenticating-to-github-in-github-desktop) your account, and [configure](https://docs.github.com/en/desktop/configuring-and-customizing-github-desktop/configuring-git-for-github-desktop) Git for GitHub Desktop
 
 ---
 
@@ -39,56 +40,29 @@ pacman::p_load(tidyverse, ggplot2, lubridate, gapminder, scales,
 version$version.string
 ```
 
+- What version of Python do you have?
+```{python}
+import sys
+print(f"Python version: {sys.version}")
+```
+
+
 - Have you installed the proper extensions in VS Code?
   - GitHub Copilot and GitHub Copilot Chat
   - Python and Jupyter
   - Quarto
   - R and R Extension Pack
 
+
 - If using R, have you updated all of your R packages? 
-```{r}
+```{r, eval=FALSE}
 update.packages(ask = FALSE, checkBuilt = TRUE, repos='https://cran.us.r-project.org')
 ```
   
 
 ---
 
-## Checklist
-
-- Which version of Git have you installed?
-```{bash}
-#| include: false
-git --version
-```
-
-- Did you introduce yourself to Git? (Substitute in your details.)
-```{bash}
-#| eval: false
-git config --global user.name 'Ian McCarthy'
-git config --global user.email 'ian.mccarthy@emory.edu'
-git config --global --list
-```
-
-- Did you register an account in GitHub?
-
-
-
-# Practice with Git and VS Code
-
-
----
-
-## For the rest of today (and before next class)
-
-1. Download [R](https://www.r-project.org/)
-2. Download [VS Code](https://code.visualstudio.com/)
-3. Download [Git](https://git-scm.com/downloads)
-4. Create an account on [GitHub](https://github.com/)
-5. Start/clone/fork a repository for this class 
-
----
-
-## If using Python
+## Checklist (for Python)
 
 1. Download [Python](https://www.python.org/). During installation, ensure the option **Add Python to PATH** is checked
 2. Install Python Extension in VS Code
@@ -97,11 +71,36 @@ git config --global --list
    - Click on the Python interpreter selector in the bottom-left corner of the VS Code window (or use `Ctrl+Shift+P` and search for **"Python: Select Interpreter"**).
 4. Install python libraries, `pip install <library>` from terminal
 
+
 ---
 
-## Setting things up
+## Checklist 
 
-Now we're going to clone a GitHub repository (repo) using Git. 
+- Which version of Git have you installed?
+```{bash}
+#| include: false
+git --version
+```
+
+- Did you register an account in GitHub?
+
+- Did you [authenticate](https://docs.github.com/en/desktop/installing-and-authenticating-to-github-desktop/authenticating-to-github-in-github-desktop) your account and [configure](https://docs.github.com/en/desktop/configuring-and-customizing-github-desktop/configuring-git-for-github-desktop) your local Git for GitHub Desktop?
+
+
+
+
+# Practice with Git, GitHub, VS Code, and GitHub Desktop
+
+
+---
+
+1. Start a repository on GitHub
+2. Clone repository to your local computer
+3. Create a basic folder structure
+4. Create a ReadMe and a gitignore file in VS Code
+5. Commit changes to git
+6. Push changes to GitHub
+
 
 ---
 
@@ -121,4 +120,34 @@ Now we're going to clone a GitHub repository (repo) using Git.
 Until you are a Git(Hub) expert...
 
 1. Start project on GitHub (fork from another repo if needed)
-2. Clone to local computer with Git (or GitHub Desktop)
+2. Clone to local computer with GitHub Desktop
+3. Set up structure and basic files
+
+
+---
+
+## Recommended Structure
+
+```
+homework1
+|
+|   README.md
+|   .gitignore
+|
+|---data (not tracked in git or pushed to github)
+|   |   input (symbolic links)
+|   |   output (analytic data sets)
+|
+|---submission1
+|   |---data-code
+|   |---analysis
+|   |---results
+|   |   mccarthy-i-hwk1-1.pdf
+|
+|---submission2
+|   |---data-code
+|   |---analysis
+|   |---results
+|   |   mccarthy-i-hwk1-2.pdf
+|
+```
