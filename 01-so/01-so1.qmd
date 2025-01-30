@@ -24,6 +24,20 @@ pacman::p_load(tidyverse, ggplot2, lubridate, gapminder, scales,
 ```
 
 
+# But first...
+
+---
+
+## Some basics of data management
+
+- Let's not reinvent the wheel!
+- Let's review some excellent resources from [Grant McDermott](https://github.com/uo-ec607/lectures)
+
+
+# Hospital Prices
+
+---
+
 ## What is a hospital price?
 
 Defining characteristic of hospital services: *it's complicated!*
