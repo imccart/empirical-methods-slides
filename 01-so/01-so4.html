@@ -8,7 +8,7 @@
 <link href="01-so4_files/libs/quarto-html/light-border.css" rel="stylesheet">
 <link href="01-so4_files/libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
 <link href="01-so4_files/libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.3.450">
+  <meta name="generator" content="quarto-1.5.57">
 
   <meta name="author" content="Ian McCarthy | Emory University">
   <title>Matching and Weighting IRL</title>
@@ -31,7 +31,7 @@
     }
     /* CSS for syntax highlighting */
     pre > code.sourceCode { white-space: pre; position: relative; }
-    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span { line-height: 1.25; }
     pre > code.sourceCode > span:empty { height: 1.2em; }
     .sourceCode { overflow: visible; }
     code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -42,7 +42,7 @@
     }
     @media print {
     pre > code.sourceCode { white-space: pre-wrap; }
-    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
     }
     pre.numberSource code
       { counter-reset: source-line 0; }
@@ -223,7 +223,8 @@
   }
 
   .callout.callout-titled .callout-body > .callout-content > :last-child {
-    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0;
   }
 
   .callout.callout-titled .callout-icon::before {
@@ -406,31 +407,31 @@ Ian McCarthy | Emory University
 <section id="penalized-hospitals" class="slide level2">
 <h2>Penalized hospitals</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Find Penalized Hospitals</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a>hcris.data <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="fu">here</span>(<span class="st">"data/HCRIS_Data.rds"</span>))</span>
-<span id="cb1-2"><a href="#cb1-2"></a></span>
-<span id="cb1-3"><a href="#cb1-3"></a>hcris.data <span class="ot">&lt;-</span> hcris.data <span class="sc">%&gt;%</span></span>
-<span id="cb1-4"><a href="#cb1-4"></a>  <span class="fu">mutate</span>( <span class="at">discount_factor =</span> <span class="dv">1</span><span class="sc">-</span>tot_discounts<span class="sc">/</span>tot_charges,</span>
-<span id="cb1-5"><a href="#cb1-5"></a>          <span class="at">price_num =</span> (ip_charges <span class="sc">+</span> icu_charges <span class="sc">+</span> ancillary_charges)<span class="sc">*</span>discount_factor <span class="sc">-</span> tot_mcare_payment,</span>
-<span id="cb1-6"><a href="#cb1-6"></a>          <span class="at">price_denom =</span> tot_discharges <span class="sc">-</span> mcare_discharges,</span>
-<span id="cb1-7"><a href="#cb1-7"></a>          <span class="at">price =</span> price_num<span class="sc">/</span>price_denom)</span>
-<span id="cb1-8"><a href="#cb1-8"></a></span>
-<span id="cb1-9"><a href="#cb1-9"></a>final.hcris <span class="ot">&lt;-</span> hcris.data <span class="sc">%&gt;%</span> <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb1-10"><a href="#cb1-10"></a>  <span class="fu">filter</span>(price_denom<span class="sc">&gt;</span><span class="dv">100</span>, <span class="sc">!</span><span class="fu">is.na</span>(price_denom), </span>
-<span id="cb1-11"><a href="#cb1-11"></a>         price_num<span class="sc">&gt;</span><span class="dv">0</span>, <span class="sc">!</span><span class="fu">is.na</span>(price_num),</span>
-<span id="cb1-12"><a href="#cb1-12"></a>         price<span class="sc">&lt;</span><span class="dv">100000</span>, </span>
-<span id="cb1-13"><a href="#cb1-13"></a>         beds<span class="sc">&gt;</span><span class="dv">30</span>, year<span class="sc">==</span><span class="dv">2012</span>) <span class="sc">%&gt;%</span>  <span class="co">#&lt;&lt;</span></span>
-<span id="cb1-14"><a href="#cb1-14"></a>  <span class="fu">mutate</span>( <span class="at">hvbp_payment =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(hvbp_payment),<span class="dv">0</span>,hvbp_payment),</span>
-<span id="cb1-15"><a href="#cb1-15"></a>          <span class="at">hrrp_payment =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(hrrp_payment),<span class="dv">0</span>,<span class="fu">abs</span>(hrrp_payment)), <span class="co">#&lt;&lt;</span></span>
-<span id="cb1-16"><a href="#cb1-16"></a>    <span class="at">penalty =</span> (hvbp_payment<span class="sc">-</span>hrrp_payment<span class="sc">&lt;</span><span class="dv">0</span>)) <span class="co">#&lt;&lt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a>hcris.data <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="fu">here</span>(<span class="st">"data/HCRIS_Data.rds"</span>))</span>
+<span id="cb1-2"><a href=""></a></span>
+<span id="cb1-3"><a href=""></a>hcris.data <span class="ot">&lt;-</span> hcris.data <span class="sc">%&gt;%</span></span>
+<span id="cb1-4"><a href=""></a>  <span class="fu">mutate</span>( <span class="at">discount_factor =</span> <span class="dv">1</span><span class="sc">-</span>tot_discounts<span class="sc">/</span>tot_charges,</span>
+<span id="cb1-5"><a href=""></a>          <span class="at">price_num =</span> (ip_charges <span class="sc">+</span> icu_charges <span class="sc">+</span> ancillary_charges)<span class="sc">*</span>discount_factor <span class="sc">-</span> tot_mcare_payment,</span>
+<span id="cb1-6"><a href=""></a>          <span class="at">price_denom =</span> tot_discharges <span class="sc">-</span> mcare_discharges,</span>
+<span id="cb1-7"><a href=""></a>          <span class="at">price =</span> price_num<span class="sc">/</span>price_denom)</span>
+<span id="cb1-8"><a href=""></a></span>
+<span id="cb1-9"><a href=""></a>final.hcris <span class="ot">&lt;-</span> hcris.data <span class="sc">%&gt;%</span> <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb1-10"><a href=""></a>  <span class="fu">filter</span>(price_denom<span class="sc">&gt;</span><span class="dv">100</span>, <span class="sc">!</span><span class="fu">is.na</span>(price_denom), </span>
+<span id="cb1-11"><a href=""></a>         price_num<span class="sc">&gt;</span><span class="dv">0</span>, <span class="sc">!</span><span class="fu">is.na</span>(price_num),</span>
+<span id="cb1-12"><a href=""></a>         price<span class="sc">&lt;</span><span class="dv">100000</span>, </span>
+<span id="cb1-13"><a href=""></a>         beds<span class="sc">&gt;</span><span class="dv">30</span>, year<span class="sc">==</span><span class="dv">2012</span>) <span class="sc">%&gt;%</span>  <span class="co">#&lt;&lt;</span></span>
+<span id="cb1-14"><a href=""></a>  <span class="fu">mutate</span>( <span class="at">hvbp_payment =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(hvbp_payment),<span class="dv">0</span>,hvbp_payment),</span>
+<span id="cb1-15"><a href=""></a>          <span class="at">hrrp_payment =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(hrrp_payment),<span class="dv">0</span>,<span class="fu">abs</span>(hrrp_payment)), <span class="co">#&lt;&lt;</span></span>
+<span id="cb1-16"><a href=""></a>    <span class="at">penalty =</span> (hvbp_payment<span class="sc">-</span>hrrp_payment<span class="sc">&lt;</span><span class="dv">0</span>)) <span class="co">#&lt;&lt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Mean Prices by Penalty</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>mean.pen <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">mean</span>(final.hcris<span class="sc">$</span>price[<span class="fu">which</span>(final.hcris<span class="sc">$</span>penalty<span class="sc">==</span><span class="dv">1</span>)]),<span class="dv">2</span>)</span>
-<span id="cb2-2"><a href="#cb2-2"></a>mean.nopen <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">mean</span>(final.hcris<span class="sc">$</span>price[<span class="fu">which</span>(final.hcris<span class="sc">$</span>penalty<span class="sc">==</span><span class="dv">0</span>)]),<span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href=""></a>mean.pen <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">mean</span>(final.hcris<span class="sc">$</span>price[<span class="fu">which</span>(final.hcris<span class="sc">$</span>penalty<span class="sc">==</span><span class="dv">1</span>)]),<span class="dv">2</span>)</span>
+<span id="cb2-2"><a href=""></a>mean.nopen <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">mean</span>(final.hcris<span class="sc">$</span>price[<span class="fu">which</span>(final.hcris<span class="sc">$</span>penalty<span class="sc">==</span><span class="dv">0</span>)]),<span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -448,30 +449,37 @@ Ian McCarthy | Emory University
 <div class="columns">
 <div class="column" style="width:50%;">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="fu">summary</span>(hcris.data<span class="sc">$</span>price)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a><span class="fu">summary</span>(hcris.data<span class="sc">$</span>price)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
 -123697    4783    7113     Inf   10230     Inf   63662 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(hcris.data<span class="sc">$</span>price, <span class="at">na.rm=</span><span class="cn">TRUE</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href=""></a><span class="fu">plot</span>(<span class="fu">density</span>(hcris.data<span class="sc">$</span>price, <span class="at">na.rm=</span><span class="cn">TRUE</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
+<div>
+<figure>
 <p><img data-src="01-so4_files/figure-revealjs/unnamed-chunk-4-1.png" width="960"></p>
+</figure>
+</div>
 </div>
 </div>
 </div><div class="column" style="width:50%;">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="fu">summary</span>(final.hcris<span class="sc">$</span>price)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href=""></a><span class="fu">summary</span>(final.hcris<span class="sc">$</span>price)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
   340.8  6129.9  8705.4  9646.9 11905.4 97688.8 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(final.hcris<span class="sc">$</span>price))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href=""></a><span class="fu">plot</span>(<span class="fu">density</span>(final.hcris<span class="sc">$</span>price))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
+<div>
+<figure>
 <p><img data-src="01-so4_files/figure-revealjs/unnamed-chunk-5-1.png" width="960"></p>
+</figure>
 </div>
 </div>
 </div>
-</div>
+</div></div>
 </section>
 <section id="dealing-with-problems" class="slide level2">
 <h2>Dealing with problems</h2>
@@ -500,24 +508,24 @@ Ian McCarthy | Emory University
 <section id="love-plots-without-adjustment" class="slide level2">
 <h2>Love plots without adjustment</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Subset Data</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>lp.vars <span class="ot">&lt;-</span> final.hcris <span class="sc">%&gt;%</span> </span>
-<span id="cb9-2"><a href="#cb9-2"></a>  <span class="fu">select</span>(beds, mcaid_discharges, penalty, ip_charges, </span>
-<span id="cb9-3"><a href="#cb9-3"></a>         mcare_discharges, tot_mcare_payment, price) <span class="sc">%&gt;%</span></span>
-<span id="cb9-4"><a href="#cb9-4"></a>  <span class="fu">filter</span>(<span class="fu">complete.cases</span>(.))</span>
-<span id="cb9-5"><a href="#cb9-5"></a>lp.covs <span class="ot">&lt;-</span> lp.vars <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(<span class="st">"penalty"</span>,<span class="st">"price"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href=""></a>lp.vars <span class="ot">&lt;-</span> final.hcris <span class="sc">%&gt;%</span> </span>
+<span id="cb9-2"><a href=""></a>  <span class="fu">select</span>(beds, mcaid_discharges, penalty, ip_charges, </span>
+<span id="cb9-3"><a href=""></a>         mcare_discharges, tot_mcare_payment, price) <span class="sc">%&gt;%</span></span>
+<span id="cb9-4"><a href=""></a>  <span class="fu">filter</span>(<span class="fu">complete.cases</span>(.))</span>
+<span id="cb9-5"><a href=""></a>lp.covs <span class="ot">&lt;-</span> lp.vars <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(<span class="st">"penalty"</span>,<span class="st">"price"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell" data-layout-align="center">
-<details>
+<details class="code-fold">
 <summary>Love Plot</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a><span class="fu">love.plot</span>(<span class="fu">bal.tab</span>(lp.covs,<span class="at">treat=</span>lp.vars<span class="sc">$</span>penalty), <span class="at">colors=</span><span class="st">"black"</span>, <span class="at">shapes=</span><span class="st">"circle"</span>, <span class="at">threshold=</span><span class="fl">0.1</span>) <span class="sc">+</span> </span>
-<span id="cb10-2"><a href="#cb10-2"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">legend.position=</span><span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href=""></a><span class="fu">love.plot</span>(<span class="fu">bal.tab</span>(lp.covs,<span class="at">treat=</span>lp.vars<span class="sc">$</span>penalty), <span class="at">colors=</span><span class="st">"black"</span>, <span class="at">shapes=</span><span class="st">"circle"</span>, <span class="at">threshold=</span><span class="fl">0.1</span>) <span class="sc">+</span> </span>
+<span id="cb10-2"><a href=""></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">legend.position=</span><span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 
 </div>
-<img data-src="01-so4_files/figure-revealjs/unnamed-chunk-7-1.png" width="960" class="r-stretch quarto-figure-center"></section>
+<img data-src="01-so4_files/figure-revealjs/unnamed-chunk-7-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
 <section id="using-matching-to-improve-balance" class="slide level2">
 <h2>Using matching to improve balance</h2>
 <p>Some things to think about:</p>
@@ -530,14 +538,14 @@ Ian McCarthy | Emory University
 <section id="exact-matching" class="slide level2">
 <h2>1. Exact Matching</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Exact Matching</summary>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a>m.exact <span class="ot">&lt;-</span> Matching<span class="sc">::</span><span class="fu">Match</span>(<span class="at">Y=</span>lp.vars<span class="sc">$</span>price,</span>
-<span id="cb11-2"><a href="#cb11-2"></a>                           <span class="at">Tr=</span>lp.vars<span class="sc">$</span>penalty,</span>
-<span id="cb11-3"><a href="#cb11-3"></a>                           <span class="at">X=</span>lp.covs,</span>
-<span id="cb11-4"><a href="#cb11-4"></a>                           <span class="at">M=</span><span class="dv">1</span>,</span>
-<span id="cb11-5"><a href="#cb11-5"></a>                           <span class="at">exact=</span><span class="cn">TRUE</span>) <span class="co">#&lt;&lt;</span></span>
-<span id="cb11-6"><a href="#cb11-6"></a><span class="fu">print</span>(m.exact)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href=""></a>m.exact <span class="ot">&lt;-</span> Matching<span class="sc">::</span><span class="fu">Match</span>(<span class="at">Y=</span>lp.vars<span class="sc">$</span>price,</span>
+<span id="cb11-2"><a href=""></a>                           <span class="at">Tr=</span>lp.vars<span class="sc">$</span>penalty,</span>
+<span id="cb11-3"><a href=""></a>                           <span class="at">X=</span>lp.covs,</span>
+<span id="cb11-4"><a href=""></a>                           <span class="at">M=</span><span class="dv">1</span>,</span>
+<span id="cb11-5"><a href=""></a>                           <span class="at">exact=</span><span class="cn">TRUE</span>) <span class="co">#&lt;&lt;</span></span>
+<span id="cb11-6"><a href=""></a><span class="fu">print</span>(m.exact)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] NA
@@ -549,92 +557,92 @@ attr(,"class")
 <section id="exact-matching-on-a-subset" class="slide level2">
 <h2>1. Exact Matching (on a subset)</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Exact Matching</summary>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a>lp.covs2 <span class="ot">&lt;-</span> lp.covs <span class="sc">%&gt;%</span> <span class="fu">select</span>(beds, mcaid_discharges)</span>
-<span id="cb13-2"><a href="#cb13-2"></a>m.exact <span class="ot">&lt;-</span> Matching<span class="sc">::</span><span class="fu">Match</span>(<span class="at">Y=</span>lp.vars<span class="sc">$</span>price,</span>
-<span id="cb13-3"><a href="#cb13-3"></a>                           <span class="at">Tr=</span>lp.vars<span class="sc">$</span>penalty,</span>
-<span id="cb13-4"><a href="#cb13-4"></a>                           <span class="at">X=</span>lp.covs2,</span>
-<span id="cb13-5"><a href="#cb13-5"></a>                           <span class="at">M=</span><span class="dv">1</span>,</span>
-<span id="cb13-6"><a href="#cb13-6"></a>                           <span class="at">exact=</span><span class="cn">TRUE</span>,</span>
-<span id="cb13-7"><a href="#cb13-7"></a>                           <span class="at">estimand=</span><span class="st">"ATE"</span>) <span class="co">#&lt;&lt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href=""></a>lp.covs2 <span class="ot">&lt;-</span> lp.covs <span class="sc">%&gt;%</span> <span class="fu">select</span>(beds, mcaid_discharges)</span>
+<span id="cb13-2"><a href=""></a>m.exact <span class="ot">&lt;-</span> Matching<span class="sc">::</span><span class="fu">Match</span>(<span class="at">Y=</span>lp.vars<span class="sc">$</span>price,</span>
+<span id="cb13-3"><a href=""></a>                           <span class="at">Tr=</span>lp.vars<span class="sc">$</span>penalty,</span>
+<span id="cb13-4"><a href=""></a>                           <span class="at">X=</span>lp.covs2,</span>
+<span id="cb13-5"><a href=""></a>                           <span class="at">M=</span><span class="dv">1</span>,</span>
+<span id="cb13-6"><a href=""></a>                           <span class="at">exact=</span><span class="cn">TRUE</span>,</span>
+<span id="cb13-7"><a href=""></a>                           <span class="at">estimand=</span><span class="st">"ATE"</span>) <span class="co">#&lt;&lt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
 <section id="exact-matching-on-a-subset-1" class="slide level2">
 <h2>1. Exact Matching (on a subset)</h2>
 <div class="cell" data-layout-align="center">
-<details>
+<details class="code-fold">
 <summary>Exact Matching Plot</summary>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a><span class="fu">love.plot</span>(<span class="fu">bal.tab</span>(m.exact, <span class="at">covs =</span> lp.covs2, <span class="at">treat =</span> lp.vars<span class="sc">$</span>penalty),  </span>
-<span id="cb14-2"><a href="#cb14-2"></a>          <span class="at">threshold=</span><span class="fl">0.1</span>, </span>
-<span id="cb14-3"><a href="#cb14-3"></a>          <span class="at">grid=</span><span class="cn">FALSE</span>, <span class="at">sample.names=</span><span class="fu">c</span>(<span class="st">"Unmatched"</span>, <span class="st">"Matched"</span>),</span>
-<span id="cb14-4"><a href="#cb14-4"></a>          <span class="at">position=</span><span class="st">"top"</span>, <span class="at">shapes=</span><span class="fu">c</span>(<span class="st">"circle"</span>,<span class="st">"triangle"</span>),</span>
-<span id="cb14-5"><a href="#cb14-5"></a>          <span class="at">colors=</span><span class="fu">c</span>(<span class="st">"black"</span>,<span class="st">"blue"</span>)) <span class="sc">+</span> </span>
-<span id="cb14-6"><a href="#cb14-6"></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href=""></a><span class="fu">love.plot</span>(<span class="fu">bal.tab</span>(m.exact, <span class="at">covs =</span> lp.covs2, <span class="at">treat =</span> lp.vars<span class="sc">$</span>penalty),  </span>
+<span id="cb14-2"><a href=""></a>          <span class="at">threshold=</span><span class="fl">0.1</span>, </span>
+<span id="cb14-3"><a href=""></a>          <span class="at">grid=</span><span class="cn">FALSE</span>, <span class="at">sample.names=</span><span class="fu">c</span>(<span class="st">"Unmatched"</span>, <span class="st">"Matched"</span>),</span>
+<span id="cb14-4"><a href=""></a>          <span class="at">position=</span><span class="st">"top"</span>, <span class="at">shapes=</span><span class="fu">c</span>(<span class="st">"circle"</span>,<span class="st">"triangle"</span>),</span>
+<span id="cb14-5"><a href=""></a>          <span class="at">colors=</span><span class="fu">c</span>(<span class="st">"black"</span>,<span class="st">"blue"</span>)) <span class="sc">+</span> </span>
+<span id="cb14-6"><a href=""></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 
 </div>
-<img data-src="01-so4_files/figure-revealjs/unnamed-chunk-10-1.png" width="960" class="r-stretch quarto-figure-center"></section>
+<img data-src="01-so4_files/figure-revealjs/unnamed-chunk-10-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
 <section id="nearest-neighbor-matching-inverse-variance" class="slide level2">
 <h2>2. Nearest neighbor matching (inverse variance)</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Nearest Neighbor Matching, Multiple Match</summary>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a>m.nn.var <span class="ot">&lt;-</span> Matching<span class="sc">::</span><span class="fu">Match</span>(<span class="at">Y=</span>lp.vars<span class="sc">$</span>price,</span>
-<span id="cb15-2"><a href="#cb15-2"></a>                            <span class="at">Tr=</span>lp.vars<span class="sc">$</span>penalty,</span>
-<span id="cb15-3"><a href="#cb15-3"></a>                            <span class="at">X=</span>lp.covs,</span>
-<span id="cb15-4"><a href="#cb15-4"></a>                            <span class="at">M=</span><span class="dv">4</span>,  <span class="co">#&lt;&lt;</span></span>
-<span id="cb15-5"><a href="#cb15-5"></a>                            <span class="at">Weight=</span><span class="dv">1</span>,</span>
-<span id="cb15-6"><a href="#cb15-6"></a>                            <span class="at">estimand=</span><span class="st">"ATE"</span>)</span>
-<span id="cb15-7"><a href="#cb15-7"></a></span>
-<span id="cb15-8"><a href="#cb15-8"></a>v.name<span class="ot">=</span><span class="fu">data.frame</span>(<span class="at">new=</span><span class="fu">c</span>(<span class="st">"Beds"</span>,<span class="st">"Medicaid Discharges"</span>, <span class="st">"Inaptient Charges"</span>,</span>
-<span id="cb15-9"><a href="#cb15-9"></a>                   <span class="st">"Medicare Discharges"</span>, <span class="st">"Medicare Payments"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href=""></a>m.nn.var <span class="ot">&lt;-</span> Matching<span class="sc">::</span><span class="fu">Match</span>(<span class="at">Y=</span>lp.vars<span class="sc">$</span>price,</span>
+<span id="cb15-2"><a href=""></a>                            <span class="at">Tr=</span>lp.vars<span class="sc">$</span>penalty,</span>
+<span id="cb15-3"><a href=""></a>                            <span class="at">X=</span>lp.covs,</span>
+<span id="cb15-4"><a href=""></a>                            <span class="at">M=</span><span class="dv">4</span>,  <span class="co">#&lt;&lt;</span></span>
+<span id="cb15-5"><a href=""></a>                            <span class="at">Weight=</span><span class="dv">1</span>,</span>
+<span id="cb15-6"><a href=""></a>                            <span class="at">estimand=</span><span class="st">"ATE"</span>)</span>
+<span id="cb15-7"><a href=""></a></span>
+<span id="cb15-8"><a href=""></a>v.name<span class="ot">=</span><span class="fu">data.frame</span>(<span class="at">new=</span><span class="fu">c</span>(<span class="st">"Beds"</span>,<span class="st">"Medicaid Discharges"</span>, <span class="st">"Inaptient Charges"</span>,</span>
+<span id="cb15-9"><a href=""></a>                   <span class="st">"Medicare Discharges"</span>, <span class="st">"Medicare Payments"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
 <section id="nearest-neighbor-matching-inverse-variance-1" class="slide level2">
 <h2>2. Nearest neighbor matching (inverse variance)</h2>
 <div class="cell" data-layout-align="center">
-<details>
+<details class="code-fold">
 <summary>Nearest Neighbor Matching Plot</summary>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a><span class="fu">love.plot</span>(<span class="fu">bal.tab</span>(m.nn.var, <span class="at">covs =</span> lp.covs, <span class="at">treat =</span> lp.vars<span class="sc">$</span>penalty), </span>
-<span id="cb16-2"><a href="#cb16-2"></a>          <span class="at">threshold=</span><span class="fl">0.1</span>, </span>
-<span id="cb16-3"><a href="#cb16-3"></a>          <span class="at">var.names=</span>v.name,</span>
-<span id="cb16-4"><a href="#cb16-4"></a>          <span class="at">grid=</span><span class="cn">FALSE</span>, <span class="at">sample.names=</span><span class="fu">c</span>(<span class="st">"Unmatched"</span>, <span class="st">"Matched"</span>),</span>
-<span id="cb16-5"><a href="#cb16-5"></a>          <span class="at">position=</span><span class="st">"top"</span>, <span class="at">shapes=</span><span class="fu">c</span>(<span class="st">"circle"</span>,<span class="st">"triangle"</span>),</span>
-<span id="cb16-6"><a href="#cb16-6"></a>          <span class="at">colors=</span><span class="fu">c</span>(<span class="st">"black"</span>,<span class="st">"blue"</span>)) <span class="sc">+</span> </span>
-<span id="cb16-7"><a href="#cb16-7"></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href=""></a><span class="fu">love.plot</span>(<span class="fu">bal.tab</span>(m.nn.var, <span class="at">covs =</span> lp.covs, <span class="at">treat =</span> lp.vars<span class="sc">$</span>penalty), </span>
+<span id="cb16-2"><a href=""></a>          <span class="at">threshold=</span><span class="fl">0.1</span>, </span>
+<span id="cb16-3"><a href=""></a>          <span class="at">var.names=</span>v.name,</span>
+<span id="cb16-4"><a href=""></a>          <span class="at">grid=</span><span class="cn">FALSE</span>, <span class="at">sample.names=</span><span class="fu">c</span>(<span class="st">"Unmatched"</span>, <span class="st">"Matched"</span>),</span>
+<span id="cb16-5"><a href=""></a>          <span class="at">position=</span><span class="st">"top"</span>, <span class="at">shapes=</span><span class="fu">c</span>(<span class="st">"circle"</span>,<span class="st">"triangle"</span>),</span>
+<span id="cb16-6"><a href=""></a>          <span class="at">colors=</span><span class="fu">c</span>(<span class="st">"black"</span>,<span class="st">"blue"</span>)) <span class="sc">+</span> </span>
+<span id="cb16-7"><a href=""></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 
 </div>
-<img data-src="01-so4_files/figure-revealjs/unnamed-chunk-12-1.png" width="960" class="r-stretch quarto-figure-center"></section>
+<img data-src="01-so4_files/figure-revealjs/unnamed-chunk-12-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
 <section id="nearest-neighbor-matching-inverse-variance-2" class="slide level2">
 <h2>2. Nearest neighbor matching (inverse variance)</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Nearest Neighbor Matching, Single Match</summary>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a>m.nn.var2 <span class="ot">&lt;-</span> Matching<span class="sc">::</span><span class="fu">Match</span>(<span class="at">Y=</span>lp.vars<span class="sc">$</span>price,</span>
-<span id="cb17-2"><a href="#cb17-2"></a>                             <span class="at">Tr=</span>lp.vars<span class="sc">$</span>penalty,</span>
-<span id="cb17-3"><a href="#cb17-3"></a>                             <span class="at">X=</span>lp.covs,</span>
-<span id="cb17-4"><a href="#cb17-4"></a>                             <span class="at">M=</span><span class="dv">1</span>,   <span class="co">#&lt;&lt;</span></span>
-<span id="cb17-5"><a href="#cb17-5"></a>                             <span class="at">Weight=</span><span class="dv">1</span>,</span>
-<span id="cb17-6"><a href="#cb17-6"></a>                             <span class="at">estimand=</span><span class="st">"ATE"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href=""></a>m.nn.var2 <span class="ot">&lt;-</span> Matching<span class="sc">::</span><span class="fu">Match</span>(<span class="at">Y=</span>lp.vars<span class="sc">$</span>price,</span>
+<span id="cb17-2"><a href=""></a>                             <span class="at">Tr=</span>lp.vars<span class="sc">$</span>penalty,</span>
+<span id="cb17-3"><a href=""></a>                             <span class="at">X=</span>lp.covs,</span>
+<span id="cb17-4"><a href=""></a>                             <span class="at">M=</span><span class="dv">1</span>,   <span class="co">#&lt;&lt;</span></span>
+<span id="cb17-5"><a href=""></a>                             <span class="at">Weight=</span><span class="dv">1</span>,</span>
+<span id="cb17-6"><a href=""></a>                             <span class="at">estimand=</span><span class="st">"ATE"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
 <section id="nearest-neighbor-matching-inverse-variance-3" class="slide level2">
 <h2>2. Nearest neighbor matching (inverse variance)</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Nearest Neighbor Matching Plot</summary>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a><span class="fu">love.plot</span>(<span class="fu">bal.tab</span>(m.nn.var2, <span class="at">covs =</span> lp.covs, <span class="at">treat =</span> lp.vars<span class="sc">$</span>penalty), </span>
-<span id="cb18-2"><a href="#cb18-2"></a>          <span class="at">threshold=</span><span class="fl">0.1</span>, </span>
-<span id="cb18-3"><a href="#cb18-3"></a>          <span class="at">var.names=</span>v.name,</span>
-<span id="cb18-4"><a href="#cb18-4"></a>          <span class="at">grid=</span><span class="cn">FALSE</span>, <span class="at">sample.names=</span><span class="fu">c</span>(<span class="st">"Unmatched"</span>, <span class="st">"Matched"</span>),</span>
-<span id="cb18-5"><a href="#cb18-5"></a>          <span class="at">position=</span><span class="st">"top"</span>, <span class="at">shapes=</span><span class="fu">c</span>(<span class="st">"circle"</span>,<span class="st">"triangle"</span>),</span>
-<span id="cb18-6"><a href="#cb18-6"></a>          <span class="at">colors=</span><span class="fu">c</span>(<span class="st">"black"</span>,<span class="st">"blue"</span>)) <span class="sc">+</span> </span>
-<span id="cb18-7"><a href="#cb18-7"></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href=""></a><span class="fu">love.plot</span>(<span class="fu">bal.tab</span>(m.nn.var2, <span class="at">covs =</span> lp.covs, <span class="at">treat =</span> lp.vars<span class="sc">$</span>penalty), </span>
+<span id="cb18-2"><a href=""></a>          <span class="at">threshold=</span><span class="fl">0.1</span>, </span>
+<span id="cb18-3"><a href=""></a>          <span class="at">var.names=</span>v.name,</span>
+<span id="cb18-4"><a href=""></a>          <span class="at">grid=</span><span class="cn">FALSE</span>, <span class="at">sample.names=</span><span class="fu">c</span>(<span class="st">"Unmatched"</span>, <span class="st">"Matched"</span>),</span>
+<span id="cb18-5"><a href=""></a>          <span class="at">position=</span><span class="st">"top"</span>, <span class="at">shapes=</span><span class="fu">c</span>(<span class="st">"circle"</span>,<span class="st">"triangle"</span>),</span>
+<span id="cb18-6"><a href=""></a>          <span class="at">colors=</span><span class="fu">c</span>(<span class="st">"black"</span>,<span class="st">"blue"</span>)) <span class="sc">+</span> </span>
+<span id="cb18-7"><a href=""></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 
 </div>
@@ -642,77 +650,77 @@ attr(,"class")
 <section id="nearest-neighbor-matching-mahalanobis" class="slide level2">
 <h2>2. Nearest neighbor matching (Mahalanobis)</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Nearest Neighbor Matching</summary>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a>m.nn.md <span class="ot">&lt;-</span> Matching<span class="sc">::</span><span class="fu">Match</span>(<span class="at">Y=</span>lp.vars<span class="sc">$</span>price,</span>
-<span id="cb19-2"><a href="#cb19-2"></a>                           <span class="at">Tr=</span>lp.vars<span class="sc">$</span>penalty,</span>
-<span id="cb19-3"><a href="#cb19-3"></a>                           <span class="at">X=</span>lp.covs,</span>
-<span id="cb19-4"><a href="#cb19-4"></a>                           <span class="at">M=</span><span class="dv">1</span>,</span>
-<span id="cb19-5"><a href="#cb19-5"></a>                           <span class="at">Weight=</span><span class="dv">2</span>,</span>
-<span id="cb19-6"><a href="#cb19-6"></a>                           <span class="at">estimand=</span><span class="st">"ATE"</span>)                           </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href=""></a>m.nn.md <span class="ot">&lt;-</span> Matching<span class="sc">::</span><span class="fu">Match</span>(<span class="at">Y=</span>lp.vars<span class="sc">$</span>price,</span>
+<span id="cb19-2"><a href=""></a>                           <span class="at">Tr=</span>lp.vars<span class="sc">$</span>penalty,</span>
+<span id="cb19-3"><a href=""></a>                           <span class="at">X=</span>lp.covs,</span>
+<span id="cb19-4"><a href=""></a>                           <span class="at">M=</span><span class="dv">1</span>,</span>
+<span id="cb19-5"><a href=""></a>                           <span class="at">Weight=</span><span class="dv">2</span>,</span>
+<span id="cb19-6"><a href=""></a>                           <span class="at">estimand=</span><span class="st">"ATE"</span>)                           </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
 <section id="nearest-neighbor-matching-mahalanobis-1" class="slide level2">
 <h2>2. Nearest neighbor matching (Mahalanobis)</h2>
 <div class="cell" data-layout-align="center">
-<details>
+<details class="code-fold">
 <summary>Nearest Neighbor Matching Plot, Mahalanobis</summary>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1"></a><span class="fu">love.plot</span>(<span class="fu">bal.tab</span>(m.nn.md, <span class="at">covs =</span> lp.covs, <span class="at">treat =</span> lp.vars<span class="sc">$</span>penalty), </span>
-<span id="cb20-2"><a href="#cb20-2"></a>          <span class="at">threshold=</span><span class="fl">0.1</span>, </span>
-<span id="cb20-3"><a href="#cb20-3"></a>          <span class="at">var.names=</span>v.name,</span>
-<span id="cb20-4"><a href="#cb20-4"></a>          <span class="at">grid=</span><span class="cn">FALSE</span>, <span class="at">sample.names=</span><span class="fu">c</span>(<span class="st">"Unmatched"</span>, <span class="st">"Matched"</span>),</span>
-<span id="cb20-5"><a href="#cb20-5"></a>          <span class="at">position=</span><span class="st">"top"</span>, <span class="at">shapes=</span><span class="fu">c</span>(<span class="st">"circle"</span>,<span class="st">"triangle"</span>),</span>
-<span id="cb20-6"><a href="#cb20-6"></a>          <span class="at">colors=</span><span class="fu">c</span>(<span class="st">"black"</span>,<span class="st">"blue"</span>)) <span class="sc">+</span> </span>
-<span id="cb20-7"><a href="#cb20-7"></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href=""></a><span class="fu">love.plot</span>(<span class="fu">bal.tab</span>(m.nn.md, <span class="at">covs =</span> lp.covs, <span class="at">treat =</span> lp.vars<span class="sc">$</span>penalty), </span>
+<span id="cb20-2"><a href=""></a>          <span class="at">threshold=</span><span class="fl">0.1</span>, </span>
+<span id="cb20-3"><a href=""></a>          <span class="at">var.names=</span>v.name,</span>
+<span id="cb20-4"><a href=""></a>          <span class="at">grid=</span><span class="cn">FALSE</span>, <span class="at">sample.names=</span><span class="fu">c</span>(<span class="st">"Unmatched"</span>, <span class="st">"Matched"</span>),</span>
+<span id="cb20-5"><a href=""></a>          <span class="at">position=</span><span class="st">"top"</span>, <span class="at">shapes=</span><span class="fu">c</span>(<span class="st">"circle"</span>,<span class="st">"triangle"</span>),</span>
+<span id="cb20-6"><a href=""></a>          <span class="at">colors=</span><span class="fu">c</span>(<span class="st">"black"</span>,<span class="st">"blue"</span>)) <span class="sc">+</span> </span>
+<span id="cb20-7"><a href=""></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 
 </div>
-<img data-src="01-so4_files/figure-revealjs/unnamed-chunk-16-1.png" width="960" class="r-stretch quarto-figure-center"></section>
+<img data-src="01-so4_files/figure-revealjs/unnamed-chunk-16-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
 <section id="nearest-neighbor-matching-propensity-score" class="slide level2">
 <h2>2. Nearest neighbor matching (propensity score)</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Nearest Neighbor Matching, PS</summary>
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a>logit.model <span class="ot">&lt;-</span> <span class="fu">glm</span>(penalty <span class="sc">~</span> beds <span class="sc">+</span> mcaid_discharges <span class="sc">+</span> ip_charges <span class="sc">+</span> mcare_discharges <span class="sc">+</span></span>
-<span id="cb21-2"><a href="#cb21-2"></a>            tot_mcare_payment, <span class="at">family=</span>binomial, <span class="at">data=</span>lp.vars)</span>
-<span id="cb21-3"><a href="#cb21-3"></a>ps <span class="ot">&lt;-</span> <span class="fu">fitted</span>(logit.model)</span>
-<span id="cb21-4"><a href="#cb21-4"></a>m.nn.ps <span class="ot">&lt;-</span> Matching<span class="sc">::</span><span class="fu">Match</span>(<span class="at">Y=</span>lp.vars<span class="sc">$</span>price,</span>
-<span id="cb21-5"><a href="#cb21-5"></a>                           <span class="at">Tr=</span>lp.vars<span class="sc">$</span>penalty,</span>
-<span id="cb21-6"><a href="#cb21-6"></a>                           <span class="at">X=</span>ps,</span>
-<span id="cb21-7"><a href="#cb21-7"></a>                           <span class="at">M=</span><span class="dv">1</span>,</span>
-<span id="cb21-8"><a href="#cb21-8"></a>                           <span class="at">estimand=</span><span class="st">"ATE"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href=""></a>logit.model <span class="ot">&lt;-</span> <span class="fu">glm</span>(penalty <span class="sc">~</span> beds <span class="sc">+</span> mcaid_discharges <span class="sc">+</span> ip_charges <span class="sc">+</span> mcare_discharges <span class="sc">+</span></span>
+<span id="cb21-2"><a href=""></a>            tot_mcare_payment, <span class="at">family=</span>binomial, <span class="at">data=</span>lp.vars)</span>
+<span id="cb21-3"><a href=""></a>ps <span class="ot">&lt;-</span> <span class="fu">fitted</span>(logit.model)</span>
+<span id="cb21-4"><a href=""></a>m.nn.ps <span class="ot">&lt;-</span> Matching<span class="sc">::</span><span class="fu">Match</span>(<span class="at">Y=</span>lp.vars<span class="sc">$</span>price,</span>
+<span id="cb21-5"><a href=""></a>                           <span class="at">Tr=</span>lp.vars<span class="sc">$</span>penalty,</span>
+<span id="cb21-6"><a href=""></a>                           <span class="at">X=</span>ps,</span>
+<span id="cb21-7"><a href=""></a>                           <span class="at">M=</span><span class="dv">1</span>,</span>
+<span id="cb21-8"><a href=""></a>                           <span class="at">estimand=</span><span class="st">"ATE"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
 <section id="nearest-neighbor-matching-propensity-score-1" class="slide level2">
 <h2>2. Nearest neighbor matching (propensity score)</h2>
 <div class="cell" data-layout-align="center">
-<details>
+<details class="code-fold">
 <summary>Nearest Neighbor Matching Plot, PS</summary>
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1"></a><span class="fu">love.plot</span>(<span class="fu">bal.tab</span>(m.nn.ps, <span class="at">covs =</span> lp.covs, <span class="at">treat =</span> lp.vars<span class="sc">$</span>penalty), </span>
-<span id="cb22-2"><a href="#cb22-2"></a>          <span class="at">threshold=</span><span class="fl">0.1</span>, </span>
-<span id="cb22-3"><a href="#cb22-3"></a>          <span class="at">var.names=</span>v.name,</span>
-<span id="cb22-4"><a href="#cb22-4"></a>          <span class="at">grid=</span><span class="cn">FALSE</span>, <span class="at">sample.names=</span><span class="fu">c</span>(<span class="st">"Unmatched"</span>, <span class="st">"Matched"</span>),</span>
-<span id="cb22-5"><a href="#cb22-5"></a>          <span class="at">position=</span><span class="st">"top"</span>, <span class="at">shapes=</span><span class="fu">c</span>(<span class="st">"circle"</span>,<span class="st">"triangle"</span>),</span>
-<span id="cb22-6"><a href="#cb22-6"></a>          <span class="at">colors=</span><span class="fu">c</span>(<span class="st">"black"</span>,<span class="st">"blue"</span>)) <span class="sc">+</span> </span>
-<span id="cb22-7"><a href="#cb22-7"></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href=""></a><span class="fu">love.plot</span>(<span class="fu">bal.tab</span>(m.nn.ps, <span class="at">covs =</span> lp.covs, <span class="at">treat =</span> lp.vars<span class="sc">$</span>penalty), </span>
+<span id="cb22-2"><a href=""></a>          <span class="at">threshold=</span><span class="fl">0.1</span>, </span>
+<span id="cb22-3"><a href=""></a>          <span class="at">var.names=</span>v.name,</span>
+<span id="cb22-4"><a href=""></a>          <span class="at">grid=</span><span class="cn">FALSE</span>, <span class="at">sample.names=</span><span class="fu">c</span>(<span class="st">"Unmatched"</span>, <span class="st">"Matched"</span>),</span>
+<span id="cb22-5"><a href=""></a>          <span class="at">position=</span><span class="st">"top"</span>, <span class="at">shapes=</span><span class="fu">c</span>(<span class="st">"circle"</span>,<span class="st">"triangle"</span>),</span>
+<span id="cb22-6"><a href=""></a>          <span class="at">colors=</span><span class="fu">c</span>(<span class="st">"black"</span>,<span class="st">"blue"</span>)) <span class="sc">+</span> </span>
+<span id="cb22-7"><a href=""></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 
 </div>
-<img data-src="01-so4_files/figure-revealjs/unnamed-chunk-18-1.png" width="960" class="r-stretch quarto-figure-center"></section>
+<img data-src="01-so4_files/figure-revealjs/unnamed-chunk-18-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
 <section id="weighting" class="slide level2">
 <h2>3. Weighting</h2>
 <div class="cell" data-layout-align="center">
-<details>
+<details class="code-fold">
 <summary>Propensity Weights</summary>
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a><span class="fu">ggplot</span>(lp.vars, <span class="fu">aes</span>(<span class="at">x=</span>ps)) <span class="sc">+</span> <span class="fu">geom_histogram</span>() <span class="sc">+</span> </span>
-<span id="cb23-2"><a href="#cb23-2"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> penalty, <span class="at">ncol=</span><span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb23-3"><a href="#cb23-3"></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href=""></a><span class="fu">ggplot</span>(lp.vars, <span class="fu">aes</span>(<span class="at">x=</span>ps)) <span class="sc">+</span> <span class="fu">geom_histogram</span>() <span class="sc">+</span> </span>
+<span id="cb23-2"><a href=""></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> penalty, <span class="at">ncol=</span><span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb23-3"><a href=""></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 
 </div>
-<img data-src="01-so4_files/figure-revealjs/unnamed-chunk-19-1.png" width="960" class="r-stretch quarto-figure-center"></section>
+<img data-src="01-so4_files/figure-revealjs/unnamed-chunk-19-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
 <section id="results-exact-matching" class="slide level2">
 <h2>Results: Exact matching</h2>
 <div class="cell">
@@ -795,19 +803,19 @@ Matched number of observations  (unweighted).  14795 </code></pre>
 <section id="results-ipw-weighting" class="slide level2">
 <h2>Results: IPW weighting</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>IPW Weights</summary>
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1"></a>lp.vars <span class="ot">&lt;-</span> lp.vars <span class="sc">%&gt;%</span></span>
-<span id="cb28-2"><a href="#cb28-2"></a>  <span class="fu">mutate</span>(<span class="at">ipw =</span> <span class="fu">case_when</span>(</span>
-<span id="cb28-3"><a href="#cb28-3"></a>    penalty<span class="sc">==</span><span class="dv">1</span> <span class="sc">~</span> <span class="dv">1</span><span class="sc">/</span>ps,</span>
-<span id="cb28-4"><a href="#cb28-4"></a>    penalty<span class="sc">==</span><span class="dv">0</span> <span class="sc">~</span> <span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span><span class="sc">-</span>ps),</span>
-<span id="cb28-5"><a href="#cb28-5"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_real_</span></span>
-<span id="cb28-6"><a href="#cb28-6"></a>  ))</span>
-<span id="cb28-7"><a href="#cb28-7"></a>mean.t1 <span class="ot">&lt;-</span> lp.vars <span class="sc">%&gt;%</span> <span class="fu">filter</span>(penalty<span class="sc">==</span><span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb28-8"><a href="#cb28-8"></a>  <span class="fu">select</span>(price, ipw) <span class="sc">%&gt;%</span> <span class="fu">summarize</span>(<span class="at">mean_p=</span><span class="fu">weighted.mean</span>(price,<span class="at">w=</span>ipw))</span>
-<span id="cb28-9"><a href="#cb28-9"></a>mean.t0 <span class="ot">&lt;-</span> lp.vars <span class="sc">%&gt;%</span> <span class="fu">filter</span>(penalty<span class="sc">==</span><span class="dv">0</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb28-10"><a href="#cb28-10"></a>  <span class="fu">select</span>(price, ipw) <span class="sc">%&gt;%</span> <span class="fu">summarize</span>(<span class="at">mean_p=</span><span class="fu">weighted.mean</span>(price,<span class="at">w=</span>ipw))</span>
-<span id="cb28-11"><a href="#cb28-11"></a>mean.t1<span class="sc">$</span>mean_p <span class="sc">-</span> mean.t0<span class="sc">$</span>mean_p</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href=""></a>lp.vars <span class="ot">&lt;-</span> lp.vars <span class="sc">%&gt;%</span></span>
+<span id="cb28-2"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">ipw =</span> <span class="fu">case_when</span>(</span>
+<span id="cb28-3"><a href=""></a>    penalty<span class="sc">==</span><span class="dv">1</span> <span class="sc">~</span> <span class="dv">1</span><span class="sc">/</span>ps,</span>
+<span id="cb28-4"><a href=""></a>    penalty<span class="sc">==</span><span class="dv">0</span> <span class="sc">~</span> <span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span><span class="sc">-</span>ps),</span>
+<span id="cb28-5"><a href=""></a>    <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_real_</span></span>
+<span id="cb28-6"><a href=""></a>  ))</span>
+<span id="cb28-7"><a href=""></a>mean.t1 <span class="ot">&lt;-</span> lp.vars <span class="sc">%&gt;%</span> <span class="fu">filter</span>(penalty<span class="sc">==</span><span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb28-8"><a href=""></a>  <span class="fu">select</span>(price, ipw) <span class="sc">%&gt;%</span> <span class="fu">summarize</span>(<span class="at">mean_p=</span><span class="fu">weighted.mean</span>(price,<span class="at">w=</span>ipw))</span>
+<span id="cb28-9"><a href=""></a>mean.t0 <span class="ot">&lt;-</span> lp.vars <span class="sc">%&gt;%</span> <span class="fu">filter</span>(penalty<span class="sc">==</span><span class="dv">0</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb28-10"><a href=""></a>  <span class="fu">select</span>(price, ipw) <span class="sc">%&gt;%</span> <span class="fu">summarize</span>(<span class="at">mean_p=</span><span class="fu">weighted.mean</span>(price,<span class="at">w=</span>ipw))</span>
+<span id="cb28-11"><a href=""></a>mean.t1<span class="sc">$</span>mean_p <span class="sc">-</span> mean.t0<span class="sc">$</span>mean_p</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] -196.8922</code></pre>
@@ -817,10 +825,10 @@ Matched number of observations  (unweighted).  14795 </code></pre>
 <section id="results-ipw-weighting-with-regression" class="slide level2">
 <h2>Results: IPW weighting with regression</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>IPW Regression</summary>
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1"></a>ipw.reg <span class="ot">&lt;-</span> <span class="fu">lm</span>(price <span class="sc">~</span> penalty, <span class="at">data=</span>lp.vars, <span class="at">weights=</span>ipw)</span>
-<span id="cb30-2"><a href="#cb30-2"></a><span class="fu">summary</span>(ipw.reg)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href=""></a>ipw.reg <span class="ot">&lt;-</span> <span class="fu">lm</span>(price <span class="sc">~</span> penalty, <span class="at">data=</span>lp.vars, <span class="at">weights=</span>ipw)</span>
+<span id="cb30-2"><a href=""></a><span class="fu">summary</span>(ipw.reg)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -847,18 +855,18 @@ F-statistic: 0.8688 on 1 and 2705 DF,  p-value: 0.3514</code></pre>
 <section id="results-regression" class="slide level2">
 <h2>Results: Regression</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Two-step Regression</summary>
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1"></a>reg1.dat <span class="ot">&lt;-</span> lp.vars <span class="sc">%&gt;%</span> <span class="fu">filter</span>(penalty<span class="sc">==</span><span class="dv">1</span>, <span class="fu">complete.cases</span>(.))</span>
-<span id="cb32-2"><a href="#cb32-2"></a>reg1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(price <span class="sc">~</span> beds<span class="sc">+</span> mcaid_discharges <span class="sc">+</span> ip_charges <span class="sc">+</span> mcare_discharges <span class="sc">+</span></span>
-<span id="cb32-3"><a href="#cb32-3"></a>            tot_mcare_payment, <span class="at">data=</span>reg1.dat)</span>
-<span id="cb32-4"><a href="#cb32-4"></a></span>
-<span id="cb32-5"><a href="#cb32-5"></a>reg0.dat <span class="ot">&lt;-</span> lp.vars <span class="sc">%&gt;%</span> <span class="fu">filter</span>(penalty<span class="sc">==</span><span class="dv">0</span>, <span class="fu">complete.cases</span>(.))</span>
-<span id="cb32-6"><a href="#cb32-6"></a>reg0 <span class="ot">&lt;-</span> <span class="fu">lm</span>(price <span class="sc">~</span> beds <span class="sc">+</span> mcaid_discharges <span class="sc">+</span> ip_charges <span class="sc">+</span> mcare_discharges <span class="sc">+</span></span>
-<span id="cb32-7"><a href="#cb32-7"></a>            tot_mcare_payment, <span class="at">data=</span>reg0.dat)</span>
-<span id="cb32-8"><a href="#cb32-8"></a>pred1 <span class="ot">&lt;-</span> <span class="fu">predict</span>(reg1,<span class="at">new=</span>lp.vars)</span>
-<span id="cb32-9"><a href="#cb32-9"></a>pred0 <span class="ot">&lt;-</span> <span class="fu">predict</span>(reg0,<span class="at">new=</span>lp.vars)</span>
-<span id="cb32-10"><a href="#cb32-10"></a><span class="fu">mean</span>(pred1<span class="sc">-</span>pred0)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href=""></a>reg1.dat <span class="ot">&lt;-</span> lp.vars <span class="sc">%&gt;%</span> <span class="fu">filter</span>(penalty<span class="sc">==</span><span class="dv">1</span>, <span class="fu">complete.cases</span>(.))</span>
+<span id="cb32-2"><a href=""></a>reg1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(price <span class="sc">~</span> beds<span class="sc">+</span> mcaid_discharges <span class="sc">+</span> ip_charges <span class="sc">+</span> mcare_discharges <span class="sc">+</span></span>
+<span id="cb32-3"><a href=""></a>            tot_mcare_payment, <span class="at">data=</span>reg1.dat)</span>
+<span id="cb32-4"><a href=""></a></span>
+<span id="cb32-5"><a href=""></a>reg0.dat <span class="ot">&lt;-</span> lp.vars <span class="sc">%&gt;%</span> <span class="fu">filter</span>(penalty<span class="sc">==</span><span class="dv">0</span>, <span class="fu">complete.cases</span>(.))</span>
+<span id="cb32-6"><a href=""></a>reg0 <span class="ot">&lt;-</span> <span class="fu">lm</span>(price <span class="sc">~</span> beds <span class="sc">+</span> mcaid_discharges <span class="sc">+</span> ip_charges <span class="sc">+</span> mcare_discharges <span class="sc">+</span></span>
+<span id="cb32-7"><a href=""></a>            tot_mcare_payment, <span class="at">data=</span>reg0.dat)</span>
+<span id="cb32-8"><a href=""></a>pred1 <span class="ot">&lt;-</span> <span class="fu">predict</span>(reg1,<span class="at">new=</span>lp.vars)</span>
+<span id="cb32-9"><a href=""></a>pred0 <span class="ot">&lt;-</span> <span class="fu">predict</span>(reg0,<span class="at">new=</span>lp.vars)</span>
+<span id="cb32-10"><a href=""></a><span class="fu">mean</span>(pred1<span class="sc">-</span>pred0)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] -5.845761</code></pre>
@@ -868,18 +876,18 @@ F-statistic: 0.8688 on 1 and 2705 DF,  p-value: 0.3514</code></pre>
 <section id="results-regression-in-one-step" class="slide level2">
 <h2>Results: Regression in one step</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>One-step Regression</summary>
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1"></a>reg.dat <span class="ot">&lt;-</span> lp.vars <span class="sc">%&gt;%</span> <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="fu">complete.cases</span>(.)) <span class="sc">%&gt;%</span></span>
-<span id="cb34-2"><a href="#cb34-2"></a>  <span class="fu">mutate</span>(<span class="at">beds_diff =</span> penalty<span class="sc">*</span>(beds <span class="sc">-</span> <span class="fu">mean</span>(beds)),</span>
-<span id="cb34-3"><a href="#cb34-3"></a>         <span class="at">mcaid_diff =</span> penalty<span class="sc">*</span>(mcaid_discharges <span class="sc">-</span> <span class="fu">mean</span>(mcaid_discharges)),</span>
-<span id="cb34-4"><a href="#cb34-4"></a>         <span class="at">ip_diff =</span> penalty<span class="sc">*</span>(ip_charges <span class="sc">-</span> <span class="fu">mean</span>(ip_charges)),</span>
-<span id="cb34-5"><a href="#cb34-5"></a>         <span class="at">mcare_diff =</span> penalty<span class="sc">*</span>(mcare_discharges <span class="sc">-</span> <span class="fu">mean</span>(mcare_discharges)),</span>
-<span id="cb34-6"><a href="#cb34-6"></a>         <span class="at">mpay_diff =</span> penalty<span class="sc">*</span>(tot_mcare_payment <span class="sc">-</span> <span class="fu">mean</span>(tot_mcare_payment)))</span>
-<span id="cb34-7"><a href="#cb34-7"></a>reg <span class="ot">&lt;-</span> <span class="fu">lm</span>(price <span class="sc">~</span> penalty <span class="sc">+</span> beds <span class="sc">+</span> mcaid_discharges <span class="sc">+</span> ip_charges <span class="sc">+</span> mcare_discharges <span class="sc">+</span> tot_mcare_payment <span class="sc">+</span> </span>
-<span id="cb34-8"><a href="#cb34-8"></a>            beds_diff <span class="sc">+</span> mcaid_diff <span class="sc">+</span> ip_diff <span class="sc">+</span> mcare_diff <span class="sc">+</span> mpay_diff,</span>
-<span id="cb34-9"><a href="#cb34-9"></a>          <span class="at">data=</span>reg.dat)</span>
-<span id="cb34-10"><a href="#cb34-10"></a><span class="fu">summary</span>(reg)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href=""></a>reg.dat <span class="ot">&lt;-</span> lp.vars <span class="sc">%&gt;%</span> <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="fu">complete.cases</span>(.)) <span class="sc">%&gt;%</span></span>
+<span id="cb34-2"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">beds_diff =</span> penalty<span class="sc">*</span>(beds <span class="sc">-</span> <span class="fu">mean</span>(beds)),</span>
+<span id="cb34-3"><a href=""></a>         <span class="at">mcaid_diff =</span> penalty<span class="sc">*</span>(mcaid_discharges <span class="sc">-</span> <span class="fu">mean</span>(mcaid_discharges)),</span>
+<span id="cb34-4"><a href=""></a>         <span class="at">ip_diff =</span> penalty<span class="sc">*</span>(ip_charges <span class="sc">-</span> <span class="fu">mean</span>(ip_charges)),</span>
+<span id="cb34-5"><a href=""></a>         <span class="at">mcare_diff =</span> penalty<span class="sc">*</span>(mcare_discharges <span class="sc">-</span> <span class="fu">mean</span>(mcare_discharges)),</span>
+<span id="cb34-6"><a href=""></a>         <span class="at">mpay_diff =</span> penalty<span class="sc">*</span>(tot_mcare_payment <span class="sc">-</span> <span class="fu">mean</span>(tot_mcare_payment)))</span>
+<span id="cb34-7"><a href=""></a>reg <span class="ot">&lt;-</span> <span class="fu">lm</span>(price <span class="sc">~</span> penalty <span class="sc">+</span> beds <span class="sc">+</span> mcaid_discharges <span class="sc">+</span> ip_charges <span class="sc">+</span> mcare_discharges <span class="sc">+</span> tot_mcare_payment <span class="sc">+</span> </span>
+<span id="cb34-8"><a href=""></a>            beds_diff <span class="sc">+</span> mcaid_diff <span class="sc">+</span> ip_diff <span class="sc">+</span> mcare_diff <span class="sc">+</span> mpay_diff,</span>
+<span id="cb34-9"><a href=""></a>          <span class="at">data=</span>reg.dat)</span>
+<span id="cb34-10"><a href=""></a><span class="fu">summary</span>(reg)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -957,8 +965,10 @@ F-statistic: 80.69 on 11 and 2695 DF,  p-value: &lt; 2.2e-16</code></pre>
 <li>Regression</li>
 </ol>
 </div>
+<div class="quarto-auto-generated-content">
 <div class="footer footer-default">
 
+</div>
 </div>
 </section></section>
     </div>
@@ -988,7 +998,6 @@ F-statistic: 80.69 on 11 and 2695 DF,  p-value: &lt; 2.2e-16</code></pre>
       Reveal.initialize({
 'controlsAuto': true,
 'previewLinksAuto': true,
-'smaller': false,
 'pdfSeparateFragments': false,
 'autoAnimateEasing': "ease",
 'autoAnimateDuration': 1,
@@ -1175,42 +1184,80 @@ F-statistic: 80.69 on 11 and 2695 DF,  p-value: &lt; 2.2e-16</code></pre>
       });
     </script>
     
+
     <script>
+
       // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+
       // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+
       // slide changes (different for each slide format).
+
       (function () {
+
         // dispatch for htmlwidgets
+
         function fireSlideEnter() {
+
           const event = window.document.createEvent("Event");
+
           event.initEvent("slideenter", true, true);
+
           window.document.dispatchEvent(event);
+
         }
+
+    
 
         function fireSlideChanged(previousSlide, currentSlide) {
+
           fireSlideEnter();
 
+    
+
           // dispatch for shiny
+
           if (window.jQuery) {
+
             if (previousSlide) {
+
               window.jQuery(previousSlide).trigger("hidden");
+
             }
+
             if (currentSlide) {
+
               window.jQuery(currentSlide).trigger("shown");
+
             }
+
           }
+
         }
+
+    
 
         // hookup for slidy
+
         if (window.w3c_slidy) {
+
           window.w3c_slidy.add_observer(function (slide_num) {
+
             // slide_num starts at position 1
+
             fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+
           });
+
         }
 
+    
+
       })();
+
     </script>
+
+    
 
     <script id="quarto-html-after-body" type="application/javascript">
     window.document.addEventListener("DOMContentLoaded", function (event) {
@@ -1244,18 +1291,7 @@ F-statistic: 80.69 on 11 and 2695 DF,  p-value: &lt; 2.2e-16</code></pre>
         }
         return false;
       }
-      const clipboard = new window.ClipboardJS('.code-copy-button', {
-        text: function(trigger) {
-          const codeEl = trigger.previousElementSibling.cloneNode(true);
-          for (const childEl of codeEl.children) {
-            if (isCodeAnnotation(childEl)) {
-              childEl.remove();
-            }
-          }
-          return codeEl.innerText;
-        }
-      });
-      clipboard.on('success', function(e) {
+      const onCopySuccess = function(e) {
         // button target
         const button = e.trigger;
         // don't keep focus
@@ -1287,11 +1323,50 @@ F-statistic: 80.69 on 11 and 2695 DF,  p-value: &lt; 2.2e-16</code></pre>
         }, 1000);
         // clear code selection
         e.clearSelection();
+      }
+      const getTextToCopy = function(trigger) {
+          const codeEl = trigger.previousElementSibling.cloneNode(true);
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
+            }
+          }
+          return codeEl.innerText;
+      }
+      const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+        text: getTextToCopy
       });
-      function tippyHover(el, contentFn) {
+      clipboard.on('success', onCopySuccess);
+      if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+        // For code content inside modals, clipBoardJS needs to be initialized with a container option
+        // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+        const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+          text: getTextToCopy,
+          container: window.document.getElementById('quarto-embedded-source-code-modal')
+        });
+        clipboardModal.on('success', onCopySuccess);
+      }
+        var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+        var mailtoRegex = new RegExp(/^mailto:/);
+          var filterRegex = new RegExp('/' + window.location.host + '/');
+        var isInternal = (href) => {
+            return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+        }
+        // Inspect non-navigation links and adorn them if external
+     	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+        for (var i=0; i<links.length; i++) {
+          const link = links[i];
+          if (!isInternal(link.href)) {
+            // undo the damage that might have been done by quarto-nav.js in the case of
+            // links that we want to consider external
+            if (link.dataset.originalHref !== undefined) {
+              link.href = link.dataset.originalHref;
+            }
+          }
+        }
+      function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
         const config = {
           allowHTML: true,
-          content: contentFn,
           maxWidth: 500,
           delay: 100,
           arrow: false,
@@ -1301,8 +1376,17 @@ F-statistic: 80.69 on 11 and 2695 DF,  p-value: &lt; 2.2e-16</code></pre>
           interactive: true,
           interactiveBorder: 10,
           theme: 'light-border',
-          placement: 'bottom-start'
+          placement: 'bottom-start',
         };
+        if (contentFn) {
+          config.content = contentFn;
+        }
+        if (onTriggerFn) {
+          config.onTrigger = onTriggerFn;
+        }
+        if (onUntriggerFn) {
+          config.onUntrigger = onUntriggerFn;
+        }
           config['offset'] = [0,0];
           config['maxWidth'] = 700;
         window.tippy(el, config); 
@@ -1316,7 +1400,11 @@ F-statistic: 80.69 on 11 and 2695 DF,  p-value: &lt; 2.2e-16</code></pre>
           try { href = new URL(href).hash; } catch {}
           const id = href.replace(/^#\/?/, "");
           const note = window.document.getElementById(id);
-          return note.innerHTML;
+          if (note) {
+            return note.innerHTML;
+          } else {
+            return "";
+          }
         });
       }
       const findCites = (el) => {

@@ -8,7 +8,7 @@
 <link href="01-so3_files/libs/quarto-html/light-border.css" rel="stylesheet">
 <link href="01-so3_files/libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
 <link href="01-so3_files/libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.3.450">
+  <meta name="generator" content="quarto-1.5.57">
 
   <meta name="author" content="Ian McCarthy | Emory University">
   <title>Matching and Weighting</title>
@@ -31,7 +31,7 @@
     }
     /* CSS for syntax highlighting */
     pre > code.sourceCode { white-space: pre; position: relative; }
-    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span { line-height: 1.25; }
     pre > code.sourceCode > span:empty { height: 1.2em; }
     .sourceCode { overflow: visible; }
     code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -42,7 +42,7 @@
     }
     @media print {
     pre > code.sourceCode { white-space: pre-wrap; }
-    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
     }
     pre.numberSource code
       { counter-reset: source-line 0; }
@@ -223,7 +223,8 @@
   }
 
   .callout.callout-titled .callout-body > .callout-content > :last-child {
-    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0;
   }
 
   .callout.callout-titled .callout-icon::before {
@@ -412,21 +413,15 @@ Ian McCarthy | Emory University
 <li>Common support: <span class="math display">\[0 &lt; \text{Pr}(D_{i}=1|X_{i}) &lt; 1\]</span></li>
 </ol>
 <div class="fragment">
-<p>Then we can use <span class="math inline">\(X_{i}\)</span> to group observations and use expectations for control as the predicted counterfactuals among treated, and vice versa.</p>
+<p>Then we can use <span class="math inline">\(X_{i}\)</span> to group observations and use expected values from control group as the predicted counterfactuals among treated, and vice versa.</p>
 </div>
 </section>
 <section id="assumption-1-selection-on-observables" class="slide level2">
 <h2>Assumption 1: Selection on Observables</h2>
 <p><span class="math inline">\(E[Y_{1}|D,X]=E[Y_{1}|X]\)</span></p>
 <div class="fragment">
-<p>In words…nothing unobserved that determines treatment selection and affects your outcome of interest.</p>
+<p>In words…nothing else, outside of <span class="math inline">\(X\)</span>, that determines treatment selection and affects your outcome of interest.</p>
 </div>
-</section>
-<section id="assumption-1-selection-on-observables-1" class="slide level2">
-<h2>Assumption 1: Selection on Observables</h2>
-<ul>
-<li>Example of selection on observables from <em>Mastering Metrics</em></li>
-</ul>
 </section>
 <section id="assumption-2-common-support" class="slide level2">
 <h2>Assumption 2: Common Support</h2>
@@ -451,16 +446,135 @@ Ian McCarthy | Emory University
 <p>Sum the average treatment effects by group, and take a weighted average over those groups:</p>
 <p><span class="math display">\[ATE=\sum_{i=1}^{N} P(X=x_{i}) \left(E[Y | X, D=1] - E[Y | X, D=0]\right)\]</span></p>
 </section>
-<section id="subclassification-1" class="slide level2">
-<h2>Subclassification</h2>
+<section id="subclassification-example" class="slide level2">
+<h2>Subclassification: Example</h2>
 <ul>
 <li>Difference between treated and controls</li>
 <li>Weighted average by probability of given group (proportion of sample)</li>
-<li>What if outcome is unobserved for treatment or control group for a given subclass?</li>
 </ul>
-<div class="fragment">
-<p>This is the <em>curse of dimensionality</em></p>
+<table class="caption-top">
+<colgroup>
+<col style="width: 13%">
+<col style="width: 18%">
+<col style="width: 15%">
+<col style="width: 15%">
+<col style="width: 18%">
+<col style="width: 18%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Stratum (X)</th>
+<th>Proportion P(X)</th>
+<th>Y (treated)</th>
+<th>Y (control)</th>
+<th>Treatment Effect</th>
+<th>Contribution to ATE</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Low</td>
+<td>0.4</td>
+<td>12</td>
+<td>10</td>
+<td>2</td>
+<td>0.8</td>
+</tr>
+<tr class="even">
+<td>Medium</td>
+<td>0.35</td>
+<td>15</td>
+<td>11</td>
+<td>4</td>
+<td>1.4</td>
+</tr>
+<tr class="odd">
+<td>High</td>
+<td>0.25</td>
+<td>18</td>
+<td>14</td>
+<td>4</td>
+<td>1.0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Final ATE Calculation:</strong> <span class="math display">\[ATE = (0.4 \times 2) + (0.35 \times 4) + (0.25 \times 4) = 3.2\]</span></p>
+</section>
+<section id="subclassification-graph" class="slide level2">
+<h2>Subclassification: Graph</h2>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>R Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a><span class="co"># Define the data with proportions</span></span>
+<span id="cb1-2"><a href=""></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb1-3"><a href=""></a>  <span class="at">Stratum =</span> <span class="fu">factor</span>(<span class="fu">c</span>(<span class="st">"Low"</span>, <span class="st">"Medium"</span>, <span class="st">"High"</span>), <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Low"</span>, <span class="st">"Medium"</span>, <span class="st">"High"</span>)),</span>
+<span id="cb1-4"><a href=""></a>  <span class="at">P_X =</span> <span class="fu">c</span>(<span class="fl">0.4</span>, <span class="fl">0.35</span>, <span class="fl">0.25</span>),  <span class="co"># Proportion of each stratum</span></span>
+<span id="cb1-5"><a href=""></a>  <span class="at">Treated =</span> <span class="fu">c</span>(<span class="dv">12</span>, <span class="dv">15</span>, <span class="dv">18</span>),  </span>
+<span id="cb1-6"><a href=""></a>  <span class="at">Control =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">11</span>, <span class="dv">14</span>)  </span>
+<span id="cb1-7"><a href=""></a>)</span>
+<span id="cb1-8"><a href=""></a></span>
+<span id="cb1-9"><a href=""></a><span class="co"># Compute the ATE and per-group contributions</span></span>
+<span id="cb1-10"><a href=""></a>df <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span></span>
+<span id="cb1-11"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">TE =</span> Treated <span class="sc">-</span> Control,  <span class="co"># Treatment effect per stratum</span></span>
+<span id="cb1-12"><a href=""></a>         <span class="at">Contribution =</span> P_X <span class="sc">*</span> TE)  <span class="co"># Contribution to ATE</span></span>
+<span id="cb1-13"><a href=""></a></span>
+<span id="cb1-14"><a href=""></a>ATE <span class="ot">&lt;-</span> <span class="fu">sum</span>(df<span class="sc">$</span>Contribution)  <span class="co"># Weighted sum</span></span>
+<span id="cb1-15"><a href=""></a></span>
+<span id="cb1-16"><a href=""></a><span class="co"># Convert to long format for ggplot</span></span>
+<span id="cb1-17"><a href=""></a>df_long <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span></span>
+<span id="cb1-18"><a href=""></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(<span class="st">"Treated"</span>, <span class="st">"Control"</span>), <span class="at">names_to =</span> <span class="st">"Group"</span>, <span class="at">values_to =</span> <span class="st">"Outcome"</span>)</span>
+<span id="cb1-19"><a href=""></a></span>
+<span id="cb1-20"><a href=""></a><span class="co"># Create the plot</span></span>
+<span id="cb1-21"><a href=""></a><span class="fu">ggplot</span>(df_long, <span class="fu">aes</span>(<span class="at">x =</span> Stratum, <span class="at">y =</span> Outcome, <span class="at">fill =</span> Group)) <span class="sc">+</span></span>
+<span id="cb1-22"><a href=""></a>  </span>
+<span id="cb1-23"><a href=""></a>  <span class="co"># Bar plot for treated and control outcomes</span></span>
+<span id="cb1-24"><a href=""></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">position =</span> <span class="fu">position_dodge</span>(<span class="at">width =</span> <span class="fl">0.6</span>), <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb1-25"><a href=""></a>  </span>
+<span id="cb1-26"><a href=""></a>  <span class="co"># Treatment effect slopes (dashed lines)</span></span>
+<span id="cb1-27"><a href=""></a>  <span class="fu">geom_segment</span>(<span class="at">data =</span> df, <span class="fu">aes</span>(</span>
+<span id="cb1-28"><a href=""></a>    <span class="at">x =</span> <span class="fu">as.numeric</span>(Stratum) <span class="sc">-</span> <span class="fl">0.2</span>,  <span class="co"># Control (left)</span></span>
+<span id="cb1-29"><a href=""></a>    <span class="at">xend =</span> <span class="fu">as.numeric</span>(Stratum) <span class="sc">+</span> <span class="fl">0.2</span>,  <span class="co"># Treated (right)</span></span>
+<span id="cb1-30"><a href=""></a>    <span class="at">y =</span> Control, </span>
+<span id="cb1-31"><a href=""></a>    <span class="at">yend =</span> Treated</span>
+<span id="cb1-32"><a href=""></a>  ), <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"black"</span>, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb1-33"><a href=""></a>  </span>
+<span id="cb1-34"><a href=""></a>  <span class="co"># Slope labels (Δ = Treatment Effect)</span></span>
+<span id="cb1-35"><a href=""></a>  <span class="fu">geom_text</span>(<span class="at">data =</span> df, <span class="fu">aes</span>(</span>
+<span id="cb1-36"><a href=""></a>    <span class="at">x =</span> Stratum, </span>
+<span id="cb1-37"><a href=""></a>    <span class="at">y =</span> (Treated <span class="sc">+</span> Control) <span class="sc">/</span> <span class="dv">2</span>,  <span class="co"># Middle of the dashed line</span></span>
+<span id="cb1-38"><a href=""></a>    <span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"Δ = "</span>, TE)</span>
+<span id="cb1-39"><a href=""></a>  ), <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>, <span class="at">color =</span> <span class="st">"black"</span>, <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.5</span>, <span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span></span>
+<span id="cb1-40"><a href=""></a>  </span>
+<span id="cb1-41"><a href=""></a>  <span class="co"># Sample proportion labels (P(X) below bars)</span></span>
+<span id="cb1-42"><a href=""></a>  <span class="fu">geom_text</span>(<span class="at">data =</span> df, <span class="fu">aes</span>(</span>
+<span id="cb1-43"><a href=""></a>    <span class="at">x =</span> Stratum, </span>
+<span id="cb1-44"><a href=""></a>    <span class="at">y =</span> <span class="fu">min</span>(Control, Treated) <span class="sc">-</span> <span class="dv">1</span>,  <span class="co"># Below the bars</span></span>
+<span id="cb1-45"><a href=""></a>    <span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"P(X) = "</span>, P_X)</span>
+<span id="cb1-46"><a href=""></a>  ), <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>, <span class="at">color =</span> <span class="st">"black"</span>, <span class="at">vjust =</span> <span class="dv">1</span>, <span class="at">size =</span> <span class="dv">4</span>) <span class="sc">+</span></span>
+<span id="cb1-47"><a href=""></a></span>
+<span id="cb1-48"><a href=""></a>  <span class="co"># Horizontal ATE line</span></span>
+<span id="cb1-49"><a href=""></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> ATE, <span class="at">linetype =</span> <span class="st">"dotted"</span>, <span class="at">color =</span> <span class="st">"darkblue"</span>, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb1-50"><a href=""></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="dv">2</span>, <span class="at">y =</span> ATE <span class="sc">+</span> <span class="fl">0.5</span>, <span class="at">label =</span> <span class="fu">paste</span>(<span class="st">"ATE ="</span>, <span class="fu">round</span>(ATE, <span class="dv">2</span>)), <span class="at">color =</span> <span class="st">"darkblue"</span>, <span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span></span>
+<span id="cb1-51"><a href=""></a>  </span>
+<span id="cb1-52"><a href=""></a>  <span class="co"># Labels and theme</span></span>
+<span id="cb1-53"><a href=""></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Treatment and Control Outcomes by Stratum"</span>,</span>
+<span id="cb1-54"><a href=""></a>       <span class="at">subtitle =</span> <span class="fu">paste</span>(<span class="st">"Overall ATE ="</span>, <span class="fu">round</span>(ATE, <span class="dv">2</span>)),</span>
+<span id="cb1-55"><a href=""></a>       <span class="at">x =</span> <span class="st">"Stratum (X)"</span>,</span>
+<span id="cb1-56"><a href=""></a>       <span class="at">y =</span> <span class="st">"Outcome (Y)"</span>) <span class="sc">+</span></span>
+<span id="cb1-57"><a href=""></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Treated"</span> <span class="ot">=</span> <span class="st">"blue"</span>, <span class="st">"Control"</span> <span class="ot">=</span> <span class="st">"red"</span>)) <span class="sc">+</span></span>
+<span id="cb1-58"><a href=""></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+
 </div>
+<img data-src="01-so3_files/figure-revealjs/unnamed-chunk-2-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
+<section id="problem-with-subclassification" class="slide level2">
+<h2>Problem with Subclassification</h2>
+<ul>
+<li>What if outcome is unobserved for treatment or control group for a given subclass?</li>
+<li>No longer able to estimate <span class="math inline">\(E[Y | X, D=1] - E[Y | X, D=0]\)</span></li>
+<li>As the number of variables in <span class="math inline">\(X\)</span> (i.e., the dimensionality) grows, this becomes more likely</li>
+<li>This is the <em>curse of dimensionality</em></li>
+</ul>
 </section>
 <section id="matching-the-process" class="slide level2">
 <h2>Matching: The process</h2>
@@ -473,8 +587,130 @@ Y_{i} &amp; \text{if} &amp; D_{i}=0 \\
 Y_{i} &amp; \text{if} &amp; D_{i}=1 \\
 \frac{1}{m} \sum_{j \in J_{m}(i)} Y_{j} &amp; \text{if} &amp; D_{i}=0
 \end{cases}\]</span></p></li>
-<li><p>Form “matched” ATE: <span class="math inline">\(\hat{\delta}^{\text{match}} = \frac{1}{N} \sum_{i=1}^{N} \left(\hat{Y}_{1i} - \hat{Y}_{0i} \right)\)</span></p></li>
+<li><p>Form “matched” ATE: <span class="math display">\[\hat{\delta}^{\text{match}} = \frac{1}{N} \sum_{i=1}^{N} \left(\hat{Y}_{1i} - \hat{Y}_{0i} \right)\]</span></p></li>
 </ol>
+</section>
+<section id="matching-example" class="slide level2">
+<h2>Matching: Example</h2>
+<p>Let’s assume we are evaluating the effect of a treatment on an outcome variable (e.g., a job training program on income). We match <strong>on education level</strong>, considering the <strong>“High School Only”</strong> group. We will use <strong>all available matches</strong> within the stratum.</p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>ID</th>
+<th>D</th>
+<th>Income</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>1</td>
+<td>35,000</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>1</td>
+<td>37,000</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>0</td>
+<td>30,000</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>0</td>
+<td>32,000</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>0</td>
+<td>31,000</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="slide level2">
+
+<h3 id="step-1-identify-matches"><strong>Step 1: Identify Matches</strong></h3>
+<ul>
+<li><strong>All treated individuals (IDs 1 and 2) are matched to all control individuals (IDs 3, 4, and 5).</strong></li>
+<li>The number of matches per treated unit: <strong>( m = 3 )</strong>.</li>
+</ul>
+</section>
+<section class="slide level2">
+
+<h3 id="step-2-impute-counterfactuals"><strong>Step 2: Impute Counterfactuals</strong></h3>
+<p>For treated individuals, estimate the <strong>counterfactual control outcome</strong>:</p>
+<p><span class="math display">\[\hat{Y}_{0i} = \frac{1}{m} \sum_{j \in J_m(i)} Y_j\]</span></p>
+<p><span class="math display">\[\hat{Y}_{0,1} = \hat{Y}_{0,2} = \frac{30,000 + 32,000 + 31,000}{3} = 31,000\]</span></p>
+<p>For control individuals, estimate the <strong>counterfactual treated outcome</strong>:</p>
+<p><span class="math display">\[\hat{Y}_{1i} = \frac{1}{m} \sum_{j \in J_m(i)} Y_j\]</span></p>
+<p><span class="math display">\[\hat{Y}_{1,3} = \hat{Y}_{1,4} = \hat{Y}_{1,5} = \frac{35,000 + 37,000}{2} = 36,000\]</span></p>
+</section>
+<section class="slide level2">
+
+<h3 id="step-3-compute-the-matched-ate"><strong>Step 3: Compute the Matched ATE</strong></h3>
+<p><span class="math display">\[\hat{\delta}^{\text{match}} = \frac{1}{N} \sum_{i=1}^{N} \left(\hat{Y}_{1i} - \hat{Y}_{0i} \right)\]</span></p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>ID</th>
+<th>D</th>
+<th>Y obs</th>
+<th>Y hyp</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>1</td>
+<td>35,000</td>
+<td>31,000</td>
+<td>35,000 - 31,000 = 4,000</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>1</td>
+<td>37,000</td>
+<td>31,000</td>
+<td>37,000 - 31,000 = 6,000</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>0</td>
+<td>30,000</td>
+<td>36,000</td>
+<td>36,000 - 30,000 = 6,000</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>0</td>
+<td>32,000</td>
+<td>36,000</td>
+<td>36,000 - 32,000 = 4,000</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>0</td>
+<td>31,000</td>
+<td>36,000</td>
+<td>36,000 - 31,000 = 5,000</td>
+</tr>
+</tbody>
+</table>
+<p><span class="math display">\[\hat{\delta}^{\text{match}} = \frac{1}{5} \left( 4,000 + 6,000 + 6,000 + 4,000 + 5,000 \right)\]</span></p>
+<p><span class="math display">\[= \frac{25,000}{5} = 5,000\]</span></p>
+</section>
+<section class="slide level2">
+
+<h3 id="final-matched-ate-interpretation"><strong>Final Matched ATE Interpretation</strong></h3>
+<ul>
+<li><strong>Estimated Treatment Effect:</strong> <strong>$5,000</strong><br>
+</li>
+<li><strong>Interpretation:</strong> After matching on education level, we estimate that the <strong>job training program increases income by $5,000 on average.</strong></li>
+</ul>
 </section>
 <section id="matching-defining-nearest" class="slide level2">
 <h2>Matching: Defining “nearest”</h2>
@@ -488,24 +724,34 @@ Y_{i} &amp; \text{if} &amp; D_{i}=1 \\
 <h2>Animation for matching</h2>
 
 <img data-src="../images/match_animate.gif" class="r-stretch"></section>
-<section id="matching-defining-nearest-1" class="slide level2">
-<h2>Matching: Defining “nearest”</h2>
+<section id="matching-bias-correction" class="slide level2">
+<h2>Matching: Bias Correction</h2>
 <ul>
-<li>But are observations really the same in each group?</li>
-<li>Potential for “matching discrepancies” to introduce bias in estimates</li>
-</ul>
-<div class="fragment">
+<li>But are observations really the same in each group? Potential for “matching discrepancies” to introduce bias in estimates</li>
+<li>“Bias correction” based on <span class="math display">\[\hat{\mu}(x_{i}) - \hat{\mu}(x_{j(i)})\]</span> (i.e., difference in fitted values from regression of <span class="math inline">\(y\)</span> on <span class="math inline">\(x\)</span>, with the difference between observed <span class="math inline">\(Y_{1i}\)</span> and imputed <span class="math inline">\(Y_{0i}\)</span>)
 <ul>
-<li>“Bias correction” based on <span class="math display">\[\hat{\mu}(x_{i}) - \hat{\mu}(x_{j(i)})\]</span> (i.e., difference in fitted values from regression of <span class="math inline">\(y\)</span> on <span class="math inline">\(x\)</span>, with the difference between observed <span class="math inline">\(Y_{1i}\)</span> and imputed <span class="math inline">\(Y_{0i}\)</span>)</li>
+<li><span class="math inline">\(\hat{\mu}(x_{i})\)</span> is the predicted outcome from a regression of <span class="math inline">\(Y\)</span> on <span class="math inline">\(X\)</span>.</li>
+<li><span class="math inline">\(x_{i}\)</span> is the covariate vector for a <strong>treated</strong> unit.</li>
+<li><span class="math inline">\(x_{j(i)}\)</span> is the covariate vector for its <strong>matched control</strong>.</li>
+</ul></li>
 </ul>
-</div>
+</section>
+<section id="matching-bias-correction-1" class="slide level2">
+<h2>Matching: Bias Correction</h2>
+<p><span class="math display">\[\hat{\delta}^{\text{adjusted}} = \frac{1}{N} \sum_{i=1}^{N} \left(\left(\hat{Y}_{1i} - \hat{Y}_{0i}\right) - \left(\hat{\mu}(X_i) - \hat{\mu}(X_{j(i)})\right) \right)\]</span></p>
+<p>where:</p>
+<ul>
+<li><span class="math inline">\(\hat{Y}_{1i}\)</span> is the <strong>estimated treated outcome</strong> for individual <span class="math inline">\(i\)</span>.</li>
+<li><span class="math inline">\(\hat{Y}_{0i}\)</span> is the <strong>estimated control outcome</strong> for individual <span class="math inline">\(i\)</span>.</li>
+<li>The <strong>bias correction term</strong> ensures differences in covariates do not confound the estimate.</li>
+</ul>
 </section>
 <section id="weighting" class="slide level2">
 <h2>Weighting</h2>
 <ol type="1">
 <li><p>Estimate propensity score, denoted <span class="math inline">\(\hat{\pi}(X_{i})\)</span></p></li>
 <li><p>Weight by inverse of propensity score <span class="math display">\[\hat{\mu}_{1} = \frac{ \sum_{i=1}^{N} \frac{Y_{i} D_{i}}{\hat{\pi}(X_{i})} }{ \sum_{i=1}^{N} \frac{D_{i}}{\hat{\pi}(X_{i})} } \text{ and }
-$\hat{\mu}_{0} = \frac{ \sum_{i=1}^{N} \frac{Y_{i} (1-D_{i})}{1-\hat{\pi}(X_{i})} }{ \sum_{i=1}^{N} \frac{1-D_{i}}{1-\hat{\pi}(X_{i})} }\]</span></p></li>
+\hat{\mu}_{0} = \frac{ \sum_{i=1}^{N} \frac{Y_{i} (1-D_{i})}{1-\hat{\pi}(X_{i})} }{ \sum_{i=1}^{N} \frac{1-D_{i}}{1-\hat{\pi}(X_{i})} }\]</span></p></li>
 <li><p>Form “inverse-propensity weighted” ATE: <span class="math display">\[\hat{\delta}^{IPW} = \hat{\mu}_{1} - \hat{\mu}_{0}\]</span></p></li>
 </ol>
 </section>
@@ -551,78 +797,78 @@ $\hat{\mu}_{0} = \frac{ \sum_{i=1}^{N} \frac{Y_{i} (1-D_{i})}{1-\hat{\pi}(X_{i})
 <h2>Simulated data</h2>
 <p>Now let’s do some matching, re-weighting, and regression with simulated data:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a>n <span class="ot">&lt;-</span> <span class="dv">5000</span></span>
-<span id="cb1-2"><a href="#cb1-2"></a>select.dat <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
-<span id="cb1-3"><a href="#cb1-3"></a>  <span class="at">x =</span> <span class="fu">runif</span>(n, <span class="dv">0</span>, <span class="dv">1</span>),</span>
-<span id="cb1-4"><a href="#cb1-4"></a>  <span class="at">z =</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="dv">1</span>),</span>
-<span id="cb1-5"><a href="#cb1-5"></a>  <span class="at">w =</span> (x<span class="sc">&gt;</span><span class="fl">0.65</span>),</span>
-<span id="cb1-6"><a href="#cb1-6"></a>  <span class="at">y =</span> <span class="sc">-</span><span class="fl">2.5</span> <span class="sc">+</span> <span class="dv">4</span><span class="sc">*</span>w <span class="sc">+</span> <span class="fl">1.5</span><span class="sc">*</span>x <span class="sc">+</span> <span class="fu">rnorm</span>(n,<span class="dv">0</span>,<span class="dv">1</span>),</span>
-<span id="cb1-7"><a href="#cb1-7"></a>  <span class="at">w_alt =</span> ( x <span class="sc">+</span> z <span class="sc">&gt;</span> <span class="fl">0.35</span>),</span>
-<span id="cb1-8"><a href="#cb1-8"></a>  <span class="at">y_alt =</span> <span class="sc">-</span><span class="fl">2.5</span> <span class="sc">+</span> <span class="dv">4</span><span class="sc">*</span>w_alt <span class="sc">+</span> <span class="fl">1.5</span><span class="sc">*</span>x <span class="sc">+</span> <span class="fl">2.25</span><span class="sc">*</span>z <span class="sc">+</span> <span class="fu">rnorm</span>(n,<span class="dv">0</span>,<span class="dv">1</span>)</span>
-<span id="cb1-9"><a href="#cb1-9"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href=""></a>n <span class="ot">&lt;-</span> <span class="dv">5000</span></span>
+<span id="cb2-2"><a href=""></a>select.dat <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb2-3"><a href=""></a>  <span class="at">x =</span> <span class="fu">runif</span>(n, <span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb2-4"><a href=""></a>  <span class="at">z =</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb2-5"><a href=""></a>  <span class="at">w =</span> (x<span class="sc">&gt;</span><span class="fl">0.65</span>),</span>
+<span id="cb2-6"><a href=""></a>  <span class="at">y =</span> <span class="sc">-</span><span class="fl">2.5</span> <span class="sc">+</span> <span class="dv">4</span><span class="sc">*</span>w <span class="sc">+</span> <span class="fl">1.5</span><span class="sc">*</span>x <span class="sc">+</span> <span class="fu">rnorm</span>(n,<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb2-7"><a href=""></a>  <span class="at">w_alt =</span> ( x <span class="sc">+</span> z <span class="sc">&gt;</span> <span class="fl">0.35</span>),</span>
+<span id="cb2-8"><a href=""></a>  <span class="at">y_alt =</span> <span class="sc">-</span><span class="fl">2.5</span> <span class="sc">+</span> <span class="dv">4</span><span class="sc">*</span>w_alt <span class="sc">+</span> <span class="fl">1.5</span><span class="sc">*</span>x <span class="sc">+</span> <span class="fl">2.25</span><span class="sc">*</span>z <span class="sc">+</span> <span class="fu">rnorm</span>(n,<span class="dv">0</span>,<span class="dv">1</span>)</span>
+<span id="cb2-9"><a href=""></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="simulation-nearest-neighbor-matching" class="slide level2">
 <h2>Simulation: nearest neighbor matching</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>nn.est1 <span class="ot">&lt;-</span> Matching<span class="sc">::</span><span class="fu">Match</span>(<span class="at">Y=</span>select.dat<span class="sc">$</span>y,</span>
-<span id="cb2-2"><a href="#cb2-2"></a>                            <span class="at">Tr=</span>select.dat<span class="sc">$</span>w,</span>
-<span id="cb2-3"><a href="#cb2-3"></a>                            <span class="at">X=</span>select.dat<span class="sc">$</span>x,</span>
-<span id="cb2-4"><a href="#cb2-4"></a>                            <span class="at">M=</span><span class="dv">1</span>,</span>
-<span id="cb2-5"><a href="#cb2-5"></a>                            <span class="at">Weight=</span><span class="dv">1</span>,</span>
-<span id="cb2-6"><a href="#cb2-6"></a>                            <span class="at">estimand=</span><span class="st">"ATE"</span>)</span>
-<span id="cb2-7"><a href="#cb2-7"></a><span class="fu">summary</span>(nn.est1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a>nn.est1 <span class="ot">&lt;-</span> Matching<span class="sc">::</span><span class="fu">Match</span>(<span class="at">Y=</span>select.dat<span class="sc">$</span>y,</span>
+<span id="cb3-2"><a href=""></a>                            <span class="at">Tr=</span>select.dat<span class="sc">$</span>w,</span>
+<span id="cb3-3"><a href=""></a>                            <span class="at">X=</span>select.dat<span class="sc">$</span>x,</span>
+<span id="cb3-4"><a href=""></a>                            <span class="at">M=</span><span class="dv">1</span>,</span>
+<span id="cb3-5"><a href=""></a>                            <span class="at">Weight=</span><span class="dv">1</span>,</span>
+<span id="cb3-6"><a href=""></a>                            <span class="at">estimand=</span><span class="st">"ATE"</span>)</span>
+<span id="cb3-7"><a href=""></a><span class="fu">summary</span>(nn.est1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
-Estimate...  5.3168 
-AI SE......  0.64953 
-T-stat.....  8.1857 
-p.val......  2.2204e-16 
+Estimate...  4.7816 
+AI SE......  0.61462 
+T-stat.....  7.7798 
+p.val......  7.3275e-15 
 
 Original number of observations..............  5000 
-Original number of treated obs...............  1733 
+Original number of treated obs...............  1774 
 Matched number of observations...............  5000 
-Matched number of observations  (unweighted).  5032 </code></pre>
+Matched number of observations  (unweighted).  5007 </code></pre>
 </div>
 </div>
 </section>
 <section id="simulation-nearest-neighbor-matching-1" class="slide level2">
 <h2>Simulation: nearest neighbor matching</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>nn.est2 <span class="ot">&lt;-</span> Matching<span class="sc">::</span><span class="fu">Match</span>(<span class="at">Y=</span>select.dat<span class="sc">$</span>y,</span>
-<span id="cb4-2"><a href="#cb4-2"></a>                            <span class="at">Tr=</span>select.dat<span class="sc">$</span>w,</span>
-<span id="cb4-3"><a href="#cb4-3"></a>                            <span class="at">X=</span>select.dat<span class="sc">$</span>x,</span>
-<span id="cb4-4"><a href="#cb4-4"></a>                            <span class="at">M=</span><span class="dv">1</span>,</span>
-<span id="cb4-5"><a href="#cb4-5"></a>                            <span class="at">Weight=</span><span class="dv">2</span>, <span class="co">#&lt;&lt;</span></span>
-<span id="cb4-6"><a href="#cb4-6"></a>                            <span class="at">estimand=</span><span class="st">"ATE"</span>)</span>
-<span id="cb4-7"><a href="#cb4-7"></a><span class="fu">summary</span>(nn.est2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href=""></a>nn.est2 <span class="ot">&lt;-</span> Matching<span class="sc">::</span><span class="fu">Match</span>(<span class="at">Y=</span>select.dat<span class="sc">$</span>y,</span>
+<span id="cb5-2"><a href=""></a>                            <span class="at">Tr=</span>select.dat<span class="sc">$</span>w,</span>
+<span id="cb5-3"><a href=""></a>                            <span class="at">X=</span>select.dat<span class="sc">$</span>x,</span>
+<span id="cb5-4"><a href=""></a>                            <span class="at">M=</span><span class="dv">1</span>,</span>
+<span id="cb5-5"><a href=""></a>                            <span class="at">Weight=</span><span class="dv">2</span>, <span class="co">#&lt;&lt;</span></span>
+<span id="cb5-6"><a href=""></a>                            <span class="at">estimand=</span><span class="st">"ATE"</span>)</span>
+<span id="cb5-7"><a href=""></a><span class="fu">summary</span>(nn.est2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
-Estimate...  5.3168 
-AI SE......  0.64953 
-T-stat.....  8.1857 
-p.val......  2.2204e-16 
+Estimate...  4.7816 
+AI SE......  0.61462 
+T-stat.....  7.7798 
+p.val......  7.3275e-15 
 
 Original number of observations..............  5000 
-Original number of treated obs...............  1733 
+Original number of treated obs...............  1774 
 Matched number of observations...............  5000 
-Matched number of observations  (unweighted).  5032 </code></pre>
+Matched number of observations  (unweighted).  5007 </code></pre>
 </div>
 </div>
 </section>
 <section id="simulation-regression" class="slide level2">
 <h2>Simulation: regression</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>reg1.dat <span class="ot">&lt;-</span> select.dat <span class="sc">%&gt;%</span> <span class="fu">filter</span>(w<span class="sc">==</span><span class="dv">1</span>)</span>
-<span id="cb6-2"><a href="#cb6-2"></a>reg1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> x, <span class="at">data=</span>reg1.dat)</span>
-<span id="cb6-3"><a href="#cb6-3"></a></span>
-<span id="cb6-4"><a href="#cb6-4"></a>reg0.dat <span class="ot">&lt;-</span> select.dat <span class="sc">%&gt;%</span> <span class="fu">filter</span>(w<span class="sc">==</span><span class="dv">0</span>)</span>
-<span id="cb6-5"><a href="#cb6-5"></a>reg0 <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> x, <span class="at">data=</span>reg0.dat)</span>
-<span id="cb6-6"><a href="#cb6-6"></a>pred1 <span class="ot">&lt;-</span> <span class="fu">predict</span>(reg1,<span class="at">new=</span>select.dat)</span>
-<span id="cb6-7"><a href="#cb6-7"></a>pred0 <span class="ot">&lt;-</span> <span class="fu">predict</span>(reg0,<span class="at">new=</span>select.dat)</span>
-<span id="cb6-8"><a href="#cb6-8"></a><span class="fu">mean</span>(pred1<span class="sc">-</span>pred0)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href=""></a>reg1.dat <span class="ot">&lt;-</span> select.dat <span class="sc">%&gt;%</span> <span class="fu">filter</span>(w<span class="sc">==</span><span class="dv">1</span>)</span>
+<span id="cb7-2"><a href=""></a>reg1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> x, <span class="at">data=</span>reg1.dat)</span>
+<span id="cb7-3"><a href=""></a></span>
+<span id="cb7-4"><a href=""></a>reg0.dat <span class="ot">&lt;-</span> select.dat <span class="sc">%&gt;%</span> <span class="fu">filter</span>(w<span class="sc">==</span><span class="dv">0</span>)</span>
+<span id="cb7-5"><a href=""></a>reg0 <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> x, <span class="at">data=</span>reg0.dat)</span>
+<span id="cb7-6"><a href=""></a>pred1 <span class="ot">&lt;-</span> <span class="fu">predict</span>(reg1,<span class="at">new=</span>select.dat)</span>
+<span id="cb7-7"><a href=""></a>pred0 <span class="ot">&lt;-</span> <span class="fu">predict</span>(reg0,<span class="at">new=</span>select.dat)</span>
+<span id="cb7-8"><a href=""></a><span class="fu">mean</span>(pred1<span class="sc">-</span>pred0)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 4.000259</code></pre>
+<pre><code>[1] 3.956289</code></pre>
 </div>
 </div>
 </section>
@@ -632,43 +878,42 @@ Matched number of observations  (unweighted).  5032 </code></pre>
 <div class="column" style="width:50%;">
 <p>NN Matching</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>nn.est3 <span class="ot">&lt;-</span> Matching<span class="sc">::</span><span class="fu">Match</span>(<span class="at">Y=</span>select.dat<span class="sc">$</span>y_alt,</span>
-<span id="cb8-2"><a href="#cb8-2"></a>                            <span class="at">Tr=</span>select.dat<span class="sc">$</span>w_alt,</span>
-<span id="cb8-3"><a href="#cb8-3"></a>                            <span class="at">X=</span>select.dat<span class="sc">$</span>x,</span>
-<span id="cb8-4"><a href="#cb8-4"></a>                            <span class="at">M=</span><span class="dv">1</span>,</span>
-<span id="cb8-5"><a href="#cb8-5"></a>                            <span class="at">Weight=</span><span class="dv">2</span>,</span>
-<span id="cb8-6"><a href="#cb8-6"></a>                            <span class="at">estimand=</span><span class="st">"ATE"</span>)</span>
-<span id="cb8-7"><a href="#cb8-7"></a><span class="fu">summary</span>(nn.est3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href=""></a>nn.est3 <span class="ot">&lt;-</span> Matching<span class="sc">::</span><span class="fu">Match</span>(<span class="at">Y=</span>select.dat<span class="sc">$</span>y_alt,</span>
+<span id="cb9-2"><a href=""></a>                            <span class="at">Tr=</span>select.dat<span class="sc">$</span>w_alt,</span>
+<span id="cb9-3"><a href=""></a>                            <span class="at">X=</span>select.dat<span class="sc">$</span>x,</span>
+<span id="cb9-4"><a href=""></a>                            <span class="at">M=</span><span class="dv">1</span>,</span>
+<span id="cb9-5"><a href=""></a>                            <span class="at">Weight=</span><span class="dv">2</span>,</span>
+<span id="cb9-6"><a href=""></a>                            <span class="at">estimand=</span><span class="st">"ATE"</span>)</span>
+<span id="cb9-7"><a href=""></a><span class="fu">summary</span>(nn.est3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
-Estimate...  7.6277 
-AI SE......  0.051843 
-T-stat.....  147.13 
+Estimate...  7.567 
+AI SE......  0.053401 
+T-stat.....  141.7 
 p.val......  &lt; 2.22e-16 
 
 Original number of observations..............  5000 
-Original number of treated obs...............  2788 
+Original number of treated obs...............  2813 
 Matched number of observations...............  5000 
-Matched number of observations  (unweighted).  22610 </code></pre>
+Matched number of observations  (unweighted).  22388 </code></pre>
 </div>
 </div>
 </div><div class="column" style="width:50%;">
 <p>Regression</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>reg1.dat <span class="ot">&lt;-</span> select.dat <span class="sc">%&gt;%</span> <span class="fu">filter</span>(w_alt<span class="sc">==</span><span class="dv">1</span>)</span>
-<span id="cb10-2"><a href="#cb10-2"></a>reg1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(y_alt <span class="sc">~</span> x, <span class="at">data=</span>reg1.dat)</span>
-<span id="cb10-3"><a href="#cb10-3"></a></span>
-<span id="cb10-4"><a href="#cb10-4"></a>reg0.dat <span class="ot">&lt;-</span> select.dat <span class="sc">%&gt;%</span> <span class="fu">filter</span>(w_alt<span class="sc">==</span><span class="dv">0</span>)</span>
-<span id="cb10-5"><a href="#cb10-5"></a>reg0 <span class="ot">&lt;-</span> <span class="fu">lm</span>(y_alt <span class="sc">~</span> x, <span class="at">data=</span>reg0.dat)</span>
-<span id="cb10-6"><a href="#cb10-6"></a>pred1_alt <span class="ot">&lt;-</span> <span class="fu">predict</span>(reg1,<span class="at">new=</span>select.dat)</span>
-<span id="cb10-7"><a href="#cb10-7"></a>pred0_alt <span class="ot">&lt;-</span> <span class="fu">predict</span>(reg0,<span class="at">new=</span>select.dat)</span>
-<span id="cb10-8"><a href="#cb10-8"></a><span class="fu">mean</span>(pred1_alt<span class="sc">-</span>pred0_alt)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href=""></a>reg1.dat <span class="ot">&lt;-</span> select.dat <span class="sc">%&gt;%</span> <span class="fu">filter</span>(w_alt<span class="sc">==</span><span class="dv">1</span>)</span>
+<span id="cb11-2"><a href=""></a>reg1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(y_alt <span class="sc">~</span> x, <span class="at">data=</span>reg1.dat)</span>
+<span id="cb11-3"><a href=""></a></span>
+<span id="cb11-4"><a href=""></a>reg0.dat <span class="ot">&lt;-</span> select.dat <span class="sc">%&gt;%</span> <span class="fu">filter</span>(w_alt<span class="sc">==</span><span class="dv">0</span>)</span>
+<span id="cb11-5"><a href=""></a>reg0 <span class="ot">&lt;-</span> <span class="fu">lm</span>(y_alt <span class="sc">~</span> x, <span class="at">data=</span>reg0.dat)</span>
+<span id="cb11-6"><a href=""></a>pred1_alt <span class="ot">&lt;-</span> <span class="fu">predict</span>(reg1,<span class="at">new=</span>select.dat)</span>
+<span id="cb11-7"><a href=""></a>pred0_alt <span class="ot">&lt;-</span> <span class="fu">predict</span>(reg0,<span class="at">new=</span>select.dat)</span>
+<span id="cb11-8"><a href=""></a><span class="fu">mean</span>(pred1_alt<span class="sc">-</span>pred0_alt)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 7.629613</code></pre>
+<pre><code>[1] 7.562176</code></pre>
 </div>
 </div>
-</div>
-</div>
+</div></div>
 </section>
 <section id="what-covariates-to-use" class="slide level2">
 <h2>What covariates to use?</h2>
@@ -680,8 +925,10 @@ Matched number of observations  (unweighted).  22610 </code></pre>
 <li>Also endogenous (more generally)</li>
 </ul></li>
 </ul>
+<div class="quarto-auto-generated-content">
 <div class="footer footer-default">
 
+</div>
 </div>
 </section></section>
     </div>
@@ -711,7 +958,6 @@ Matched number of observations  (unweighted).  22610 </code></pre>
       Reveal.initialize({
 'controlsAuto': true,
 'previewLinksAuto': true,
-'smaller': false,
 'pdfSeparateFragments': false,
 'autoAnimateEasing': "ease",
 'autoAnimateDuration': 1,
@@ -898,42 +1144,80 @@ Matched number of observations  (unweighted).  22610 </code></pre>
       });
     </script>
     
+
     <script>
+
       // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+
       // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+
       // slide changes (different for each slide format).
+
       (function () {
+
         // dispatch for htmlwidgets
+
         function fireSlideEnter() {
+
           const event = window.document.createEvent("Event");
+
           event.initEvent("slideenter", true, true);
+
           window.document.dispatchEvent(event);
+
         }
+
+    
 
         function fireSlideChanged(previousSlide, currentSlide) {
+
           fireSlideEnter();
 
+    
+
           // dispatch for shiny
+
           if (window.jQuery) {
+
             if (previousSlide) {
+
               window.jQuery(previousSlide).trigger("hidden");
+
             }
+
             if (currentSlide) {
+
               window.jQuery(currentSlide).trigger("shown");
+
             }
+
           }
+
         }
+
+    
 
         // hookup for slidy
+
         if (window.w3c_slidy) {
+
           window.w3c_slidy.add_observer(function (slide_num) {
+
             // slide_num starts at position 1
+
             fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+
           });
+
         }
 
+    
+
       })();
+
     </script>
+
+    
 
     <script id="quarto-html-after-body" type="application/javascript">
     window.document.addEventListener("DOMContentLoaded", function (event) {
@@ -967,18 +1251,7 @@ Matched number of observations  (unweighted).  22610 </code></pre>
         }
         return false;
       }
-      const clipboard = new window.ClipboardJS('.code-copy-button', {
-        text: function(trigger) {
-          const codeEl = trigger.previousElementSibling.cloneNode(true);
-          for (const childEl of codeEl.children) {
-            if (isCodeAnnotation(childEl)) {
-              childEl.remove();
-            }
-          }
-          return codeEl.innerText;
-        }
-      });
-      clipboard.on('success', function(e) {
+      const onCopySuccess = function(e) {
         // button target
         const button = e.trigger;
         // don't keep focus
@@ -1010,11 +1283,50 @@ Matched number of observations  (unweighted).  22610 </code></pre>
         }, 1000);
         // clear code selection
         e.clearSelection();
+      }
+      const getTextToCopy = function(trigger) {
+          const codeEl = trigger.previousElementSibling.cloneNode(true);
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
+            }
+          }
+          return codeEl.innerText;
+      }
+      const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+        text: getTextToCopy
       });
-      function tippyHover(el, contentFn) {
+      clipboard.on('success', onCopySuccess);
+      if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+        // For code content inside modals, clipBoardJS needs to be initialized with a container option
+        // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+        const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+          text: getTextToCopy,
+          container: window.document.getElementById('quarto-embedded-source-code-modal')
+        });
+        clipboardModal.on('success', onCopySuccess);
+      }
+        var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+        var mailtoRegex = new RegExp(/^mailto:/);
+          var filterRegex = new RegExp('/' + window.location.host + '/');
+        var isInternal = (href) => {
+            return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+        }
+        // Inspect non-navigation links and adorn them if external
+     	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+        for (var i=0; i<links.length; i++) {
+          const link = links[i];
+          if (!isInternal(link.href)) {
+            // undo the damage that might have been done by quarto-nav.js in the case of
+            // links that we want to consider external
+            if (link.dataset.originalHref !== undefined) {
+              link.href = link.dataset.originalHref;
+            }
+          }
+        }
+      function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
         const config = {
           allowHTML: true,
-          content: contentFn,
           maxWidth: 500,
           delay: 100,
           arrow: false,
@@ -1024,8 +1336,17 @@ Matched number of observations  (unweighted).  22610 </code></pre>
           interactive: true,
           interactiveBorder: 10,
           theme: 'light-border',
-          placement: 'bottom-start'
+          placement: 'bottom-start',
         };
+        if (contentFn) {
+          config.content = contentFn;
+        }
+        if (onTriggerFn) {
+          config.onTrigger = onTriggerFn;
+        }
+        if (onUntriggerFn) {
+          config.onUntrigger = onUntriggerFn;
+        }
           config['offset'] = [0,0];
           config['maxWidth'] = 700;
         window.tippy(el, config); 
@@ -1039,7 +1360,11 @@ Matched number of observations  (unweighted).  22610 </code></pre>
           try { href = new URL(href).hash; } catch {}
           const id = href.replace(/^#\/?/, "");
           const note = window.document.getElementById(id);
-          return note.innerHTML;
+          if (note) {
+            return note.innerHTML;
+          } else {
+            return "";
+          }
         });
       }
       const findCites = (el) => {
@@ -1062,25 +1387,4 @@ Matched number of observations  (unweighted).  22610 </code></pre>
       for (var i=0; i<bibliorefs.length; i++) {
         const ref = bibliorefs[i];
         const citeInfo = findCites(ref);
-        if (citeInfo) {
-          tippyHover(citeInfo.el, function() {
-            var popup = window.document.createElement('div');
-            citeInfo.cites.forEach(function(cite) {
-              var citeDiv = window.document.createElement('div');
-              citeDiv.classList.add('hanging-indent');
-              citeDiv.classList.add('csl-entry');
-              var biblioDiv = window.document.getElementById('ref-' + cite);
-              if (biblioDiv) {
-                citeDiv.innerHTML = biblioDiv.innerHTML;
-              }
-              popup.appendChild(citeDiv);
-            });
-            return popup.innerHTML;
-          });
-        }
-      }
-    });
-    </script>
-    
-
-</body></html>
+   

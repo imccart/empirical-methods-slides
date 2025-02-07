@@ -33,7 +33,7 @@ Find covariates $X_{i}$ such that the following assumptions are plausible:
 2. Common support: $$0 < \text{Pr}(D_{i}=1|X_{i}) < 1$$
 
 ::: {.fragment}
-Then we can use $X_{i}$ to group observations and use expectations for control as the predicted counterfactuals among treated, and vice versa. 
+Then we can use $X_{i}$ to group observations and use expected values from control group as the predicted counterfactuals among treated, and vice versa. 
 :::
 
 ---
@@ -44,14 +44,8 @@ $E[Y_{1}|D,X]=E[Y_{1}|X]$
 
 
 ::: {.fragment}
-In words...nothing unobserved that determines treatment selection and affects your outcome of interest.
+In words...nothing else, outside of $X$, that determines treatment selection and affects your outcome of interest.
 :::
-
----
-
-## Assumption 1: Selection on Observables
-
-- Example of selection on observables from *Mastering Metrics*
 
 
 ---
@@ -87,15 +81,98 @@ $$ATE=\sum_{i=1}^{N} P(X=x_{i}) \left(E[Y | X, D=1] - E[Y | X, D=0]\right)$$
 
 ---
 
-## Subclassification
+## Subclassification: Example
 
 - Difference between treated and controls
 - Weighted average by probability of given group (proportion of sample)
-- What if outcome is unobserved for treatment or control group for a given subclass?
 
-::: {.fragment}
-This is the *curse of dimensionality*
-:::
+| Stratum (X) | Proportion P(X) | Y (treated) | Y (control) | Treatment Effect | Contribution to ATE |
+|------------|----------------|--------------|--------------|----------------|----------------|
+| Low        | 0.4            | 12           | 10           | 2              | 0.8            |
+| Medium     | 0.35           | 15           | 11           | 4              | 1.4            |
+| High       | 0.25           | 18           | 14           | 4              | 1.0            |
+
+**Final ATE Calculation:**
+$$ATE = (0.4 \times 2) + (0.35 \times 4) + (0.25 \times 4) = 3.2$$
+
+---
+
+## Subclassification: Graph
+
+```{r}
+#| code-fold: true
+#| code-summary: "R Code"
+#| fig-align: center
+
+# Define the data with proportions
+df <- data.frame(
+  Stratum = factor(c("Low", "Medium", "High"), levels = c("Low", "Medium", "High")),
+  P_X = c(0.4, 0.35, 0.25),  # Proportion of each stratum
+  Treated = c(12, 15, 18),  
+  Control = c(10, 11, 14)  
+)
+
+# Compute the ATE and per-group contributions
+df <- df %>%
+  mutate(TE = Treated - Control,  # Treatment effect per stratum
+         Contribution = P_X * TE)  # Contribution to ATE
+
+ATE <- sum(df$Contribution)  # Weighted sum
+
+# Convert to long format for ggplot
+df_long <- df %>%
+  pivot_longer(cols = c("Treated", "Control"), names_to = "Group", values_to = "Outcome")
+
+# Create the plot
+ggplot(df_long, aes(x = Stratum, y = Outcome, fill = Group)) +
+  
+  # Bar plot for treated and control outcomes
+  geom_bar(stat = "identity", position = position_dodge(width = 0.6), alpha = 0.7) +
+  
+  # Treatment effect slopes (dashed lines)
+  geom_segment(data = df, aes(
+    x = as.numeric(Stratum) - 0.2,  # Control (left)
+    xend = as.numeric(Stratum) + 0.2,  # Treated (right)
+    y = Control, 
+    yend = Treated
+  ), inherit.aes = FALSE, linetype = "dashed", color = "black", linewidth = 1) +
+  
+  # Slope labels (Δ = Treatment Effect)
+  geom_text(data = df, aes(
+    x = Stratum, 
+    y = (Treated + Control) / 2,  # Middle of the dashed line
+    label = paste0("Δ = ", TE)
+  ), inherit.aes = FALSE, color = "black", vjust = -0.5, size = 5) +
+  
+  # Sample proportion labels (P(X) below bars)
+  geom_text(data = df, aes(
+    x = Stratum, 
+    y = min(Control, Treated) - 1,  # Below the bars
+    label = paste0("P(X) = ", P_X)
+  ), inherit.aes = FALSE, color = "black", vjust = 1, size = 4) +
+
+  # Horizontal ATE line
+  geom_hline(yintercept = ATE, linetype = "dotted", color = "darkblue", linewidth = 1) +
+  annotate("text", x = 2, y = ATE + 0.5, label = paste("ATE =", round(ATE, 2)), color = "darkblue", size = 5) +
+  
+  # Labels and theme
+  labs(title = "Treatment and Control Outcomes by Stratum",
+       subtitle = paste("Overall ATE =", round(ATE, 2)),
+       x = "Stratum (X)",
+       y = "Outcome (Y)") +
+  scale_fill_manual(values = c("Treated" = "blue", "Control" = "red")) +
+  theme_minimal()
+```
+
+---
+
+## Problem with Subclassification
+
+- What if outcome is unobserved for treatment or control group for a given subclass?
+- No longer able to estimate $E[Y | X, D=1] - E[Y | X, D=0]$
+- As the number of variables in $X$ (i.e., the dimensionality) grows, this becomes more likely
+- This is the *curse of dimensionality*
+
 
 ---
 
@@ -113,7 +190,72 @@ $$\hat{Y}_{1i} = \begin{cases}
 \end{cases}$$
 
 3. Form "matched" ATE:
-$\hat{\delta}^{\text{match}} = \frac{1}{N} \sum_{i=1}^{N} \left(\hat{Y}_{1i} - \hat{Y}_{0i} \right)$
+$$\hat{\delta}^{\text{match}} = \frac{1}{N} \sum_{i=1}^{N} \left(\hat{Y}_{1i} - \hat{Y}_{0i} \right)$$
+
+---
+
+## Matching: Example
+
+Let's assume we are evaluating the effect of a treatment on an outcome variable (e.g., a job training program on income). We match **on education level**, considering the **"High School Only"** group. We will use **all available matches** within the stratum.
+
+
+| ID  | D  | Income |
+|----|-----|----------------|
+| 1  | 1   | 35,000  |
+| 2  | 1   | 37,000  |
+| 3  | 0   | 30,000  |
+| 4  | 0   | 32,000  |
+| 5  | 0   | 31,000  |
+
+---
+
+### **Step 1: Identify Matches**
+
+- **All treated individuals (IDs 1 and 2) are matched to all control individuals (IDs 3, 4, and 5).**
+- The number of matches per treated unit: **\( m = 3 \)**.
+
+---
+
+### **Step 2: Impute Counterfactuals**
+
+For treated individuals, estimate the **counterfactual control outcome**:
+
+$$\hat{Y}_{0i} = \frac{1}{m} \sum_{j \in J_m(i)} Y_j$$
+
+$$\hat{Y}_{0,1} = \hat{Y}_{0,2} = \frac{30,000 + 32,000 + 31,000}{3} = 31,000$$
+
+
+For control individuals, estimate the **counterfactual treated outcome**:
+
+$$\hat{Y}_{1i} = \frac{1}{m} \sum_{j \in J_m(i)} Y_j$$
+
+$$\hat{Y}_{1,3} = \hat{Y}_{1,4} = \hat{Y}_{1,5} = \frac{35,000 + 37,000}{2} = 36,000$$
+
+---
+
+### **Step 3: Compute the Matched ATE**
+
+$$\hat{\delta}^{\text{match}} = \frac{1}{N} \sum_{i=1}^{N} \left(\hat{Y}_{1i} - \hat{Y}_{0i} \right)$$
+
+| ID | D  | Y obs   | Y hyp   | Effect |
+|----|----|---------|---------|--------------------|
+| 1  | 1  | 35,000  | 31,000  | 35,000 - 31,000 = 4,000 |
+| 2  | 1  | 37,000  | 31,000  | 37,000 - 31,000 = 6,000 |
+| 3  | 0  | 30,000  | 36,000  | 36,000 - 30,000 = 6,000 |
+| 4  | 0  | 32,000  | 36,000  | 36,000 - 32,000 = 4,000 |
+| 5  | 0  | 31,000  | 36,000  | 36,000 - 31,000 = 5,000 |
+
+$$\hat{\delta}^{\text{match}} = \frac{1}{5} \left( 4,000 + 6,000 + 6,000 + 4,000 + 5,000 \right)$$
+
+$$= \frac{25,000}{5} = 5,000$$
+
+---
+
+### **Final Matched ATE Interpretation**
+
+- **Estimated Treatment Effect:** **$5,000**  
+- **Interpretation:** After matching on education level, we estimate that the **job training program increases income by $5,000 on average.**  
+
 
 ---
 
@@ -201,24 +343,36 @@ anim_save("images/match_animate.gif", anim.p)
 
 ---
 
-## Matching: Defining "nearest"
+## Matching: Bias Correction
 
-- But are observations really the same in each group?
-- Potential for "matching discrepancies" to introduce bias in estimates
-
-
-::: {.fragment}
+- But are observations really the same in each group? Potential for "matching discrepancies" to introduce bias in estimates
 - "Bias correction" based on $$\hat{\mu}(x_{i}) - \hat{\mu}(x_{j(i)})$$ (i.e., difference in fitted values from regression of $y$ on $x$, with the difference between observed $Y_{1i}$ and imputed $Y_{0i}$)
-:::
+  - $\hat{\mu}(x_{i})$ is the predicted outcome from a regression of $Y$ on $X$.
+  - $x_{i}$ is the covariate vector for a **treated** unit.
+  - $x_{j(i)}$ is the covariate vector for its **matched control**.
+
+---
+
+## Matching: Bias Correction
+
+$$\hat{\delta}^{\text{adjusted}} = \frac{1}{N} \sum_{i=1}^{N} \left(\left(\hat{Y}_{1i} - \hat{Y}_{0i}\right) - \left(\hat{\mu}(X_i) - \hat{\mu}(X_{j(i)})\right) \right)$$
+
+where:
+
+- $\hat{Y}_{1i}$ is the **estimated treated outcome** for individual $i$.
+- $\hat{Y}_{0i}$ is the **estimated control outcome** for individual $i$.
+- The **bias correction term** ensures differences in covariates do not confound the estimate.
+
 
 ---
 
 ## Weighting
 
 1. Estimate propensity score, denoted $\hat{\pi}(X_{i})$
+   
 2. Weight by inverse of propensity score
 $$\hat{\mu}_{1} = \frac{ \sum_{i=1}^{N} \frac{Y_{i} D_{i}}{\hat{\pi}(X_{i})} }{ \sum_{i=1}^{N} \frac{D_{i}}{\hat{\pi}(X_{i})} } \text{ and } 
-$\hat{\mu}_{0} = \frac{ \sum_{i=1}^{N} \frac{Y_{i} (1-D_{i})}{1-\hat{\pi}(X_{i})} }{ \sum_{i=1}^{N} \frac{1-D_{i}}{1-\hat{\pi}(X_{i})} }$$
+\hat{\mu}_{0} = \frac{ \sum_{i=1}^{N} \frac{Y_{i} (1-D_{i})}{1-\hat{\pi}(X_{i})} }{ \sum_{i=1}^{N} \frac{1-D_{i}}{1-\hat{\pi}(X_{i})} }$$
 
 3. Form "inverse-propensity weighted" ATE:
 $$\hat{\delta}^{IPW} = \hat{\mu}_{1} - \hat{\mu}_{0}$$
