@@ -20,7 +20,7 @@ execute:
 #| include: false
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(tidyverse, ggplot2, lubridate, gapminder, scales,
-               hrbrthemes, gganimate, OECD, here)
+               hrbrthemes, gganimate, OECD, here, modelsummary)
 ```
 
 
@@ -39,7 +39,7 @@ pacman::p_load(tidyverse, ggplot2, lubridate, gapminder, scales,
 - Lung cancer becoming more common after 1930s
 - First evidence of link in 1950s
 - Surgeon general's report in 1964
-- Very important in causal inference! ([Section 5.1.1](https://mixtape.scunning.com/matching-and-subclassification.html#some-background) of Causal Inference Mixtape)
+- Very important in causal inference! ([Section 5.1.1](https://mixtape.scunning.com/05-matching_and_subclassification#some-background) of Causal Inference Mixtape)
 
 ---
 
@@ -135,10 +135,11 @@ Even if $\epsilon$ and $\eta$ are uncorrelated for a given product, observed pri
 ## Example with simulated data
 
 We will assume linear relationships for simplicity:
+
 - Demand curve: $Q_d = \alpha_d + \beta_d P + \gamma_d Y + \epsilon_d$
 - Supply curve: $Q_s = \alpha_s + \beta_s P + \gamma_s C + \epsilon_s$
 
-Where
+where
 
 - $Q_d$ and $Q_s$ are the quantity demanded and supplied, respectively.
 - $P$ is the price.
@@ -146,6 +147,14 @@ Where
 - $C$ is the cost factor affecting supply.
 - $\alpha$, $\beta$, and $\gamma$ are parameters ($\beta$ is the price elasticity of demand).
 - $\epsilon_d$ and $\epsilon_s$ are error terms.
+
+---
+
+## Example with simulated data
+
+- Demand curve: $Q_d = \alpha_d + \beta_d P + \gamma_d Y + \epsilon_d$
+- Supply curve: $Q_s = \alpha_s + \beta_s P + \gamma_s C + \epsilon_s$
+
 
 Equilibrium occurs when $Q_d = Q_s$. We'll simulate this scenario in R and perform an OLS regression of quantity on price, neglecting the effects of $Y$ and $C$, to show the bias in estimating price elasticity.
 
@@ -166,12 +175,16 @@ Y = rnorm(n, mean = 50000, sd = 10000)
 C = rnorm(n, mean = 20, sd = 5)
 
 # Parameters for demand and supply curves
-alpha_d = 100; beta_d = -2; gamma_d = 0.0001
-alpha_s = 50; beta_s = 1.5; gamma_s = -0.5
+alpha_d = 100
+beta_d = -2
+gamma_d = 0.15
+alpha_s = 50
+beta_s = 1.5
+gamma_s = -0.5
 
 # Equilibrium price P such that Q_d = Q_s, solving for P here requires numerical methods
 # For simplification, let's assume we observe an equilibrium P directly influenced by Y and C
-P = 100 + 0.0001 * Y - 0.5 * C + rnorm(n)
+P = 100 + gamma_d * Y - gamma_s * C + rnorm(n)
 
 # Simulate demand and supply
 epsilon_d = rnorm(n)
@@ -184,5 +197,5 @@ Q = alpha_d + beta_d * P + gamma_d * Y + epsilon_d # Using the demand equation f
 
 # OLS regression of Q on P
 model = lm(Q ~ P, data = data.frame(Q, P))
-summary(model)
+modelsummary(model, gof_map=NA)
 ```

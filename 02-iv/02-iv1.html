@@ -8,7 +8,7 @@
 <link href="02-iv1_files/libs/quarto-html/light-border.css" rel="stylesheet">
 <link href="02-iv1_files/libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
 <link href="02-iv1_files/libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.3.450">
+  <meta name="generator" content="quarto-1.5.57">
 
   <meta name="author" content="Ian McCarthy | Emory University">
   <title>Smoking and Demand Elasticity</title>
@@ -31,7 +31,7 @@
     }
     /* CSS for syntax highlighting */
     pre > code.sourceCode { white-space: pre; position: relative; }
-    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span { line-height: 1.25; }
     pre > code.sourceCode > span:empty { height: 1.2em; }
     .sourceCode { overflow: visible; }
     code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -42,7 +42,7 @@
     }
     @media print {
     pre > code.sourceCode { white-space: pre-wrap; }
-    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
     }
     pre.numberSource code
       { counter-reset: source-line 0; }
@@ -223,7 +223,8 @@
   }
 
   .callout.callout-titled .callout-body > .callout-content > :last-child {
-    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0;
   }
 
   .callout.callout-titled .callout-icon::before {
@@ -419,7 +420,7 @@ Ian McCarthy | Emory University
 <li>Lung cancer becoming more common after 1930s</li>
 <li>First evidence of link in 1950s</li>
 <li>Surgeon general’s report in 1964</li>
-<li>Very important in causal inference! (<a href="https://mixtape.scunning.com/matching-and-subclassification.html#some-background">Section 5.1.1</a> of Causal Inference Mixtape)</li>
+<li>Very important in causal inference! (<a href="https://mixtape.scunning.com/05-matching_and_subclassification#some-background">Section 5.1.1</a> of Causal Inference Mixtape)</li>
 </ul>
 </section>
 <section id="why-it-matters" class="slide level2">
@@ -509,8 +510,12 @@ p_{i} &amp;= C(z_{i}, q_{1}, ... , p_{N}, \eta_{1}, ... \eta_{N})
 </section>
 <section id="example-with-simulated-data-1" class="slide level2">
 <h2>Example with simulated data</h2>
-<p>We will assume linear relationships for simplicity: - Demand curve: <span class="math inline">\(Q_d = \alpha_d + \beta_d P + \gamma_d Y + \epsilon_d\)</span> - Supply curve: <span class="math inline">\(Q_s = \alpha_s + \beta_s P + \gamma_s C + \epsilon_s\)</span></p>
-<p>Where</p>
+<p>We will assume linear relationships for simplicity:</p>
+<ul>
+<li>Demand curve: <span class="math inline">\(Q_d = \alpha_d + \beta_d P + \gamma_d Y + \epsilon_d\)</span></li>
+<li>Supply curve: <span class="math inline">\(Q_s = \alpha_s + \beta_s P + \gamma_s C + \epsilon_s\)</span></li>
+</ul>
+<p>where</p>
 <ul>
 <li><span class="math inline">\(Q_d\)</span> and <span class="math inline">\(Q_s\)</span> are the quantity demanded and supplied, respectively.</li>
 <li><span class="math inline">\(P\)</span> is the price.</li>
@@ -519,64 +524,151 @@ p_{i} &amp;= C(z_{i}, q_{1}, ... , p_{N}, \eta_{1}, ... \eta_{N})
 <li><span class="math inline">\(\alpha\)</span>, <span class="math inline">\(\beta\)</span>, and <span class="math inline">\(\gamma\)</span> are parameters (<span class="math inline">\(\beta\)</span> is the price elasticity of demand).</li>
 <li><span class="math inline">\(\epsilon_d\)</span> and <span class="math inline">\(\epsilon_s\)</span> are error terms.</li>
 </ul>
+</section>
+<section id="example-with-simulated-data-2" class="slide level2">
+<h2>Example with simulated data</h2>
+<ul>
+<li>Demand curve: <span class="math inline">\(Q_d = \alpha_d + \beta_d P + \gamma_d Y + \epsilon_d\)</span></li>
+<li>Supply curve: <span class="math inline">\(Q_s = \alpha_s + \beta_s P + \gamma_s C + \epsilon_s\)</span></li>
+</ul>
 <p>Equilibrium occurs when <span class="math inline">\(Q_d = Q_s\)</span>. We’ll simulate this scenario in R and perform an OLS regression of quantity on price, neglecting the effects of <span class="math inline">\(Y\)</span> and <span class="math inline">\(C\)</span>, to show the bias in estimating price elasticity.</p>
 </section>
 <section id="results-from-ols" class="slide level2">
 <h2>Results from OLS</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>R Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>) <span class="co"># For reproducibility</span></span>
-<span id="cb1-2"><a href="#cb1-2"></a></span>
-<span id="cb1-3"><a href="#cb1-3"></a><span class="co"># Simulate external factors (income and cost)</span></span>
-<span id="cb1-4"><a href="#cb1-4"></a>n <span class="ot">=</span> <span class="dv">1000</span></span>
-<span id="cb1-5"><a href="#cb1-5"></a>Y <span class="ot">=</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="dv">50000</span>, <span class="at">sd =</span> <span class="dv">10000</span>)</span>
-<span id="cb1-6"><a href="#cb1-6"></a>C <span class="ot">=</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="dv">20</span>, <span class="at">sd =</span> <span class="dv">5</span>)</span>
-<span id="cb1-7"><a href="#cb1-7"></a></span>
-<span id="cb1-8"><a href="#cb1-8"></a><span class="co"># Parameters for demand and supply curves</span></span>
-<span id="cb1-9"><a href="#cb1-9"></a>alpha_d <span class="ot">=</span> <span class="dv">100</span>; beta_d <span class="ot">=</span> <span class="sc">-</span><span class="dv">2</span>; gamma_d <span class="ot">=</span> <span class="fl">0.0001</span></span>
-<span id="cb1-10"><a href="#cb1-10"></a>alpha_s <span class="ot">=</span> <span class="dv">50</span>; beta_s <span class="ot">=</span> <span class="fl">1.5</span>; gamma_s <span class="ot">=</span> <span class="sc">-</span><span class="fl">0.5</span></span>
-<span id="cb1-11"><a href="#cb1-11"></a></span>
-<span id="cb1-12"><a href="#cb1-12"></a><span class="co"># Equilibrium price P such that Q_d = Q_s, solving for P here requires numerical methods</span></span>
-<span id="cb1-13"><a href="#cb1-13"></a><span class="co"># For simplification, let's assume we observe an equilibrium P directly influenced by Y and C</span></span>
-<span id="cb1-14"><a href="#cb1-14"></a>P <span class="ot">=</span> <span class="dv">100</span> <span class="sc">+</span> <span class="fl">0.0001</span> <span class="sc">*</span> Y <span class="sc">-</span> <span class="fl">0.5</span> <span class="sc">*</span> C <span class="sc">+</span> <span class="fu">rnorm</span>(n)</span>
-<span id="cb1-15"><a href="#cb1-15"></a></span>
-<span id="cb1-16"><a href="#cb1-16"></a><span class="co"># Simulate demand and supply</span></span>
-<span id="cb1-17"><a href="#cb1-17"></a>epsilon_d <span class="ot">=</span> <span class="fu">rnorm</span>(n)</span>
-<span id="cb1-18"><a href="#cb1-18"></a>epsilon_s <span class="ot">=</span> <span class="fu">rnorm</span>(n)</span>
-<span id="cb1-19"><a href="#cb1-19"></a>Q_d <span class="ot">=</span> alpha_d <span class="sc">+</span> beta_d <span class="sc">*</span> P <span class="sc">+</span> gamma_d <span class="sc">*</span> Y <span class="sc">+</span> epsilon_d</span>
-<span id="cb1-20"><a href="#cb1-20"></a>Q_s <span class="ot">=</span> alpha_s <span class="sc">+</span> beta_s <span class="sc">*</span> P <span class="sc">+</span> gamma_s <span class="sc">*</span> C <span class="sc">+</span> epsilon_s</span>
-<span id="cb1-21"><a href="#cb1-21"></a></span>
-<span id="cb1-22"><a href="#cb1-22"></a><span class="co"># Assuming equilibrium, we can set Q = Q_d = Q_s</span></span>
-<span id="cb1-23"><a href="#cb1-23"></a>Q <span class="ot">=</span> alpha_d <span class="sc">+</span> beta_d <span class="sc">*</span> P <span class="sc">+</span> gamma_d <span class="sc">*</span> Y <span class="sc">+</span> epsilon_d <span class="co"># Using the demand equation for simplicity</span></span>
-<span id="cb1-24"><a href="#cb1-24"></a></span>
-<span id="cb1-25"><a href="#cb1-25"></a><span class="co"># OLS regression of Q on P</span></span>
-<span id="cb1-26"><a href="#cb1-26"></a>model <span class="ot">=</span> <span class="fu">lm</span>(Q <span class="sc">~</span> P, <span class="at">data =</span> <span class="fu">data.frame</span>(Q, P))</span>
-<span id="cb1-27"><a href="#cb1-27"></a><span class="fu">summary</span>(model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a><span class="fu">set.seed</span>(<span class="dv">123</span>) <span class="co"># For reproducibility</span></span>
+<span id="cb1-2"><a href=""></a></span>
+<span id="cb1-3"><a href=""></a><span class="co"># Simulate external factors (income and cost)</span></span>
+<span id="cb1-4"><a href=""></a>n <span class="ot">=</span> <span class="dv">1000</span></span>
+<span id="cb1-5"><a href=""></a>Y <span class="ot">=</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="dv">50000</span>, <span class="at">sd =</span> <span class="dv">10000</span>)</span>
+<span id="cb1-6"><a href=""></a>C <span class="ot">=</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="dv">20</span>, <span class="at">sd =</span> <span class="dv">5</span>)</span>
+<span id="cb1-7"><a href=""></a></span>
+<span id="cb1-8"><a href=""></a><span class="co"># Parameters for demand and supply curves</span></span>
+<span id="cb1-9"><a href=""></a>alpha_d <span class="ot">=</span> <span class="dv">100</span></span>
+<span id="cb1-10"><a href=""></a>beta_d <span class="ot">=</span> <span class="sc">-</span><span class="dv">2</span></span>
+<span id="cb1-11"><a href=""></a>gamma_d <span class="ot">=</span> <span class="fl">0.15</span></span>
+<span id="cb1-12"><a href=""></a>alpha_s <span class="ot">=</span> <span class="dv">50</span></span>
+<span id="cb1-13"><a href=""></a>beta_s <span class="ot">=</span> <span class="fl">1.5</span></span>
+<span id="cb1-14"><a href=""></a>gamma_s <span class="ot">=</span> <span class="sc">-</span><span class="fl">0.5</span></span>
+<span id="cb1-15"><a href=""></a></span>
+<span id="cb1-16"><a href=""></a><span class="co"># Equilibrium price P such that Q_d = Q_s, solving for P here requires numerical methods</span></span>
+<span id="cb1-17"><a href=""></a><span class="co"># For simplification, let's assume we observe an equilibrium P directly influenced by Y and C</span></span>
+<span id="cb1-18"><a href=""></a>P <span class="ot">=</span> <span class="dv">100</span> <span class="sc">+</span> gamma_d <span class="sc">*</span> Y <span class="sc">-</span> gamma_s <span class="sc">*</span> C <span class="sc">+</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb1-19"><a href=""></a></span>
+<span id="cb1-20"><a href=""></a><span class="co"># Simulate demand and supply</span></span>
+<span id="cb1-21"><a href=""></a>epsilon_d <span class="ot">=</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb1-22"><a href=""></a>epsilon_s <span class="ot">=</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb1-23"><a href=""></a>Q_d <span class="ot">=</span> alpha_d <span class="sc">+</span> beta_d <span class="sc">*</span> P <span class="sc">+</span> gamma_d <span class="sc">*</span> Y <span class="sc">+</span> epsilon_d</span>
+<span id="cb1-24"><a href=""></a>Q_s <span class="ot">=</span> alpha_s <span class="sc">+</span> beta_s <span class="sc">*</span> P <span class="sc">+</span> gamma_s <span class="sc">*</span> C <span class="sc">+</span> epsilon_s</span>
+<span id="cb1-25"><a href=""></a></span>
+<span id="cb1-26"><a href=""></a><span class="co"># Assuming equilibrium, we can set Q = Q_d = Q_s</span></span>
+<span id="cb1-27"><a href=""></a>Q <span class="ot">=</span> alpha_d <span class="sc">+</span> beta_d <span class="sc">*</span> P <span class="sc">+</span> gamma_d <span class="sc">*</span> Y <span class="sc">+</span> epsilon_d <span class="co"># Using the demand equation for simplicity</span></span>
+<span id="cb1-28"><a href=""></a></span>
+<span id="cb1-29"><a href=""></a><span class="co"># OLS regression of Q on P</span></span>
+<span id="cb1-30"><a href=""></a>model <span class="ot">=</span> <span class="fu">lm</span>(Q <span class="sc">~</span> P, <span class="at">data =</span> <span class="fu">data.frame</span>(Q, P))</span>
+<span id="cb1-31"><a href=""></a><span class="fu">modelsummary</span>(model, <span class="at">gof_map=</span><span class="cn">NA</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Call:
-lm(formula = Q ~ P, data = data.frame(Q, P))
+<div class="cell-output-display">
+<!-- preamble start -->
 
-Residuals:
-    Min      1Q  Median      3Q     Max 
--4.1702 -0.8695 -0.0411  0.9244  4.6118 
+    <script>
+      function styleCell_p0fsahwtt2lcwntarivf(i, j, css_id) {
+        var table = document.getElementById("tinytable_p0fsahwtt2lcwntarivf");
+        table.rows[i].cells[j].classList.add(css_id);
+      }
+      function insertSpanRow(i, colspan, content) {
+        var table = document.getElementById('tinytable_p0fsahwtt2lcwntarivf');
+        var newRow = table.insertRow(i);
+        var newCell = newRow.insertCell(0);
+        newCell.setAttribute("colspan", colspan);
+        // newCell.innerText = content;
+        // this may be unsafe, but innerText does not interpret <br>
+        newCell.innerHTML = content;
+      }
+      function spanCell_p0fsahwtt2lcwntarivf(i, j, rowspan, colspan) {
+        var table = document.getElementById("tinytable_p0fsahwtt2lcwntarivf");
+        const targetRow = table.rows[i];
+        const targetCell = targetRow.cells[j];
+        for (let r = 0; r < rowspan; r++) {
+          // Only start deleting cells to the right for the first row (r == 0)
+          if (r === 0) {
+            // Delete cells to the right of the target cell in the first row
+            for (let c = colspan - 1; c > 0; c--) {
+              if (table.rows[i + r].cells[j + c]) {
+                table.rows[i + r].deleteCell(j + c);
+              }
+            }
+          }
+          // For rows below the first, delete starting from the target column
+          if (r > 0) {
+            for (let c = colspan - 1; c >= 0; c--) {
+              if (table.rows[i + r] && table.rows[i + r].cells[j]) {
+                table.rows[i + r].deleteCell(j);
+              }
+            }
+          }
+        }
+        // Set rowspan and colspan of the target cell
+        targetCell.rowSpan = rowspan;
+        targetCell.colSpan = colspan;
+      }
+window.addEventListener('load', function () { styleCell_p0fsahwtt2lcwntarivf(0, 0, 'tinytable_css_idvqj36b86iwpgijrqyky4') })
+window.addEventListener('load', function () { styleCell_p0fsahwtt2lcwntarivf(0, 1, 'tinytable_css_id4ikj8nya146jiy3jl5d9') })
+window.addEventListener('load', function () { styleCell_p0fsahwtt2lcwntarivf(1, 0, 'tinytable_css_id0ca269d3kw9cfr8t6st3') })
+window.addEventListener('load', function () { styleCell_p0fsahwtt2lcwntarivf(1, 1, 'tinytable_css_idz9fc33s7m1tp629uk5i6') })
+window.addEventListener('load', function () { styleCell_p0fsahwtt2lcwntarivf(2, 0, 'tinytable_css_id0ca269d3kw9cfr8t6st3') })
+window.addEventListener('load', function () { styleCell_p0fsahwtt2lcwntarivf(2, 1, 'tinytable_css_idz9fc33s7m1tp629uk5i6') })
+window.addEventListener('load', function () { styleCell_p0fsahwtt2lcwntarivf(3, 0, 'tinytable_css_id0ca269d3kw9cfr8t6st3') })
+window.addEventListener('load', function () { styleCell_p0fsahwtt2lcwntarivf(3, 1, 'tinytable_css_idz9fc33s7m1tp629uk5i6') })
+window.addEventListener('load', function () { styleCell_p0fsahwtt2lcwntarivf(4, 0, 'tinytable_css_id0ca269d3kw9cfr8t6st3') })
+window.addEventListener('load', function () { styleCell_p0fsahwtt2lcwntarivf(4, 1, 'tinytable_css_idz9fc33s7m1tp629uk5i6') })
+    </script>
 
-Coefficients:
-            Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept) 95.01470    1.48253   64.09   &lt;2e-16 ***
-P           -1.89470    0.01562 -121.32   &lt;2e-16 ***
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Residual standard error: 1.371 on 998 degrees of freedom
-Multiple R-squared:  0.9365,    Adjusted R-squared:  0.9364 
-F-statistic: 1.472e+04 on 1 and 998 DF,  p-value: &lt; 2.2e-16</code></pre>
+    <style>
+    .table td.tinytable_css_idvqj36b86iwpgijrqyky4, .table th.tinytable_css_idvqj36b86iwpgijrqyky4 {  text-align: left;  border-bottom: solid 0.1em #d3d8dc; }
+    .table td.tinytable_css_id4ikj8nya146jiy3jl5d9, .table th.tinytable_css_id4ikj8nya146jiy3jl5d9 {  text-align: center;  border-bottom: solid 0.1em #d3d8dc; }
+    .table td.tinytable_css_id0ca269d3kw9cfr8t6st3, .table th.tinytable_css_id0ca269d3kw9cfr8t6st3 {  text-align: left; }
+    .table td.tinytable_css_idz9fc33s7m1tp629uk5i6, .table th.tinytable_css_idz9fc33s7m1tp629uk5i6 {  text-align: center; }
+    </style>
+    <div class="container">
+      <table class="table table-borderless" id="tinytable_p0fsahwtt2lcwntarivf" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+        <thead>
+        
+              <tr>
+                <th scope="col"> </th>
+                <th scope="col">(1)</th>
+              </tr>
+        </thead>
+        
+        <tbody>
+                <tr>
+                  <td>(Intercept)</td>
+                  <td>-9.031 </td>
+                </tr>
+                <tr>
+                  <td>           </td>
+                  <td>(0.478)</td>
+                </tr>
+                <tr>
+                  <td>P          </td>
+                  <td>-1.000 </td>
+                </tr>
+                <tr>
+                  <td>           </td>
+                  <td>(0.000)</td>
+                </tr>
+        </tbody>
+      </table>
+    </div>
+<!-- hack to avoid NA insertion in last line -->
 </div>
 </div>
+<div class="quarto-auto-generated-content">
 <div class="footer footer-default">
 
+</div>
 </div>
 </section></section>
     </div>
@@ -606,7 +698,6 @@ F-statistic: 1.472e+04 on 1 and 998 DF,  p-value: &lt; 2.2e-16</code></pre>
       Reveal.initialize({
 'controlsAuto': true,
 'previewLinksAuto': true,
-'smaller': false,
 'pdfSeparateFragments': false,
 'autoAnimateEasing': "ease",
 'autoAnimateDuration': 1,
@@ -793,42 +884,80 @@ F-statistic: 1.472e+04 on 1 and 998 DF,  p-value: &lt; 2.2e-16</code></pre>
       });
     </script>
     
+
     <script>
+
       // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+
       // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+
       // slide changes (different for each slide format).
+
       (function () {
+
         // dispatch for htmlwidgets
+
         function fireSlideEnter() {
+
           const event = window.document.createEvent("Event");
+
           event.initEvent("slideenter", true, true);
+
           window.document.dispatchEvent(event);
+
         }
+
+    
 
         function fireSlideChanged(previousSlide, currentSlide) {
+
           fireSlideEnter();
 
+    
+
           // dispatch for shiny
+
           if (window.jQuery) {
+
             if (previousSlide) {
+
               window.jQuery(previousSlide).trigger("hidden");
+
             }
+
             if (currentSlide) {
+
               window.jQuery(currentSlide).trigger("shown");
+
             }
+
           }
+
         }
+
+    
 
         // hookup for slidy
+
         if (window.w3c_slidy) {
+
           window.w3c_slidy.add_observer(function (slide_num) {
+
             // slide_num starts at position 1
+
             fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+
           });
+
         }
 
+    
+
       })();
+
     </script>
+
+    
 
     <script id="quarto-html-after-body" type="application/javascript">
     window.document.addEventListener("DOMContentLoaded", function (event) {
@@ -862,18 +991,7 @@ F-statistic: 1.472e+04 on 1 and 998 DF,  p-value: &lt; 2.2e-16</code></pre>
         }
         return false;
       }
-      const clipboard = new window.ClipboardJS('.code-copy-button', {
-        text: function(trigger) {
-          const codeEl = trigger.previousElementSibling.cloneNode(true);
-          for (const childEl of codeEl.children) {
-            if (isCodeAnnotation(childEl)) {
-              childEl.remove();
-            }
-          }
-          return codeEl.innerText;
-        }
-      });
-      clipboard.on('success', function(e) {
+      const onCopySuccess = function(e) {
         // button target
         const button = e.trigger;
         // don't keep focus
@@ -905,11 +1023,50 @@ F-statistic: 1.472e+04 on 1 and 998 DF,  p-value: &lt; 2.2e-16</code></pre>
         }, 1000);
         // clear code selection
         e.clearSelection();
+      }
+      const getTextToCopy = function(trigger) {
+          const codeEl = trigger.previousElementSibling.cloneNode(true);
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
+            }
+          }
+          return codeEl.innerText;
+      }
+      const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+        text: getTextToCopy
       });
-      function tippyHover(el, contentFn) {
+      clipboard.on('success', onCopySuccess);
+      if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+        // For code content inside modals, clipBoardJS needs to be initialized with a container option
+        // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+        const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+          text: getTextToCopy,
+          container: window.document.getElementById('quarto-embedded-source-code-modal')
+        });
+        clipboardModal.on('success', onCopySuccess);
+      }
+        var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+        var mailtoRegex = new RegExp(/^mailto:/);
+          var filterRegex = new RegExp('/' + window.location.host + '/');
+        var isInternal = (href) => {
+            return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+        }
+        // Inspect non-navigation links and adorn them if external
+     	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+        for (var i=0; i<links.length; i++) {
+          const link = links[i];
+          if (!isInternal(link.href)) {
+            // undo the damage that might have been done by quarto-nav.js in the case of
+            // links that we want to consider external
+            if (link.dataset.originalHref !== undefined) {
+              link.href = link.dataset.originalHref;
+            }
+          }
+        }
+      function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
         const config = {
           allowHTML: true,
-          content: contentFn,
           maxWidth: 500,
           delay: 100,
           arrow: false,
@@ -919,8 +1076,17 @@ F-statistic: 1.472e+04 on 1 and 998 DF,  p-value: &lt; 2.2e-16</code></pre>
           interactive: true,
           interactiveBorder: 10,
           theme: 'light-border',
-          placement: 'bottom-start'
+          placement: 'bottom-start',
         };
+        if (contentFn) {
+          config.content = contentFn;
+        }
+        if (onTriggerFn) {
+          config.onTrigger = onTriggerFn;
+        }
+        if (onUntriggerFn) {
+          config.onUntrigger = onUntriggerFn;
+        }
           config['offset'] = [0,0];
           config['maxWidth'] = 700;
         window.tippy(el, config); 
@@ -934,48 +1100,11 @@ F-statistic: 1.472e+04 on 1 and 998 DF,  p-value: &lt; 2.2e-16</code></pre>
           try { href = new URL(href).hash; } catch {}
           const id = href.replace(/^#\/?/, "");
           const note = window.document.getElementById(id);
-          return note.innerHTML;
+          if (note) {
+            return note.innerHTML;
+          } else {
+            return "";
+          }
         });
       }
-      const findCites = (el) => {
-        const parentEl = el.parentElement;
-        if (parentEl) {
-          const cites = parentEl.dataset.cites;
-          if (cites) {
-            return {
-              el,
-              cites: cites.split(' ')
-            };
-          } else {
-            return findCites(el.parentElement)
-          }
-        } else {
-          return undefined;
-        }
-      };
-      var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
-      for (var i=0; i<bibliorefs.length; i++) {
-        const ref = bibliorefs[i];
-        const citeInfo = findCites(ref);
-        if (citeInfo) {
-          tippyHover(citeInfo.el, function() {
-            var popup = window.document.createElement('div');
-            citeInfo.cites.forEach(function(cite) {
-              var citeDiv = window.document.createElement('div');
-              citeDiv.classList.add('hanging-indent');
-              citeDiv.classList.add('csl-entry');
-              var biblioDiv = window.document.getElementById('ref-' + cite);
-              if (biblioDiv) {
-                citeDiv.innerHTML = biblioDiv.innerHTML;
-              }
-              popup.appendChild(citeDiv);
-            });
-            return popup.innerHTML;
-          });
-        }
-      }
-    });
-    </script>
-    
-
-</body></html>
+      const findCites = (el) => 
