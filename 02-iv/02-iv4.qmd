@@ -22,7 +22,7 @@ execute:
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, readr, readxl, hrbrthemes,
                scales, plotly, gganimate, cobalt, fixest, modelsummary, ggthemes, here,
-               kableExtra)
+               kableExtra, tinytable)
 ```
 
 
@@ -127,8 +127,7 @@ modelsummary(list(ols1, ols2, ols3, ivs1, ivs2, ivs3),
                     "fit_ln_price_cpi"="Log Real Price"),
           gof_map=c("nobs", "r.squared"),
           add_rows=rows) %>%
-          add_header_above(c("","OLS"=3,"IV"=3))
-          
+          group_tt(j=list(" "=1, "OLS"=2:4, "IV"=5:7))
 ```
 
 
@@ -191,4 +190,4 @@ The National Bureau of Economic Researh (NBER) has a great resource [here](https
 
 1. When do we consider IV as a potential identification strategy?
 2. What are the main IV assumptions (and what do they mean)?
-3. How do we test for those assumptions?
+3. How do we test those assumptions?
