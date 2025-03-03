@@ -8,7 +8,7 @@
 <link href="02-iv2_files/libs/quarto-html/light-border.css" rel="stylesheet">
 <link href="02-iv2_files/libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
 <link href="02-iv2_files/libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.3.450">
+  <meta name="generator" content="quarto-1.5.57">
 
   <meta name="author" content="Ian McCarthy | Emory University">
   <title>CDC Data on Smoking and Cigarette Prices</title>
@@ -31,7 +31,7 @@
     }
     /* CSS for syntax highlighting */
     pre > code.sourceCode { white-space: pre; position: relative; }
-    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span { line-height: 1.25; }
     pre > code.sourceCode > span:empty { height: 1.2em; }
     .sourceCode { overflow: visible; }
     code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -42,7 +42,7 @@
     }
     @media print {
     pre > code.sourceCode { white-space: pre-wrap; }
-    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
     }
     pre.numberSource code
       { counter-reset: source-line 0; }
@@ -223,7 +223,8 @@
   }
 
   .callout.callout-titled .callout-body > .callout-content > :last-child {
-    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0;
   }
 
   .callout.callout-titled .callout-icon::before {
@@ -386,9 +387,6 @@
       margin-right: 0; 
     }
   </style>
-  
-  <script src="02-iv2_files/libs/kePrint-0.0.1/kePrint.js"></script>
-  <link href="02-iv2_files/libs/lightable-0.0.1/lightable.css" rel="stylesheet">
 </head>
 <body class="quarto-dark">
   <div class="reveal">
@@ -423,62 +421,132 @@ Ian McCarthy | Emory University
 <h2>Summary stats</h2>
 <p>We’re interested in cigarette prices and sales, so let’s focus our summaries on those two variables</p>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>R Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a>sum.vars <span class="ot">&lt;-</span> cig.data <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="st">'Sales per Capita'</span> <span class="ot">=</span> sales_per_capita, <span class="st">'Real Price'</span> <span class="ot">=</span> price_cpi, <span class="st">'Nominal Price'</span><span class="ot">=</span>cost_per_pack)</span>
-<span id="cb1-2"><a href="#cb1-2"></a></span>
-<span id="cb1-3"><a href="#cb1-3"></a><span class="fu">datasummary</span>(<span class="fu">All</span>(sum.vars) <span class="sc">~</span> Mean <span class="sc">+</span> SD <span class="sc">+</span> Histogram, <span class="at">data=</span>sum.vars)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a>sum.vars <span class="ot">&lt;-</span> cig.data <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="st">'Sales per Capita'</span> <span class="ot">=</span> sales_per_capita, <span class="st">'Real Price'</span> <span class="ot">=</span> price_cpi, <span class="st">'Nominal Price'</span><span class="ot">=</span>cost_per_pack)</span>
+<span id="cb1-2"><a href=""></a></span>
+<span id="cb1-3"><a href=""></a><span class="fu">datasummary</span>(<span class="fu">All</span>(sum.vars) <span class="sc">~</span> Mean <span class="sc">+</span> SD <span class="sc">+</span> Histogram, <span class="at">data=</span>sum.vars)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<table class="table" data-quarto-postprocess="true" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<thead>
-<tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">Mean</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">SD</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">Histogram</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">Sales per Capita</td>
-<td style="text-align: right;">95.15</td>
-<td style="text-align: right;">41.13</td>
-<td style="text-align: right;">▂▅▅▇▄▁</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Real Price</td>
-<td style="text-align: right;">3.40</td>
-<td style="text-align: right;">1.64</td>
-<td style="text-align: right;">▇▇▂▃▂▂▁</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Nominal Price</td>
-<td style="text-align: right;">2.68</td>
-<td style="text-align: right;">2.24</td>
-<td style="text-align: right;">▇▄▁▂▂▁▁</td>
-</tr>
-</tbody>
-</table>
+<!-- preamble start -->
 
+    <script>
+      function styleCell_ydprkbf255i7yvtozofq(i, j, css_id) {
+        var table = document.getElementById("tinytable_ydprkbf255i7yvtozofq");
+        table.rows[i].cells[j].classList.add(css_id);
+      }
+      function insertSpanRow(i, colspan, content) {
+        var table = document.getElementById('tinytable_ydprkbf255i7yvtozofq');
+        var newRow = table.insertRow(i);
+        var newCell = newRow.insertCell(0);
+        newCell.setAttribute("colspan", colspan);
+        // newCell.innerText = content;
+        // this may be unsafe, but innerText does not interpret <br>
+        newCell.innerHTML = content;
+      }
+      function spanCell_ydprkbf255i7yvtozofq(i, j, rowspan, colspan) {
+        var table = document.getElementById("tinytable_ydprkbf255i7yvtozofq");
+        const targetRow = table.rows[i];
+        const targetCell = targetRow.cells[j];
+        for (let r = 0; r < rowspan; r++) {
+          // Only start deleting cells to the right for the first row (r == 0)
+          if (r === 0) {
+            // Delete cells to the right of the target cell in the first row
+            for (let c = colspan - 1; c > 0; c--) {
+              if (table.rows[i + r].cells[j + c]) {
+                table.rows[i + r].deleteCell(j + c);
+              }
+            }
+          }
+          // For rows below the first, delete starting from the target column
+          if (r > 0) {
+            for (let c = colspan - 1; c >= 0; c--) {
+              if (table.rows[i + r] && table.rows[i + r].cells[j]) {
+                table.rows[i + r].deleteCell(j);
+              }
+            }
+          }
+        }
+        // Set rowspan and colspan of the target cell
+        targetCell.rowSpan = rowspan;
+        targetCell.colSpan = colspan;
+      }
+window.addEventListener('load', function () { styleCell_ydprkbf255i7yvtozofq(0, 0, 'tinytable_css_idxxgn4f4m4i7p8x1u9onf') })
+window.addEventListener('load', function () { styleCell_ydprkbf255i7yvtozofq(0, 1, 'tinytable_css_idit56cz7rdrczgez6n0uh') })
+window.addEventListener('load', function () { styleCell_ydprkbf255i7yvtozofq(0, 2, 'tinytable_css_idit56cz7rdrczgez6n0uh') })
+window.addEventListener('load', function () { styleCell_ydprkbf255i7yvtozofq(0, 3, 'tinytable_css_idit56cz7rdrczgez6n0uh') })
+window.addEventListener('load', function () { styleCell_ydprkbf255i7yvtozofq(1, 0, 'tinytable_css_idomp8ym0sqyifrtla1sv6') })
+window.addEventListener('load', function () { styleCell_ydprkbf255i7yvtozofq(1, 1, 'tinytable_css_idek1zhyfqoo99a239sd1r') })
+window.addEventListener('load', function () { styleCell_ydprkbf255i7yvtozofq(1, 2, 'tinytable_css_idek1zhyfqoo99a239sd1r') })
+window.addEventListener('load', function () { styleCell_ydprkbf255i7yvtozofq(1, 3, 'tinytable_css_idek1zhyfqoo99a239sd1r') })
+window.addEventListener('load', function () { styleCell_ydprkbf255i7yvtozofq(2, 0, 'tinytable_css_idomp8ym0sqyifrtla1sv6') })
+window.addEventListener('load', function () { styleCell_ydprkbf255i7yvtozofq(2, 1, 'tinytable_css_idek1zhyfqoo99a239sd1r') })
+window.addEventListener('load', function () { styleCell_ydprkbf255i7yvtozofq(2, 2, 'tinytable_css_idek1zhyfqoo99a239sd1r') })
+window.addEventListener('load', function () { styleCell_ydprkbf255i7yvtozofq(2, 3, 'tinytable_css_idek1zhyfqoo99a239sd1r') })
+window.addEventListener('load', function () { styleCell_ydprkbf255i7yvtozofq(3, 0, 'tinytable_css_idomp8ym0sqyifrtla1sv6') })
+window.addEventListener('load', function () { styleCell_ydprkbf255i7yvtozofq(3, 1, 'tinytable_css_idek1zhyfqoo99a239sd1r') })
+window.addEventListener('load', function () { styleCell_ydprkbf255i7yvtozofq(3, 2, 'tinytable_css_idek1zhyfqoo99a239sd1r') })
+window.addEventListener('load', function () { styleCell_ydprkbf255i7yvtozofq(3, 3, 'tinytable_css_idek1zhyfqoo99a239sd1r') })
+    </script>
 
+    <style>
+    .table td.tinytable_css_idxxgn4f4m4i7p8x1u9onf, .table th.tinytable_css_idxxgn4f4m4i7p8x1u9onf {  text-align: left;  border-bottom: solid 0.1em #d3d8dc; }
+    .table td.tinytable_css_idit56cz7rdrczgez6n0uh, .table th.tinytable_css_idit56cz7rdrczgez6n0uh {  text-align: right;  border-bottom: solid 0.1em #d3d8dc; }
+    .table td.tinytable_css_idomp8ym0sqyifrtla1sv6, .table th.tinytable_css_idomp8ym0sqyifrtla1sv6 {  text-align: left; }
+    .table td.tinytable_css_idek1zhyfqoo99a239sd1r, .table th.tinytable_css_idek1zhyfqoo99a239sd1r {  text-align: right; }
+    </style>
+    <div class="container">
+      <table class="table table-borderless" id="tinytable_ydprkbf255i7yvtozofq" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+        <thead>
+        
+              <tr>
+                <th scope="col"> </th>
+                <th scope="col">Mean</th>
+                <th scope="col">SD</th>
+                <th scope="col">Histogram</th>
+              </tr>
+        </thead>
+        
+        <tbody>
+                <tr>
+                  <td>Sales per Capita</td>
+                  <td>95.15</td>
+                  <td>41.13</td>
+                  <td>▂▅▅▇▄▁ </td>
+                </tr>
+                <tr>
+                  <td>Real Price      </td>
+                  <td>3.40 </td>
+                  <td>1.64 </td>
+                  <td>▇▇▂▃▂▂▁</td>
+                </tr>
+                <tr>
+                  <td>Nominal Price   </td>
+                  <td>2.68 </td>
+                  <td>2.24 </td>
+                  <td>▇▄▁▂▂▁▁</td>
+                </tr>
+        </tbody>
+      </table>
+    </div>
+<!-- hack to avoid NA insertion in last line -->
 </div>
 </div>
 </section>
 <section id="cigarette-sales" class="slide level2">
 <h2>Cigarette Sales</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>R Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>cig.data <span class="sc">%&gt;%</span> </span>
-<span id="cb2-2"><a href="#cb2-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>Year,<span class="at">y=</span>sales_per_capita)) <span class="sc">+</span> </span>
-<span id="cb2-3"><a href="#cb2-3"></a>  <span class="fu">stat_summary</span>(<span class="at">fun.y=</span><span class="st">"mean"</span>,<span class="at">geom=</span><span class="st">"line"</span>) <span class="sc">+</span></span>
-<span id="cb2-4"><a href="#cb2-4"></a>  <span class="fu">labs</span>(</span>
-<span id="cb2-5"><a href="#cb2-5"></a>    <span class="at">x=</span><span class="st">"Year"</span>,</span>
-<span id="cb2-6"><a href="#cb2-6"></a>    <span class="at">y=</span><span class="st">"Packs per Capita"</span>,</span>
-<span id="cb2-7"><a href="#cb2-7"></a>    <span class="at">title=</span><span class="st">"Cigarette Sales"</span></span>
-<span id="cb2-8"><a href="#cb2-8"></a>  ) <span class="sc">+</span> <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
-<span id="cb2-9"><a href="#cb2-9"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks=</span><span class="fu">seq</span>(<span class="dv">1970</span>, <span class="dv">2020</span>, <span class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href=""></a>cig.data <span class="sc">%&gt;%</span> </span>
+<span id="cb2-2"><a href=""></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>Year,<span class="at">y=</span>sales_per_capita)) <span class="sc">+</span> </span>
+<span id="cb2-3"><a href=""></a>  <span class="fu">stat_summary</span>(<span class="at">fun.y=</span><span class="st">"mean"</span>,<span class="at">geom=</span><span class="st">"line"</span>) <span class="sc">+</span></span>
+<span id="cb2-4"><a href=""></a>  <span class="fu">labs</span>(</span>
+<span id="cb2-5"><a href=""></a>    <span class="at">x=</span><span class="st">"Year"</span>,</span>
+<span id="cb2-6"><a href=""></a>    <span class="at">y=</span><span class="st">"Packs per Capita"</span>,</span>
+<span id="cb2-7"><a href=""></a>    <span class="at">title=</span><span class="st">"Cigarette Sales"</span></span>
+<span id="cb2-8"><a href=""></a>  ) <span class="sc">+</span> <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb2-9"><a href=""></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks=</span><span class="fu">seq</span>(<span class="dv">1970</span>, <span class="dv">2020</span>, <span class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 
 </div>
@@ -486,17 +554,17 @@ Ian McCarthy | Emory University
 <section id="cigarette-prices" class="slide level2">
 <h2>Cigarette Prices</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>R Code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>cig.data <span class="sc">%&gt;%</span> </span>
-<span id="cb3-2"><a href="#cb3-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>Year,<span class="at">y=</span>price_cpi)) <span class="sc">+</span> </span>
-<span id="cb3-3"><a href="#cb3-3"></a>  <span class="fu">stat_summary</span>(<span class="at">fun.y=</span><span class="st">"mean"</span>,<span class="at">geom=</span><span class="st">"line"</span>) <span class="sc">+</span></span>
-<span id="cb3-4"><a href="#cb3-4"></a>  <span class="fu">labs</span>(</span>
-<span id="cb3-5"><a href="#cb3-5"></a>    <span class="at">x=</span><span class="st">"Year"</span>,</span>
-<span id="cb3-6"><a href="#cb3-6"></a>    <span class="at">y=</span><span class="st">"Price per Pack ($)"</span>,</span>
-<span id="cb3-7"><a href="#cb3-7"></a>    <span class="at">title=</span><span class="st">"Cigarette Prices in 2010 Real Dollars"</span></span>
-<span id="cb3-8"><a href="#cb3-8"></a>  ) <span class="sc">+</span> <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
-<span id="cb3-9"><a href="#cb3-9"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks=</span><span class="fu">seq</span>(<span class="dv">1970</span>, <span class="dv">2020</span>, <span class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a>cig.data <span class="sc">%&gt;%</span> </span>
+<span id="cb3-2"><a href=""></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>Year,<span class="at">y=</span>price_cpi)) <span class="sc">+</span> </span>
+<span id="cb3-3"><a href=""></a>  <span class="fu">stat_summary</span>(<span class="at">fun.y=</span><span class="st">"mean"</span>,<span class="at">geom=</span><span class="st">"line"</span>) <span class="sc">+</span></span>
+<span id="cb3-4"><a href=""></a>  <span class="fu">labs</span>(</span>
+<span id="cb3-5"><a href=""></a>    <span class="at">x=</span><span class="st">"Year"</span>,</span>
+<span id="cb3-6"><a href=""></a>    <span class="at">y=</span><span class="st">"Price per Pack ($)"</span>,</span>
+<span id="cb3-7"><a href=""></a>    <span class="at">title=</span><span class="st">"Cigarette Prices in 2010 Real Dollars"</span></span>
+<span id="cb3-8"><a href=""></a>  ) <span class="sc">+</span> <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb3-9"><a href=""></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks=</span><span class="fu">seq</span>(<span class="dv">1970</span>, <span class="dv">2020</span>, <span class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 
 </div>
@@ -574,7 +642,7 @@ COV(Y,Z) &amp; = E[YZ] - E[Y] E[Z] \\
 <h2>IVs in practice</h2>
 <p>Easy to think of in terms of randomized controlled trial…</p>
 <div class="fragment">
-<table>
+<table class="caption-top">
 <thead>
 <tr class="header">
 <th>Measure</th>
@@ -627,7 +695,7 @@ COV(Y,Z) &amp; = E[YZ] - E[Y] E[Z] \\
 </section>
 <section id="derivation-2" class="slide level2">
 <h2>Derivation</h2>
-<p>Recall <span class="math inline">\(\hat{\theta}=\frac{C(Z,S)}{V(Z)}\)</span>, or <span class="math inline">\(\hat{\theta}V(Z) = C(Y,Z)\)</span>. Then:</p>
+<p>Recall our first-stage, <span class="math inline">\(S=\theta Z + \varepsilon\)</span>, where <span class="math inline">\(\hat{\theta}=\frac{C(Z,S)}{V(Z)}\)</span>, or <span class="math inline">\(\hat{\theta}V(Z) = C(Z,S)\)</span>. Then:</p>
 <p><span class="math display">\[\begin{align}
 \hat{\delta}  &amp; = \frac{COV(Y,Z)}{COV(S,Z)} \\
         &amp; = \frac{\hat{\theta}C(Y,Z)}{\hat{\theta}C(S,Z)} = \frac{\hat{\theta}C(Y,Z)}{\hat{\theta}^{2}V(Z)} \\
@@ -644,8 +712,10 @@ COV(Y,Z) &amp; = E[YZ] - E[Y] E[Z] \\
 <section id="how-to-do-iv-in-practice" class="slide level2">
 <h2>How to do IV in practice</h2>
 <p>We’ll talk about this next class!</p>
+<div class="quarto-auto-generated-content">
 <div class="footer footer-default">
 
+</div>
 </div>
 </section></section>
     </div>
@@ -675,7 +745,6 @@ COV(Y,Z) &amp; = E[YZ] - E[Y] E[Z] \\
       Reveal.initialize({
 'controlsAuto': true,
 'previewLinksAuto': true,
-'smaller': false,
 'pdfSeparateFragments': false,
 'autoAnimateEasing': "ease",
 'autoAnimateDuration': 1,
@@ -862,42 +931,80 @@ COV(Y,Z) &amp; = E[YZ] - E[Y] E[Z] \\
       });
     </script>
     
+
     <script>
+
       // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+
       // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+
       // slide changes (different for each slide format).
+
       (function () {
+
         // dispatch for htmlwidgets
+
         function fireSlideEnter() {
+
           const event = window.document.createEvent("Event");
+
           event.initEvent("slideenter", true, true);
+
           window.document.dispatchEvent(event);
+
         }
+
+    
 
         function fireSlideChanged(previousSlide, currentSlide) {
+
           fireSlideEnter();
 
+    
+
           // dispatch for shiny
+
           if (window.jQuery) {
+
             if (previousSlide) {
+
               window.jQuery(previousSlide).trigger("hidden");
+
             }
+
             if (currentSlide) {
+
               window.jQuery(currentSlide).trigger("shown");
+
             }
+
           }
+
         }
+
+    
 
         // hookup for slidy
+
         if (window.w3c_slidy) {
+
           window.w3c_slidy.add_observer(function (slide_num) {
+
             // slide_num starts at position 1
+
             fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+
           });
+
         }
 
+    
+
       })();
+
     </script>
+
+    
 
     <script id="quarto-html-after-body" type="application/javascript">
     window.document.addEventListener("DOMContentLoaded", function (event) {
@@ -931,18 +1038,7 @@ COV(Y,Z) &amp; = E[YZ] - E[Y] E[Z] \\
         }
         return false;
       }
-      const clipboard = new window.ClipboardJS('.code-copy-button', {
-        text: function(trigger) {
-          const codeEl = trigger.previousElementSibling.cloneNode(true);
-          for (const childEl of codeEl.children) {
-            if (isCodeAnnotation(childEl)) {
-              childEl.remove();
-            }
-          }
-          return codeEl.innerText;
-        }
-      });
-      clipboard.on('success', function(e) {
+      const onCopySuccess = function(e) {
         // button target
         const button = e.trigger;
         // don't keep focus
@@ -974,11 +1070,50 @@ COV(Y,Z) &amp; = E[YZ] - E[Y] E[Z] \\
         }, 1000);
         // clear code selection
         e.clearSelection();
+      }
+      const getTextToCopy = function(trigger) {
+          const codeEl = trigger.previousElementSibling.cloneNode(true);
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
+            }
+          }
+          return codeEl.innerText;
+      }
+      const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+        text: getTextToCopy
       });
-      function tippyHover(el, contentFn) {
+      clipboard.on('success', onCopySuccess);
+      if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+        // For code content inside modals, clipBoardJS needs to be initialized with a container option
+        // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+        const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+          text: getTextToCopy,
+          container: window.document.getElementById('quarto-embedded-source-code-modal')
+        });
+        clipboardModal.on('success', onCopySuccess);
+      }
+        var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+        var mailtoRegex = new RegExp(/^mailto:/);
+          var filterRegex = new RegExp('/' + window.location.host + '/');
+        var isInternal = (href) => {
+            return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+        }
+        // Inspect non-navigation links and adorn them if external
+     	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+        for (var i=0; i<links.length; i++) {
+          const link = links[i];
+          if (!isInternal(link.href)) {
+            // undo the damage that might have been done by quarto-nav.js in the case of
+            // links that we want to consider external
+            if (link.dataset.originalHref !== undefined) {
+              link.href = link.dataset.originalHref;
+            }
+          }
+        }
+      function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
         const config = {
           allowHTML: true,
-          content: contentFn,
           maxWidth: 500,
           delay: 100,
           arrow: false,
@@ -988,8 +1123,17 @@ COV(Y,Z) &amp; = E[YZ] - E[Y] E[Z] \\
           interactive: true,
           interactiveBorder: 10,
           theme: 'light-border',
-          placement: 'bottom-start'
+          placement: 'bottom-start',
         };
+        if (contentFn) {
+          config.content = contentFn;
+        }
+        if (onTriggerFn) {
+          config.onTrigger = onTriggerFn;
+        }
+        if (onUntriggerFn) {
+          config.onUntrigger = onUntriggerFn;
+        }
           config['offset'] = [0,0];
           config['maxWidth'] = 700;
         window.tippy(el, config); 
@@ -1003,7 +1147,11 @@ COV(Y,Z) &amp; = E[YZ] - E[Y] E[Z] \\
           try { href = new URL(href).hash; } catch {}
           const id = href.replace(/^#\/?/, "");
           const note = window.document.getElementById(id);
-          return note.innerHTML;
+          if (note) {
+            return note.innerHTML;
+          } else {
+            return "";
+          }
         });
       }
       const findCites = (el) => {

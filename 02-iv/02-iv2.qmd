@@ -235,7 +235,7 @@ and form prediction $\hat{D}_{i}$.
 
 ## Derivation
 
-Recall $\hat{\theta}=\frac{C(Z,S)}{V(Z)}$, or $\hat{\theta}V(Z) = C(Y,Z)$. Then:
+Recall our first-stage, $S=\theta Z + \varepsilon$, where $\hat{\theta}=\frac{C(Z,S)}{V(Z)}$, or $\hat{\theta}V(Z) = C(Z,S)$. Then:
 
 $$\begin{align}
 \hat{\delta}  & = \frac{COV(Y,Z)}{COV(S,Z)} \\
