@@ -104,8 +104,8 @@ Eligible plans may receive two bonuses:
 
 ## Some good primers
 
-- [KFF Bonus Payment Illustration](pics/kff-illustration.pdf)
-- [2021 Star Ratings and Bonus Payments](https://www.kff.org/medicare/issue-brief/medicare-advantage-in-2021-star-ratings-and-bonuses/)
+- [KFF Bonus Payment Illustration](images/kff-illustration.pdf)
+- [2024 Star Ratings and Bonus Payments](https://www.kff.org/medicare/issue-brief/medicare-advantage-quality-bonus-payments-will-total-at-least-11-8-billion-in-2024/)
 
 
 # Quality Ratings and Plan Choice
