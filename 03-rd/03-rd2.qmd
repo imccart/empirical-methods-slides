@@ -42,9 +42,9 @@ Focus on enrollments and star ratings:
 #| code-fold: TRUE
 #| code-summary: "R Code"
 
-ma.data <- read_rds(here("data/final_ma_data.rds"))
+ma.data <- read_rds(here("data/ma/final_ma_data.rds"))
 sum.vars <- ma.data %>% select("MA Enrollment" = avg_enrollment, "MA Eligibles" = avg_eligibles, "Star Rating" = Star_Rating)
-datasummary(All(sum.vars) ~ Mean + SD + Histogram, data=sum.vars)
+datasummary(All(sum.vars) ~ Mean + SD + Histogram, data=sum.vars, fmt=2)
 ```
 
 

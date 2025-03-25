@@ -8,7 +8,7 @@
 <link href="03-rd2_files/libs/quarto-html/light-border.css" rel="stylesheet">
 <link href="03-rd2_files/libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
 <link href="03-rd2_files/libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.3.450">
+  <meta name="generator" content="quarto-1.5.57">
 
   <meta name="author" content="Ian McCarthy | Emory University">
   <title>Medicare Advantage Data</title>
@@ -31,7 +31,7 @@
     }
     /* CSS for syntax highlighting */
     pre > code.sourceCode { white-space: pre; position: relative; }
-    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span { line-height: 1.25; }
     pre > code.sourceCode > span:empty { height: 1.2em; }
     .sourceCode { overflow: visible; }
     code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -42,7 +42,7 @@
     }
     @media print {
     pre > code.sourceCode { white-space: pre-wrap; }
-    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
     }
     pre.numberSource code
       { counter-reset: source-line 0; }
@@ -223,7 +223,8 @@
   }
 
   .callout.callout-titled .callout-body > .callout-content > :last-child {
-    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0;
   }
 
   .callout.callout-titled .callout-icon::before {
@@ -386,9 +387,6 @@
       margin-right: 0; 
     }
   </style>
-  
-  <script src="03-rd2_files/libs/kePrint-0.0.1/kePrint.js"></script>
-  <link href="03-rd2_files/libs/lightable-0.0.1/lightable.css" rel="stylesheet">
 </head>
 <body class="quarto-dark">
   <div class="reveal">
@@ -421,45 +419,115 @@ Ian McCarthy | Emory University
 <h2>Summary stats</h2>
 <p>Focus on enrollments and star ratings:</p>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>R Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a>ma.data <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="fu">here</span>(<span class="st">"data/final_ma_data.rds"</span>))</span>
-<span id="cb1-2"><a href="#cb1-2"></a>sum.vars <span class="ot">&lt;-</span> ma.data <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="st">"MA Enrollment"</span> <span class="ot">=</span> avg_enrollment, <span class="st">"MA Eligibles"</span> <span class="ot">=</span> avg_eligibles, <span class="st">"Star Rating"</span> <span class="ot">=</span> Star_Rating)</span>
-<span id="cb1-3"><a href="#cb1-3"></a><span class="fu">datasummary</span>(<span class="fu">All</span>(sum.vars) <span class="sc">~</span> Mean <span class="sc">+</span> SD <span class="sc">+</span> Histogram, <span class="at">data=</span>sum.vars)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a>ma.data <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="fu">here</span>(<span class="st">"data/ma/final_ma_data.rds"</span>))</span>
+<span id="cb1-2"><a href=""></a>sum.vars <span class="ot">&lt;-</span> ma.data <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="st">"MA Enrollment"</span> <span class="ot">=</span> avg_enrollment, <span class="st">"MA Eligibles"</span> <span class="ot">=</span> avg_eligibles, <span class="st">"Star Rating"</span> <span class="ot">=</span> Star_Rating)</span>
+<span id="cb1-3"><a href=""></a><span class="fu">datasummary</span>(<span class="fu">All</span>(sum.vars) <span class="sc">~</span> Mean <span class="sc">+</span> SD <span class="sc">+</span> Histogram, <span class="at">data=</span>sum.vars, <span class="at">fmt=</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<table class="table" data-quarto-postprocess="true" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<thead>
-<tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">Mean</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">SD</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">Histogram</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">MA Enrollment</td>
-<td style="text-align: right;">365.17</td>
-<td style="text-align: right;">1636.62</td>
-<td style="text-align: right;">▇</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">MA Eligibles</td>
-<td style="text-align: right;">36797.77</td>
-<td style="text-align: right;">95219.09</td>
-<td style="text-align: right;">▇</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Star Rating</td>
-<td style="text-align: right;">3.29</td>
-<td style="text-align: right;">0.80</td>
-<td style="text-align: right;">▁▁▇▇▇▅▄▁</td>
-</tr>
-</tbody>
-</table>
+<!-- preamble start -->
 
+    <script>
+      function styleCell_rhssqho529p9b0m2pw7z(i, j, css_id) {
+        var table = document.getElementById("tinytable_rhssqho529p9b0m2pw7z");
+        table.rows[i].cells[j].classList.add(css_id);
+      }
+      function insertSpanRow(i, colspan, content) {
+        var table = document.getElementById('tinytable_rhssqho529p9b0m2pw7z');
+        var newRow = table.insertRow(i);
+        var newCell = newRow.insertCell(0);
+        newCell.setAttribute("colspan", colspan);
+        // newCell.innerText = content;
+        // this may be unsafe, but innerText does not interpret <br>
+        newCell.innerHTML = content;
+      }
+      function spanCell_rhssqho529p9b0m2pw7z(i, j, rowspan, colspan) {
+        var table = document.getElementById("tinytable_rhssqho529p9b0m2pw7z");
+        const targetRow = table.rows[i];
+        const targetCell = targetRow.cells[j];
+        for (let r = 0; r < rowspan; r++) {
+          // Only start deleting cells to the right for the first row (r == 0)
+          if (r === 0) {
+            // Delete cells to the right of the target cell in the first row
+            for (let c = colspan - 1; c > 0; c--) {
+              if (table.rows[i + r].cells[j + c]) {
+                table.rows[i + r].deleteCell(j + c);
+              }
+            }
+          }
+          // For rows below the first, delete starting from the target column
+          if (r > 0) {
+            for (let c = colspan - 1; c >= 0; c--) {
+              if (table.rows[i + r] && table.rows[i + r].cells[j]) {
+                table.rows[i + r].deleteCell(j);
+              }
+            }
+          }
+        }
+        // Set rowspan and colspan of the target cell
+        targetCell.rowSpan = rowspan;
+        targetCell.colSpan = colspan;
+      }
+window.addEventListener('load', function () { styleCell_rhssqho529p9b0m2pw7z(0, 0, 'tinytable_css_idueg02y6vz2fg2sarigr6') })
+window.addEventListener('load', function () { styleCell_rhssqho529p9b0m2pw7z(0, 1, 'tinytable_css_iddruee0ocu7mjkgrzdhon') })
+window.addEventListener('load', function () { styleCell_rhssqho529p9b0m2pw7z(0, 2, 'tinytable_css_iddruee0ocu7mjkgrzdhon') })
+window.addEventListener('load', function () { styleCell_rhssqho529p9b0m2pw7z(0, 3, 'tinytable_css_iddruee0ocu7mjkgrzdhon') })
+window.addEventListener('load', function () { styleCell_rhssqho529p9b0m2pw7z(1, 0, 'tinytable_css_id22yuncpk807uyusyuboe') })
+window.addEventListener('load', function () { styleCell_rhssqho529p9b0m2pw7z(1, 1, 'tinytable_css_id06lbfh9ttyq4txnni3ai') })
+window.addEventListener('load', function () { styleCell_rhssqho529p9b0m2pw7z(1, 2, 'tinytable_css_id06lbfh9ttyq4txnni3ai') })
+window.addEventListener('load', function () { styleCell_rhssqho529p9b0m2pw7z(1, 3, 'tinytable_css_id06lbfh9ttyq4txnni3ai') })
+window.addEventListener('load', function () { styleCell_rhssqho529p9b0m2pw7z(2, 0, 'tinytable_css_id22yuncpk807uyusyuboe') })
+window.addEventListener('load', function () { styleCell_rhssqho529p9b0m2pw7z(2, 1, 'tinytable_css_id06lbfh9ttyq4txnni3ai') })
+window.addEventListener('load', function () { styleCell_rhssqho529p9b0m2pw7z(2, 2, 'tinytable_css_id06lbfh9ttyq4txnni3ai') })
+window.addEventListener('load', function () { styleCell_rhssqho529p9b0m2pw7z(2, 3, 'tinytable_css_id06lbfh9ttyq4txnni3ai') })
+window.addEventListener('load', function () { styleCell_rhssqho529p9b0m2pw7z(3, 0, 'tinytable_css_id22yuncpk807uyusyuboe') })
+window.addEventListener('load', function () { styleCell_rhssqho529p9b0m2pw7z(3, 1, 'tinytable_css_id06lbfh9ttyq4txnni3ai') })
+window.addEventListener('load', function () { styleCell_rhssqho529p9b0m2pw7z(3, 2, 'tinytable_css_id06lbfh9ttyq4txnni3ai') })
+window.addEventListener('load', function () { styleCell_rhssqho529p9b0m2pw7z(3, 3, 'tinytable_css_id06lbfh9ttyq4txnni3ai') })
+    </script>
 
+    <style>
+    .table td.tinytable_css_idueg02y6vz2fg2sarigr6, .table th.tinytable_css_idueg02y6vz2fg2sarigr6 {  text-align: left;  border-bottom: solid 0.1em #d3d8dc; }
+    .table td.tinytable_css_iddruee0ocu7mjkgrzdhon, .table th.tinytable_css_iddruee0ocu7mjkgrzdhon {  text-align: right;  border-bottom: solid 0.1em #d3d8dc; }
+    .table td.tinytable_css_id22yuncpk807uyusyuboe, .table th.tinytable_css_id22yuncpk807uyusyuboe {  text-align: left; }
+    .table td.tinytable_css_id06lbfh9ttyq4txnni3ai, .table th.tinytable_css_id06lbfh9ttyq4txnni3ai {  text-align: right; }
+    </style>
+    <div class="container">
+      <table class="table table-borderless" id="tinytable_rhssqho529p9b0m2pw7z" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+        <thead>
+        
+              <tr>
+                <th scope="col"> </th>
+                <th scope="col">Mean</th>
+                <th scope="col">SD</th>
+                <th scope="col">Histogram</th>
+              </tr>
+        </thead>
+        
+        <tbody>
+                <tr>
+                  <td>MA Enrollment</td>
+                  <td>365.17  </td>
+                  <td>1636.62 </td>
+                  <td>▇       </td>
+                </tr>
+                <tr>
+                  <td>MA Eligibles </td>
+                  <td>36797.77</td>
+                  <td>95219.09</td>
+                  <td>▇       </td>
+                </tr>
+                <tr>
+                  <td>Star Rating  </td>
+                  <td>3.29    </td>
+                  <td>0.80    </td>
+                  <td>▁▁▇▇▇▅▄▁</td>
+                </tr>
+        </tbody>
+      </table>
+    </div>
+<!-- hack to avoid NA insertion in last line -->
 </div>
 </div>
 </section>
@@ -473,46 +541,46 @@ Ian McCarthy | Emory University
 </ul>
 <div class="fragment">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>ma.data.clean <span class="ot">&lt;-</span> ma.data <span class="sc">%&gt;%</span></span>
-<span id="cb2-2"><a href="#cb2-2"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(avg_enrollment) <span class="sc">&amp;</span> year<span class="sc">==</span><span class="dv">2009</span> <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(partc_score)) <span class="co">#&lt;&lt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href=""></a>ma.data.clean <span class="ot">&lt;-</span> ma.data <span class="sc">%&gt;%</span></span>
+<span id="cb2-2"><a href=""></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(avg_enrollment) <span class="sc">&amp;</span> year<span class="sc">==</span><span class="dv">2009</span> <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(partc_score)) <span class="co">#&lt;&lt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </section>
 <section id="calculate-raw-average-rating" class="slide level2">
 <h2>Calculate raw average rating</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>ma.data.clean <span class="ot">&lt;-</span> ma.data.clean <span class="sc">%&gt;%</span></span>
-<span id="cb3-2"><a href="#cb3-2"></a>  <span class="fu">mutate</span>(<span class="at">raw_rating=</span><span class="fu">rowMeans</span>(</span>
-<span id="cb3-3"><a href="#cb3-3"></a>    <span class="fu">cbind</span>(breastcancer_screen,rectalcancer_screen,cv_cholscreen,diabetes_cholscreen,</span>
-<span id="cb3-4"><a href="#cb3-4"></a>          glaucoma_test,monitoring,flu_vaccine,pn_vaccine,physical_health,</span>
-<span id="cb3-5"><a href="#cb3-5"></a>          mental_health,osteo_test,physical_monitor,primaryaccess,</span>
-<span id="cb3-6"><a href="#cb3-6"></a>          hospital_followup,depression_followup,nodelays,carequickly,</span>
-<span id="cb3-7"><a href="#cb3-7"></a>          overallrating_care,overallrating_plan,calltime,</span>
-<span id="cb3-8"><a href="#cb3-8"></a>          doctor_communicate,customer_service,osteo_manage,</span>
-<span id="cb3-9"><a href="#cb3-9"></a>          diabetes_eye,diabetes_kidney,diabetes_bloodsugar,</span>
-<span id="cb3-10"><a href="#cb3-10"></a>          diabetes_chol,antidepressant,bloodpressure,ra_manage,</span>
-<span id="cb3-11"><a href="#cb3-11"></a>          copd_test,betablocker,bladder,falling,appeals_timely,</span>
-<span id="cb3-12"><a href="#cb3-12"></a>          appeals_review),</span>
-<span id="cb3-13"><a href="#cb3-13"></a>    <span class="at">na.rm=</span>T)) <span class="sc">%&gt;%</span></span>
-<span id="cb3-14"><a href="#cb3-14"></a>  <span class="fu">select</span>(contractid, planid, fips, avg_enrollment, state, county, raw_rating, partc_score,</span>
-<span id="cb3-15"><a href="#cb3-15"></a>         avg_eligibles, avg_enrolled, premium_partc, risk_ab, Star_Rating,</span>
-<span id="cb3-16"><a href="#cb3-16"></a>         bid, avg_ffscost, ma_rate)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a>ma.data.clean <span class="ot">&lt;-</span> ma.data.clean <span class="sc">%&gt;%</span></span>
+<span id="cb3-2"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">raw_rating=</span><span class="fu">rowMeans</span>(</span>
+<span id="cb3-3"><a href=""></a>    <span class="fu">cbind</span>(breastcancer_screen,rectalcancer_screen,cv_cholscreen,diabetes_cholscreen,</span>
+<span id="cb3-4"><a href=""></a>          glaucoma_test,monitoring,flu_vaccine,pn_vaccine,physical_health,</span>
+<span id="cb3-5"><a href=""></a>          mental_health,osteo_test,physical_monitor,primaryaccess,</span>
+<span id="cb3-6"><a href=""></a>          hospital_followup,depression_followup,nodelays,carequickly,</span>
+<span id="cb3-7"><a href=""></a>          overallrating_care,overallrating_plan,calltime,</span>
+<span id="cb3-8"><a href=""></a>          doctor_communicate,customer_service,osteo_manage,</span>
+<span id="cb3-9"><a href=""></a>          diabetes_eye,diabetes_kidney,diabetes_bloodsugar,</span>
+<span id="cb3-10"><a href=""></a>          diabetes_chol,antidepressant,bloodpressure,ra_manage,</span>
+<span id="cb3-11"><a href=""></a>          copd_test,betablocker,bladder,falling,appeals_timely,</span>
+<span id="cb3-12"><a href=""></a>          appeals_review),</span>
+<span id="cb3-13"><a href=""></a>    <span class="at">na.rm=</span>T)) <span class="sc">%&gt;%</span></span>
+<span id="cb3-14"><a href=""></a>  <span class="fu">select</span>(contractid, planid, fips, avg_enrollment, state, county, raw_rating, partc_score,</span>
+<span id="cb3-15"><a href=""></a>         avg_eligibles, avg_enrolled, premium_partc, risk_ab, Star_Rating,</span>
+<span id="cb3-16"><a href=""></a>         bid, avg_ffscost, ma_rate)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section>
 <section id="distribution-of-star-ratings" class="title-slide slide level1 center">
 <h1>Distribution of star ratings</h1>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>R Code</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>ma.data.clean <span class="sc">%&gt;%</span> </span>
-<span id="cb4-2"><a href="#cb4-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span><span class="fu">as.factor</span>(Star_Rating))) <span class="sc">+</span> </span>
-<span id="cb4-3"><a href="#cb4-3"></a>  <span class="fu">geom_bar</span>() <span class="sc">+</span></span>
-<span id="cb4-4"><a href="#cb4-4"></a>  <span class="fu">labs</span>(</span>
-<span id="cb4-5"><a href="#cb4-5"></a>    <span class="at">x=</span><span class="st">"Star Rating"</span>,</span>
-<span id="cb4-6"><a href="#cb4-6"></a>    <span class="at">y=</span><span class="st">"Count of Plans"</span>,</span>
-<span id="cb4-7"><a href="#cb4-7"></a>    <span class="at">title=</span><span class="st">"Frequency Distribution of Star Ratings"</span></span>
-<span id="cb4-8"><a href="#cb4-8"></a>  ) <span class="sc">+</span> <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href=""></a>ma.data.clean <span class="sc">%&gt;%</span> </span>
+<span id="cb4-2"><a href=""></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span><span class="fu">as.factor</span>(Star_Rating))) <span class="sc">+</span> </span>
+<span id="cb4-3"><a href=""></a>  <span class="fu">geom_bar</span>() <span class="sc">+</span></span>
+<span id="cb4-4"><a href=""></a>  <span class="fu">labs</span>(</span>
+<span id="cb4-5"><a href=""></a>    <span class="at">x=</span><span class="st">"Star Rating"</span>,</span>
+<span id="cb4-6"><a href=""></a>    <span class="at">y=</span><span class="st">"Count of Plans"</span>,</span>
+<span id="cb4-7"><a href=""></a>    <span class="at">title=</span><span class="st">"Frequency Distribution of Star Ratings"</span></span>
+<span id="cb4-8"><a href=""></a>  ) <span class="sc">+</span> <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 
 </div>
@@ -520,9 +588,9 @@ Ian McCarthy | Emory University
 <section id="enrollments-and-star-ratings" class="slide level2">
 <h2>Enrollments and star ratings</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>R Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(avg_enrollment<span class="sc">~</span><span class="fu">factor</span>(Star_Rating), <span class="at">data=</span>ma.data.clean))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href=""></a><span class="fu">summary</span>(<span class="fu">lm</span>(avg_enrollment<span class="sc">~</span><span class="fu">factor</span>(Star_Rating), <span class="at">data=</span>ma.data.clean))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -561,16 +629,16 @@ F-statistic: 45.41 on 6 and 18979 DF,  p-value: &lt; 2.2e-16</code></pre>
 <section id="premiums-and-quality" class="slide level2">
 <h2>Premiums and quality</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>R Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>ma.data.clean <span class="sc">%&gt;%</span> </span>
-<span id="cb7-2"><a href="#cb7-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>partc_score, <span class="at">y=</span>premium_partc)) <span class="sc">+</span> </span>
-<span id="cb7-3"><a href="#cb7-3"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb7-4"><a href="#cb7-4"></a>  <span class="fu">labs</span>(</span>
-<span id="cb7-5"><a href="#cb7-5"></a>    <span class="at">x=</span><span class="st">"Part C Score"</span>,</span>
-<span id="cb7-6"><a href="#cb7-6"></a>    <span class="at">y=</span><span class="st">"Premium"</span>,</span>
-<span id="cb7-7"><a href="#cb7-7"></a>    <span class="at">title=</span><span class="st">"Premiums and Quality"</span></span>
-<span id="cb7-8"><a href="#cb7-8"></a>  ) <span class="sc">+</span> <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href=""></a>ma.data.clean <span class="sc">%&gt;%</span> </span>
+<span id="cb7-2"><a href=""></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>partc_score, <span class="at">y=</span>premium_partc)) <span class="sc">+</span> </span>
+<span id="cb7-3"><a href=""></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb7-4"><a href=""></a>  <span class="fu">labs</span>(</span>
+<span id="cb7-5"><a href=""></a>    <span class="at">x=</span><span class="st">"Part C Score"</span>,</span>
+<span id="cb7-6"><a href=""></a>    <span class="at">y=</span><span class="st">"Premium"</span>,</span>
+<span id="cb7-7"><a href=""></a>    <span class="at">title=</span><span class="st">"Premiums and Quality"</span></span>
+<span id="cb7-8"><a href=""></a>  ) <span class="sc">+</span> <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 
 </div>
@@ -578,9 +646,9 @@ F-statistic: 45.41 on 6 and 18979 DF,  p-value: &lt; 2.2e-16</code></pre>
 <section id="premiums-and-quality-1" class="slide level2">
 <h2>Premiums and quality</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>R Code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(premium_partc<span class="sc">~</span><span class="fu">factor</span>(Star_Rating), <span class="at">data=</span>ma.data.clean))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href=""></a><span class="fu">summary</span>(<span class="fu">lm</span>(premium_partc<span class="sc">~</span><span class="fu">factor</span>(Star_Rating), <span class="at">data=</span>ma.data.clean))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -609,8 +677,10 @@ Multiple R-squared:  0.1348,    Adjusted R-squared:  0.1344
 F-statistic: 334.9 on 6 and 12892 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
 </div>
+<div class="quarto-auto-generated-content">
 <div class="footer footer-default">
 
+</div>
 </div>
 </section></section>
     </div>
@@ -640,7 +710,6 @@ F-statistic: 334.9 on 6 and 12892 DF,  p-value: &lt; 2.2e-16</code></pre>
       Reveal.initialize({
 'controlsAuto': true,
 'previewLinksAuto': true,
-'smaller': false,
 'pdfSeparateFragments': false,
 'autoAnimateEasing': "ease",
 'autoAnimateDuration': 1,
@@ -827,42 +896,80 @@ F-statistic: 334.9 on 6 and 12892 DF,  p-value: &lt; 2.2e-16</code></pre>
       });
     </script>
     
+
     <script>
+
       // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+
       // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+
       // slide changes (different for each slide format).
+
       (function () {
+
         // dispatch for htmlwidgets
+
         function fireSlideEnter() {
+
           const event = window.document.createEvent("Event");
+
           event.initEvent("slideenter", true, true);
+
           window.document.dispatchEvent(event);
+
         }
+
+    
 
         function fireSlideChanged(previousSlide, currentSlide) {
+
           fireSlideEnter();
 
+    
+
           // dispatch for shiny
+
           if (window.jQuery) {
+
             if (previousSlide) {
+
               window.jQuery(previousSlide).trigger("hidden");
+
             }
+
             if (currentSlide) {
+
               window.jQuery(currentSlide).trigger("shown");
+
             }
+
           }
+
         }
+
+    
 
         // hookup for slidy
+
         if (window.w3c_slidy) {
+
           window.w3c_slidy.add_observer(function (slide_num) {
+
             // slide_num starts at position 1
+
             fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+
           });
+
         }
 
+    
+
       })();
+
     </script>
+
+    
 
     <script id="quarto-html-after-body" type="application/javascript">
     window.document.addEventListener("DOMContentLoaded", function (event) {
@@ -896,18 +1003,7 @@ F-statistic: 334.9 on 6 and 12892 DF,  p-value: &lt; 2.2e-16</code></pre>
         }
         return false;
       }
-      const clipboard = new window.ClipboardJS('.code-copy-button', {
-        text: function(trigger) {
-          const codeEl = trigger.previousElementSibling.cloneNode(true);
-          for (const childEl of codeEl.children) {
-            if (isCodeAnnotation(childEl)) {
-              childEl.remove();
-            }
-          }
-          return codeEl.innerText;
-        }
-      });
-      clipboard.on('success', function(e) {
+      const onCopySuccess = function(e) {
         // button target
         const button = e.trigger;
         // don't keep focus
@@ -939,11 +1035,50 @@ F-statistic: 334.9 on 6 and 12892 DF,  p-value: &lt; 2.2e-16</code></pre>
         }, 1000);
         // clear code selection
         e.clearSelection();
+      }
+      const getTextToCopy = function(trigger) {
+          const codeEl = trigger.previousElementSibling.cloneNode(true);
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
+            }
+          }
+          return codeEl.innerText;
+      }
+      const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+        text: getTextToCopy
       });
-      function tippyHover(el, contentFn) {
+      clipboard.on('success', onCopySuccess);
+      if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+        // For code content inside modals, clipBoardJS needs to be initialized with a container option
+        // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+        const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+          text: getTextToCopy,
+          container: window.document.getElementById('quarto-embedded-source-code-modal')
+        });
+        clipboardModal.on('success', onCopySuccess);
+      }
+        var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+        var mailtoRegex = new RegExp(/^mailto:/);
+          var filterRegex = new RegExp('/' + window.location.host + '/');
+        var isInternal = (href) => {
+            return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+        }
+        // Inspect non-navigation links and adorn them if external
+     	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+        for (var i=0; i<links.length; i++) {
+          const link = links[i];
+          if (!isInternal(link.href)) {
+            // undo the damage that might have been done by quarto-nav.js in the case of
+            // links that we want to consider external
+            if (link.dataset.originalHref !== undefined) {
+              link.href = link.dataset.originalHref;
+            }
+          }
+        }
+      function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
         const config = {
           allowHTML: true,
-          content: contentFn,
           maxWidth: 500,
           delay: 100,
           arrow: false,
@@ -953,8 +1088,17 @@ F-statistic: 334.9 on 6 and 12892 DF,  p-value: &lt; 2.2e-16</code></pre>
           interactive: true,
           interactiveBorder: 10,
           theme: 'light-border',
-          placement: 'bottom-start'
+          placement: 'bottom-start',
         };
+        if (contentFn) {
+          config.content = contentFn;
+        }
+        if (onTriggerFn) {
+          config.onTrigger = onTriggerFn;
+        }
+        if (onUntriggerFn) {
+          config.onUntrigger = onUntriggerFn;
+        }
           config['offset'] = [0,0];
           config['maxWidth'] = 700;
         window.tippy(el, config); 
@@ -968,7 +1112,11 @@ F-statistic: 334.9 on 6 and 12892 DF,  p-value: &lt; 2.2e-16</code></pre>
           try { href = new URL(href).hash; } catch {}
           const id = href.replace(/^#\/?/, "");
           const note = window.document.getElementById(id);
-          return note.innerHTML;
+          if (note) {
+            return note.innerHTML;
+          } else {
+            return "";
+          }
         });
       }
       const findCites = (el) => {
