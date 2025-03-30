@@ -20,7 +20,7 @@ execute:
 #| include: false
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(tidyverse, ggplot2, lubridate, gapminder, scales,
-               hrbrthemes, gganimate, OECD, here, ggthemes)
+               hrbrthemes, gganimate, OECD, here, ggthemes, rdrobust)
 ```
 
 
@@ -224,8 +224,8 @@ Goal is to estimate $E[Y_{1}|X=c] - E[Y_{0}|X=c]$
 2. Transform running variable, $\tilde{X}=X-c$
 3. Estimate regressions...
   - Linear, same slope: $y = \alpha + \delta D + \beta \tilde{X} + \varepsilon$
-  - Linear, different slope: $y = \alpha + \delta D + \beta \tilde{X} + \gamma W\tilde{X} + \varepsilon$
-  - Nonlinear: add polynomials in $\tilde{X}$ and interactions $W \tilde{X}$
+  - Linear, different slope: $y = \alpha + \delta D + \beta \tilde{X} + \gamma D\tilde{X} + \varepsilon$
+  - Nonlinear: add polynomials in $\tilde{X}$ and interactions $D \tilde{X}$
 
 
 
@@ -242,6 +242,7 @@ Most RD estimates follow a similar set of steps:
 3. Manipulation tests
 4. RD estimates
 5. Sensitivity and robustness:
+   
     - Bandwidths
     - Order of polynomial
     - Inclusion of covariates
@@ -329,6 +330,7 @@ If F-test suggests significance, then we have too few bins and need to narrow th
 
 - If RD is an appropriate design, passing the cutoff should **only** affect treatment and outcome of interest
 - How do we test for this?
+
     - Covariate balance
     - Placebo tests of other outcomes (e.g., t-1 outcomes against treatment at time t)
 
@@ -467,8 +469,10 @@ summary(rd.est)
 ::: {.column width="50%"}
 
 Cattaneo et al. (2020) argue:
+
 - Report conventional point estimate
 - Report robust confidence interval
+
 :::
 
 ::::

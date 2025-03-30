@@ -32,7 +32,7 @@ pacman::p_load(tidyverse, ggplot2, lubridate, gapminder, scales,
 #| code-fold: true
 #| code-summary: "R Code"
 
-ma.data <- read_rds(here("data/final_ma_data.rds"))
+ma.data <- read_rds(here("data/ma/final_ma_data.rds"))
 ma.data.clean <- ma.data %>%
   filter(!is.na(avg_enrollment) & year==2009 & !is.na(partc_score)) #<<
 ```

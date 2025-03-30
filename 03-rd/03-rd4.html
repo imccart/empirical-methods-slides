@@ -8,7 +8,7 @@
 <link href="03-rd4_files/libs/quarto-html/light-border.css" rel="stylesheet">
 <link href="03-rd4_files/libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
 <link href="03-rd4_files/libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.3.450">
+  <meta name="generator" content="quarto-1.5.57">
 
   <meta name="author" content="Ian McCarthy | Emory University">
   <title>Regression Discontinuity: Part II</title>
@@ -31,7 +31,7 @@
     }
     /* CSS for syntax highlighting */
     pre > code.sourceCode { white-space: pre; position: relative; }
-    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span { line-height: 1.25; }
     pre > code.sourceCode > span:empty { height: 1.2em; }
     .sourceCode { overflow: visible; }
     code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -42,7 +42,7 @@
     }
     @media print {
     pre > code.sourceCode { white-space: pre-wrap; }
-    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
     }
     pre.numberSource code
       { counter-reset: source-line 0; }
@@ -223,7 +223,8 @@
   }
 
   .callout.callout-titled .callout-body > .callout-content > :last-child {
-    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0;
   }
 
   .callout.callout-titled .callout-icon::before {
@@ -386,9 +387,6 @@
       margin-right: 0; 
     }
   </style>
-  
-  <script src="03-rd4_files/libs/kePrint-0.0.1/kePrint.js"></script>
-  <link href="03-rd4_files/libs/lightable-0.0.1/lightable.css" rel="stylesheet">
 </head>
 <body class="quarto-dark">
   <div class="reveal">
@@ -409,51 +407,51 @@ Ian McCarthy | Emory University
 <section id="ma-data" class="slide level2">
 <h2>MA Data</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>R Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a>ma.data <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="fu">here</span>(<span class="st">"data/final_ma_data.rds"</span>))</span>
-<span id="cb1-2"><a href="#cb1-2"></a>ma.data.clean <span class="ot">&lt;-</span> ma.data <span class="sc">%&gt;%</span></span>
-<span id="cb1-3"><a href="#cb1-3"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(avg_enrollment) <span class="sc">&amp;</span> year<span class="sc">==</span><span class="dv">2009</span> <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(partc_score)) <span class="co">#&lt;&lt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a>ma.data <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="fu">here</span>(<span class="st">"data/ma/final_ma_data.rds"</span>))</span>
+<span id="cb1-2"><a href=""></a>ma.data.clean <span class="ot">&lt;-</span> ma.data <span class="sc">%&gt;%</span></span>
+<span id="cb1-3"><a href=""></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(avg_enrollment) <span class="sc">&amp;</span> year<span class="sc">==</span><span class="dv">2009</span> <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(partc_score)) <span class="co">#&lt;&lt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
 <section id="calculate-raw-average-rating" class="slide level2">
 <h2>Calculate raw average rating</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>R Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>ma.data.clean <span class="ot">&lt;-</span> ma.data.clean <span class="sc">%&gt;%</span></span>
-<span id="cb2-2"><a href="#cb2-2"></a>  <span class="fu">mutate</span>(<span class="at">raw_rating=</span><span class="fu">rowMeans</span>(</span>
-<span id="cb2-3"><a href="#cb2-3"></a>    <span class="fu">cbind</span>(breastcancer_screen,rectalcancer_screen,cv_cholscreen,diabetes_cholscreen,</span>
-<span id="cb2-4"><a href="#cb2-4"></a>          glaucoma_test,monitoring,flu_vaccine,pn_vaccine,physical_health,</span>
-<span id="cb2-5"><a href="#cb2-5"></a>          mental_health,osteo_test,physical_monitor,primaryaccess,</span>
-<span id="cb2-6"><a href="#cb2-6"></a>          hospital_followup,depression_followup,nodelays,carequickly,</span>
-<span id="cb2-7"><a href="#cb2-7"></a>          overallrating_care,overallrating_plan,calltime,</span>
-<span id="cb2-8"><a href="#cb2-8"></a>          doctor_communicate,customer_service,osteo_manage,</span>
-<span id="cb2-9"><a href="#cb2-9"></a>          diabetes_eye,diabetes_kidney,diabetes_bloodsugar,</span>
-<span id="cb2-10"><a href="#cb2-10"></a>          diabetes_chol,antidepressant,bloodpressure,ra_manage,</span>
-<span id="cb2-11"><a href="#cb2-11"></a>          copd_test,betablocker,bladder,falling,appeals_timely,</span>
-<span id="cb2-12"><a href="#cb2-12"></a>          appeals_review),</span>
-<span id="cb2-13"><a href="#cb2-13"></a>    <span class="at">na.rm=</span>T)) <span class="sc">%&gt;%</span></span>
-<span id="cb2-14"><a href="#cb2-14"></a>  <span class="fu">select</span>(contractid, planid, fips, avg_enrollment, state, county, raw_rating, partc_score,</span>
-<span id="cb2-15"><a href="#cb2-15"></a>         avg_eligibles, avg_enrolled, premium_partc, risk_ab, Star_Rating,</span>
-<span id="cb2-16"><a href="#cb2-16"></a>         bid, avg_ffscost, ma_rate)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href=""></a>ma.data.clean <span class="ot">&lt;-</span> ma.data.clean <span class="sc">%&gt;%</span></span>
+<span id="cb2-2"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">raw_rating=</span><span class="fu">rowMeans</span>(</span>
+<span id="cb2-3"><a href=""></a>    <span class="fu">cbind</span>(breastcancer_screen,rectalcancer_screen,cv_cholscreen,diabetes_cholscreen,</span>
+<span id="cb2-4"><a href=""></a>          glaucoma_test,monitoring,flu_vaccine,pn_vaccine,physical_health,</span>
+<span id="cb2-5"><a href=""></a>          mental_health,osteo_test,physical_monitor,primaryaccess,</span>
+<span id="cb2-6"><a href=""></a>          hospital_followup,depression_followup,nodelays,carequickly,</span>
+<span id="cb2-7"><a href=""></a>          overallrating_care,overallrating_plan,calltime,</span>
+<span id="cb2-8"><a href=""></a>          doctor_communicate,customer_service,osteo_manage,</span>
+<span id="cb2-9"><a href=""></a>          diabetes_eye,diabetes_kidney,diabetes_bloodsugar,</span>
+<span id="cb2-10"><a href=""></a>          diabetes_chol,antidepressant,bloodpressure,ra_manage,</span>
+<span id="cb2-11"><a href=""></a>          copd_test,betablocker,bladder,falling,appeals_timely,</span>
+<span id="cb2-12"><a href=""></a>          appeals_review),</span>
+<span id="cb2-13"><a href=""></a>    <span class="at">na.rm=</span>T)) <span class="sc">%&gt;%</span></span>
+<span id="cb2-14"><a href=""></a>  <span class="fu">select</span>(contractid, planid, fips, avg_enrollment, state, county, raw_rating, partc_score,</span>
+<span id="cb2-15"><a href=""></a>         avg_eligibles, avg_enrolled, premium_partc, risk_ab, Star_Rating,</span>
+<span id="cb2-16"><a href=""></a>         bid, avg_ffscost, ma_rate)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
 <section id="distribution-of-star-ratings" class="slide level2">
 <h2>Distribution of star ratings</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>R Code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>ma.data.clean <span class="sc">%&gt;%</span> </span>
-<span id="cb3-2"><a href="#cb3-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span><span class="fu">as.factor</span>(Star_Rating))) <span class="sc">+</span> </span>
-<span id="cb3-3"><a href="#cb3-3"></a>  <span class="fu">geom_bar</span>() <span class="sc">+</span></span>
-<span id="cb3-4"><a href="#cb3-4"></a>  <span class="fu">labs</span>(</span>
-<span id="cb3-5"><a href="#cb3-5"></a>    <span class="at">x=</span><span class="st">"Star Rating"</span>,</span>
-<span id="cb3-6"><a href="#cb3-6"></a>    <span class="at">y=</span><span class="st">"Count of Plans"</span>,</span>
-<span id="cb3-7"><a href="#cb3-7"></a>    <span class="at">title=</span><span class="st">"Frequency Distribution of Star Ratings"</span></span>
-<span id="cb3-8"><a href="#cb3-8"></a>  ) <span class="sc">+</span> <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a>ma.data.clean <span class="sc">%&gt;%</span> </span>
+<span id="cb3-2"><a href=""></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span><span class="fu">as.factor</span>(Star_Rating))) <span class="sc">+</span> </span>
+<span id="cb3-3"><a href=""></a>  <span class="fu">geom_bar</span>() <span class="sc">+</span></span>
+<span id="cb3-4"><a href=""></a>  <span class="fu">labs</span>(</span>
+<span id="cb3-5"><a href=""></a>    <span class="at">x=</span><span class="st">"Star Rating"</span>,</span>
+<span id="cb3-6"><a href=""></a>    <span class="at">y=</span><span class="st">"Count of Plans"</span>,</span>
+<span id="cb3-7"><a href=""></a>    <span class="at">title=</span><span class="st">"Frequency Distribution of Star Ratings"</span></span>
+<span id="cb3-8"><a href=""></a>  ) <span class="sc">+</span> <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 
 </div>
@@ -461,9 +459,9 @@ Ian McCarthy | Emory University
 <section id="enrollments-and-star-ratings" class="slide level2">
 <h2>Enrollments and star ratings</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>R Code</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(avg_enrollment<span class="sc">~</span><span class="fu">factor</span>(Star_Rating), <span class="at">data=</span>ma.data.clean))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href=""></a><span class="fu">summary</span>(<span class="fu">lm</span>(avg_enrollment<span class="sc">~</span><span class="fu">factor</span>(Star_Rating), <span class="at">data=</span>ma.data.clean))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -509,24 +507,27 @@ F-statistic: 45.41 on 6 and 18979 DF,  p-value: &lt; 2.2e-16</code></pre>
 <div class="columns">
 <div class="column" style="width:50%;">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>ma.rd1 <span class="ot">&lt;-</span> ma.data.clean <span class="sc">%&gt;%</span></span>
-<span id="cb6-2"><a href="#cb6-2"></a>  <span class="fu">filter</span>(Star_Rating<span class="sc">==</span><span class="dv">2</span> <span class="sc">|</span> Star_Rating<span class="sc">==</span><span class="fl">2.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href=""></a>ma.rd1 <span class="ot">&lt;-</span> ma.data.clean <span class="sc">%&gt;%</span></span>
+<span id="cb6-2"><a href=""></a>  <span class="fu">filter</span>(Star_Rating<span class="sc">==</span><span class="dv">2</span> <span class="sc">|</span> Star_Rating<span class="sc">==</span><span class="fl">2.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div><div class="column" style="width:50%;">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>ma.rd1 <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>raw_rating)) <span class="sc">+</span> </span>
-<span id="cb7-2"><a href="#cb7-2"></a>  <span class="fu">geom_bar</span>(<span class="at">width=</span>.<span class="dv">025</span>) <span class="sc">+</span> <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
-<span id="cb7-3"><a href="#cb7-3"></a>  <span class="fu">labs</span>(</span>
-<span id="cb7-4"><a href="#cb7-4"></a>    <span class="at">x=</span><span class="st">"Running Variable"</span>,</span>
-<span id="cb7-5"><a href="#cb7-5"></a>    <span class="at">y=</span><span class="st">"Number of Plans"</span>,</span>
-<span id="cb7-6"><a href="#cb7-6"></a>    <span class="at">title=</span><span class="st">"Distribution of Raw Scores"</span></span>
-<span id="cb7-7"><a href="#cb7-7"></a>  ) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href=""></a>ma.rd1 <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>raw_rating)) <span class="sc">+</span> </span>
+<span id="cb7-2"><a href=""></a>  <span class="fu">geom_bar</span>(<span class="at">width=</span>.<span class="dv">025</span>) <span class="sc">+</span> <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb7-3"><a href=""></a>  <span class="fu">labs</span>(</span>
+<span id="cb7-4"><a href=""></a>    <span class="at">x=</span><span class="st">"Running Variable"</span>,</span>
+<span id="cb7-5"><a href=""></a>    <span class="at">y=</span><span class="st">"Number of Plans"</span>,</span>
+<span id="cb7-6"><a href=""></a>    <span class="at">title=</span><span class="st">"Distribution of Raw Scores"</span></span>
+<span id="cb7-7"><a href=""></a>  ) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
+<div>
+<figure>
 <p><img data-src="03-rd4_files/figure-revealjs/unnamed-chunk-7-1.png" width="960"></p>
+</figure>
 </div>
 </div>
 </div>
-</div>
+</div></div>
 </section>
 <section id="note-about-scores" class="slide level2">
 <h2>Note about scores</h2>
@@ -539,116 +540,222 @@ F-statistic: 45.41 on 6 and 18979 DF,  p-value: &lt; 2.2e-16</code></pre>
 <section id="rd-estimates" class="slide level2">
 <h2>RD estimates</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>R Code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>ma.rd1 <span class="ot">&lt;-</span> ma.rd1 <span class="sc">%&gt;%</span></span>
-<span id="cb8-2"><a href="#cb8-2"></a>  <span class="fu">mutate</span>(<span class="at">score =</span> raw_rating <span class="sc">-</span> <span class="fl">2.25</span>,</span>
-<span id="cb8-3"><a href="#cb8-3"></a>         <span class="at">treat =</span> (score<span class="sc">&gt;=</span><span class="dv">0</span>),</span>
-<span id="cb8-4"><a href="#cb8-4"></a>         <span class="at">window1 =</span> (score<span class="sc">&gt;=-</span>.<span class="dv">175</span> <span class="sc">&amp;</span> score<span class="sc">&lt;=</span>.<span class="dv">175</span>),</span>
-<span id="cb8-5"><a href="#cb8-5"></a>         <span class="at">window2 =</span> (score<span class="sc">&gt;=-</span>.<span class="dv">125</span> <span class="sc">&amp;</span> score<span class="sc">&lt;=</span>.<span class="dv">125</span>),</span>
-<span id="cb8-6"><a href="#cb8-6"></a>         <span class="at">mkt_share =</span> avg_enrollment<span class="sc">/</span>avg_eligibles,</span>
-<span id="cb8-7"><a href="#cb8-7"></a>         <span class="at">ln_share =</span> <span class="fu">log</span>(mkt_share),</span>
-<span id="cb8-8"><a href="#cb8-8"></a>         <span class="at">score_treat=</span>score<span class="sc">*</span>treat)</span>
-<span id="cb8-9"><a href="#cb8-9"></a>star25<span class="fl">.1</span> <span class="ot">&lt;-</span> <span class="fu">lm</span>(mkt_share <span class="sc">~</span> score <span class="sc">+</span> treat, <span class="at">data=</span>ma.rd1)</span>
-<span id="cb8-10"><a href="#cb8-10"></a>star25<span class="fl">.2</span> <span class="ot">&lt;-</span> <span class="fu">lm</span>(mkt_share <span class="sc">~</span> score <span class="sc">+</span> treat, <span class="at">data=</span> (ma.rd1 <span class="sc">%&gt;%</span> <span class="fu">filter</span>(window1<span class="sc">==</span><span class="cn">TRUE</span>)))</span>
-<span id="cb8-11"><a href="#cb8-11"></a>star25<span class="fl">.3</span> <span class="ot">&lt;-</span> <span class="fu">lm</span>(mkt_share <span class="sc">~</span> score <span class="sc">+</span> treat <span class="sc">+</span> score_treat, <span class="at">data=</span> (ma.rd1 <span class="sc">%&gt;%</span> <span class="fu">filter</span>(window1<span class="sc">==</span><span class="cn">TRUE</span>)))</span>
-<span id="cb8-12"><a href="#cb8-12"></a>star25<span class="fl">.4</span> <span class="ot">&lt;-</span> <span class="fu">lm</span>(mkt_share <span class="sc">~</span> score <span class="sc">+</span> treat <span class="sc">+</span> score_treat, <span class="at">data=</span> (ma.rd1 <span class="sc">%&gt;%</span> <span class="fu">filter</span>(window2<span class="sc">==</span><span class="cn">TRUE</span>)))</span>
-<span id="cb8-13"><a href="#cb8-13"></a>est1 <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(star25<span class="fl">.1</span><span class="sc">$</span>coef[<span class="dv">3</span>])</span>
-<span id="cb8-14"><a href="#cb8-14"></a>est2 <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(star25<span class="fl">.2</span><span class="sc">$</span>coef[<span class="dv">3</span>])</span>
-<span id="cb8-15"><a href="#cb8-15"></a>est3 <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(star25<span class="fl">.3</span><span class="sc">$</span>coef[<span class="dv">3</span>])</span>
-<span id="cb8-16"><a href="#cb8-16"></a>est4 <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(star25<span class="fl">.4</span><span class="sc">$</span>coef[<span class="dv">3</span>])</span>
-<span id="cb8-17"><a href="#cb8-17"></a></span>
-<span id="cb8-18"><a href="#cb8-18"></a>rows <span class="ot">&lt;-</span> <span class="fu">tribble</span>(<span class="sc">~</span>term, <span class="sc">~</span> m1, <span class="sc">~</span> m2, <span class="sc">~</span> m3 , <span class="sc">~</span> m4,</span>
-<span id="cb8-19"><a href="#cb8-19"></a>                <span class="st">'Bandwidth'</span>, <span class="st">"0.25"</span>, <span class="st">"0.175"</span>, <span class="st">"0.175"</span>, <span class="st">"0.125"</span>)</span>
-<span id="cb8-20"><a href="#cb8-20"></a><span class="fu">attr</span>(rows, <span class="st">'position'</span>)  <span class="ot">&lt;-</span> <span class="dv">7</span></span>
-<span id="cb8-21"><a href="#cb8-21"></a></span>
-<span id="cb8-22"><a href="#cb8-22"></a><span class="fu">modelsummary</span>(<span class="fu">list</span>(star25<span class="fl">.1</span>, star25<span class="fl">.2</span>, star25<span class="fl">.3</span>, star25<span class="fl">.4</span>),</span>
-<span id="cb8-23"><a href="#cb8-23"></a>          <span class="at">keep=</span><span class="fu">c</span>(<span class="st">"score"</span>, <span class="st">"treatTRUE"</span>, <span class="st">"score_treat"</span>),</span>
-<span id="cb8-24"><a href="#cb8-24"></a>          <span class="at">coef_map=</span><span class="fu">c</span>(<span class="st">"score"</span><span class="ot">=</span><span class="st">"Raw Score"</span>, </span>
-<span id="cb8-25"><a href="#cb8-25"></a>                    <span class="st">"treatTRUE"</span><span class="ot">=</span><span class="st">"Treatment"</span>,</span>
-<span id="cb8-26"><a href="#cb8-26"></a>                    <span class="st">"score_treat"</span><span class="ot">=</span><span class="st">"Score x Treat"</span>),</span>
-<span id="cb8-27"><a href="#cb8-27"></a>          <span class="at">gof_map=</span><span class="fu">c</span>(<span class="st">"nobs"</span>, <span class="st">"r.squared"</span>),</span>
-<span id="cb8-28"><a href="#cb8-28"></a>          <span class="at">add_rows=</span>rows)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href=""></a>ma.rd1 <span class="ot">&lt;-</span> ma.rd1 <span class="sc">%&gt;%</span></span>
+<span id="cb8-2"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">score =</span> raw_rating <span class="sc">-</span> <span class="fl">2.25</span>,</span>
+<span id="cb8-3"><a href=""></a>         <span class="at">treat =</span> (score<span class="sc">&gt;=</span><span class="dv">0</span>),</span>
+<span id="cb8-4"><a href=""></a>         <span class="at">window1 =</span> (score<span class="sc">&gt;=-</span>.<span class="dv">175</span> <span class="sc">&amp;</span> score<span class="sc">&lt;=</span>.<span class="dv">175</span>),</span>
+<span id="cb8-5"><a href=""></a>         <span class="at">window2 =</span> (score<span class="sc">&gt;=-</span>.<span class="dv">125</span> <span class="sc">&amp;</span> score<span class="sc">&lt;=</span>.<span class="dv">125</span>),</span>
+<span id="cb8-6"><a href=""></a>         <span class="at">mkt_share =</span> avg_enrollment<span class="sc">/</span>avg_eligibles,</span>
+<span id="cb8-7"><a href=""></a>         <span class="at">ln_share =</span> <span class="fu">log</span>(mkt_share),</span>
+<span id="cb8-8"><a href=""></a>         <span class="at">score_treat=</span>score<span class="sc">*</span>treat)</span>
+<span id="cb8-9"><a href=""></a>star25<span class="fl">.1</span> <span class="ot">&lt;-</span> <span class="fu">lm</span>(mkt_share <span class="sc">~</span> score <span class="sc">+</span> treat, <span class="at">data=</span>ma.rd1)</span>
+<span id="cb8-10"><a href=""></a>star25<span class="fl">.2</span> <span class="ot">&lt;-</span> <span class="fu">lm</span>(mkt_share <span class="sc">~</span> score <span class="sc">+</span> treat, <span class="at">data=</span> (ma.rd1 <span class="sc">%&gt;%</span> <span class="fu">filter</span>(window1<span class="sc">==</span><span class="cn">TRUE</span>)))</span>
+<span id="cb8-11"><a href=""></a>star25<span class="fl">.3</span> <span class="ot">&lt;-</span> <span class="fu">lm</span>(mkt_share <span class="sc">~</span> score <span class="sc">+</span> treat <span class="sc">+</span> score_treat, <span class="at">data=</span> (ma.rd1 <span class="sc">%&gt;%</span> <span class="fu">filter</span>(window1<span class="sc">==</span><span class="cn">TRUE</span>)))</span>
+<span id="cb8-12"><a href=""></a>star25<span class="fl">.4</span> <span class="ot">&lt;-</span> <span class="fu">lm</span>(mkt_share <span class="sc">~</span> score <span class="sc">+</span> treat <span class="sc">+</span> score_treat, <span class="at">data=</span> (ma.rd1 <span class="sc">%&gt;%</span> <span class="fu">filter</span>(window2<span class="sc">==</span><span class="cn">TRUE</span>)))</span>
+<span id="cb8-13"><a href=""></a>est1 <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(star25<span class="fl">.1</span><span class="sc">$</span>coef[<span class="dv">3</span>])</span>
+<span id="cb8-14"><a href=""></a>est2 <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(star25<span class="fl">.2</span><span class="sc">$</span>coef[<span class="dv">3</span>])</span>
+<span id="cb8-15"><a href=""></a>est3 <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(star25<span class="fl">.3</span><span class="sc">$</span>coef[<span class="dv">3</span>])</span>
+<span id="cb8-16"><a href=""></a>est4 <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(star25<span class="fl">.4</span><span class="sc">$</span>coef[<span class="dv">3</span>])</span>
+<span id="cb8-17"><a href=""></a></span>
+<span id="cb8-18"><a href=""></a>rows <span class="ot">&lt;-</span> <span class="fu">tribble</span>(<span class="sc">~</span>term, <span class="sc">~</span> m1, <span class="sc">~</span> m2, <span class="sc">~</span> m3 , <span class="sc">~</span> m4,</span>
+<span id="cb8-19"><a href=""></a>                <span class="st">'Bandwidth'</span>, <span class="st">"0.25"</span>, <span class="st">"0.175"</span>, <span class="st">"0.175"</span>, <span class="st">"0.125"</span>)</span>
+<span id="cb8-20"><a href=""></a><span class="fu">attr</span>(rows, <span class="st">'position'</span>)  <span class="ot">&lt;-</span> <span class="dv">7</span></span>
+<span id="cb8-21"><a href=""></a></span>
+<span id="cb8-22"><a href=""></a><span class="fu">modelsummary</span>(<span class="fu">list</span>(star25<span class="fl">.1</span>, star25<span class="fl">.2</span>, star25<span class="fl">.3</span>, star25<span class="fl">.4</span>),</span>
+<span id="cb8-23"><a href=""></a>          <span class="at">keep=</span><span class="fu">c</span>(<span class="st">"score"</span>, <span class="st">"treatTRUE"</span>, <span class="st">"score_treat"</span>),</span>
+<span id="cb8-24"><a href=""></a>          <span class="at">coef_map=</span><span class="fu">c</span>(<span class="st">"score"</span><span class="ot">=</span><span class="st">"Raw Score"</span>, </span>
+<span id="cb8-25"><a href=""></a>                    <span class="st">"treatTRUE"</span><span class="ot">=</span><span class="st">"Treatment"</span>,</span>
+<span id="cb8-26"><a href=""></a>                    <span class="st">"score_treat"</span><span class="ot">=</span><span class="st">"Score x Treat"</span>),</span>
+<span id="cb8-27"><a href=""></a>          <span class="at">gof_map=</span><span class="fu">c</span>(<span class="st">"nobs"</span>, <span class="st">"r.squared"</span>),</span>
+<span id="cb8-28"><a href=""></a>          <span class="at">add_rows=</span>rows)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<table class="table" data-quarto-postprocess="true" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<thead>
-<tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">&nbsp;(1)</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">&nbsp;&nbsp;(2)</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">&nbsp;&nbsp;(3)</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">&nbsp;&nbsp;(4)</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">Raw Score</td>
-<td style="text-align: center;">0.040</td>
-<td style="text-align: center;">−0.044</td>
-<td style="text-align: center;">−0.059</td>
-<td style="text-align: center;">−0.074</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"></td>
-<td style="text-align: center;">(0.002)</td>
-<td style="text-align: center;">(0.009)</td>
-<td style="text-align: center;">(0.011)</td>
-<td style="text-align: center;">(0.012)</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Treatment</td>
-<td style="text-align: center;">−0.011</td>
-<td style="text-align: center;">0.008</td>
-<td style="text-align: center;">0.007</td>
-<td style="text-align: center;">0.008</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"></td>
-<td style="text-align: center;">(0.001)</td>
-<td style="text-align: center;">(0.002)</td>
-<td style="text-align: center;">(0.002)</td>
-<td style="text-align: center;">(0.002)</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Score x Treat</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">0.035</td>
-<td style="text-align: center;">0.062</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; box-shadow: 0px 1.5px;"></td>
-<td style="text-align: center; box-shadow: 0px 1.5px;"></td>
-<td style="text-align: center; box-shadow: 0px 1.5px;"></td>
-<td style="text-align: center; box-shadow: 0px 1.5px;">(0.017)</td>
-<td style="text-align: center; box-shadow: 0px 1.5px;">(0.025)</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Bandwidth</td>
-<td style="text-align: center;">0.25</td>
-<td style="text-align: center;">0.175</td>
-<td style="text-align: center;">0.175</td>
-<td style="text-align: center;">0.125</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Num.Obs.</td>
-<td style="text-align: center;">9913</td>
-<td style="text-align: center;">3385</td>
-<td style="text-align: center;">3385</td>
-<td style="text-align: center;">3241</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">R2</td>
-<td style="text-align: center;">0.053</td>
-<td style="text-align: center;">0.008</td>
-<td style="text-align: center;">0.009</td>
-<td style="text-align: center;">0.012</td>
-</tr>
-</tbody>
-</table>
+<!-- preamble start -->
 
+    <script>
+      function styleCell_yho42vnunmbotbljfygw(i, j, css_id) {
+        var table = document.getElementById("tinytable_yho42vnunmbotbljfygw");
+        table.rows[i].cells[j].classList.add(css_id);
+      }
+      function insertSpanRow(i, colspan, content) {
+        var table = document.getElementById('tinytable_yho42vnunmbotbljfygw');
+        var newRow = table.insertRow(i);
+        var newCell = newRow.insertCell(0);
+        newCell.setAttribute("colspan", colspan);
+        // newCell.innerText = content;
+        // this may be unsafe, but innerText does not interpret <br>
+        newCell.innerHTML = content;
+      }
+      function spanCell_yho42vnunmbotbljfygw(i, j, rowspan, colspan) {
+        var table = document.getElementById("tinytable_yho42vnunmbotbljfygw");
+        const targetRow = table.rows[i];
+        const targetCell = targetRow.cells[j];
+        for (let r = 0; r < rowspan; r++) {
+          // Only start deleting cells to the right for the first row (r == 0)
+          if (r === 0) {
+            // Delete cells to the right of the target cell in the first row
+            for (let c = colspan - 1; c > 0; c--) {
+              if (table.rows[i + r].cells[j + c]) {
+                table.rows[i + r].deleteCell(j + c);
+              }
+            }
+          }
+          // For rows below the first, delete starting from the target column
+          if (r > 0) {
+            for (let c = colspan - 1; c >= 0; c--) {
+              if (table.rows[i + r] && table.rows[i + r].cells[j]) {
+                table.rows[i + r].deleteCell(j);
+              }
+            }
+          }
+        }
+        // Set rowspan and colspan of the target cell
+        targetCell.rowSpan = rowspan;
+        targetCell.colSpan = colspan;
+      }
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(0, 0, 'tinytable_css_idv64xsftz289jofqw8q5b') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(0, 1, 'tinytable_css_idwlumfmt7ph7zzt7kuib6') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(0, 2, 'tinytable_css_idwlumfmt7ph7zzt7kuib6') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(0, 3, 'tinytable_css_idwlumfmt7ph7zzt7kuib6') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(0, 4, 'tinytable_css_idwlumfmt7ph7zzt7kuib6') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(1, 0, 'tinytable_css_idh0mcp4bcfwqac8l02enn') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(1, 1, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(1, 2, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(1, 3, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(1, 4, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(2, 0, 'tinytable_css_idh0mcp4bcfwqac8l02enn') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(2, 1, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(2, 2, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(2, 3, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(2, 4, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(3, 0, 'tinytable_css_idh0mcp4bcfwqac8l02enn') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(3, 1, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(3, 2, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(3, 3, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(3, 4, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(4, 0, 'tinytable_css_idh0mcp4bcfwqac8l02enn') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(4, 1, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(4, 2, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(4, 3, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(4, 4, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(5, 0, 'tinytable_css_idh0mcp4bcfwqac8l02enn') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(5, 1, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(5, 2, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(5, 3, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(5, 4, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(6, 0, 'tinytable_css_idnkbbeb12oodrp7panzaj') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(6, 1, 'tinytable_css_idu03bmizw9gsi97harp26') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(6, 2, 'tinytable_css_idu03bmizw9gsi97harp26') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(6, 3, 'tinytable_css_idu03bmizw9gsi97harp26') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(6, 4, 'tinytable_css_idu03bmizw9gsi97harp26') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(7, 0, 'tinytable_css_idh0mcp4bcfwqac8l02enn') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(7, 1, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(7, 2, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(7, 3, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(7, 4, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(8, 0, 'tinytable_css_idh0mcp4bcfwqac8l02enn') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(8, 1, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(8, 2, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(8, 3, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(8, 4, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(9, 0, 'tinytable_css_idh0mcp4bcfwqac8l02enn') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(9, 1, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(9, 2, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(9, 3, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+window.addEventListener('load', function () { styleCell_yho42vnunmbotbljfygw(9, 4, 'tinytable_css_idgz56bch98r1zta9l7s0k') })
+    </script>
 
+    <style>
+    .table td.tinytable_css_idv64xsftz289jofqw8q5b, .table th.tinytable_css_idv64xsftz289jofqw8q5b {  text-align: left;  border-bottom: solid 0.1em #d3d8dc; }
+    .table td.tinytable_css_idwlumfmt7ph7zzt7kuib6, .table th.tinytable_css_idwlumfmt7ph7zzt7kuib6 {  text-align: center;  border-bottom: solid 0.1em #d3d8dc; }
+    .table td.tinytable_css_idh0mcp4bcfwqac8l02enn, .table th.tinytable_css_idh0mcp4bcfwqac8l02enn {  text-align: left; }
+    .table td.tinytable_css_idgz56bch98r1zta9l7s0k, .table th.tinytable_css_idgz56bch98r1zta9l7s0k {  text-align: center; }
+    .table td.tinytable_css_idnkbbeb12oodrp7panzaj, .table th.tinytable_css_idnkbbeb12oodrp7panzaj {  border-bottom: solid 0.05em black;  text-align: left; }
+    .table td.tinytable_css_idu03bmizw9gsi97harp26, .table th.tinytable_css_idu03bmizw9gsi97harp26 {  border-bottom: solid 0.05em black;  text-align: center; }
+    </style>
+    <div class="container">
+      <table class="table table-borderless" id="tinytable_yho42vnunmbotbljfygw" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+        <thead>
+        
+              <tr>
+                <th scope="col"> </th>
+                <th scope="col">(1)</th>
+                <th scope="col">(2)</th>
+                <th scope="col">(3)</th>
+                <th scope="col">(4)</th>
+              </tr>
+        </thead>
+        
+        <tbody>
+                <tr>
+                  <td>Raw Score    </td>
+                  <td>0.040  </td>
+                  <td>-0.044 </td>
+                  <td>-0.059 </td>
+                  <td>-0.074 </td>
+                </tr>
+                <tr>
+                  <td>             </td>
+                  <td>(0.002)</td>
+                  <td>(0.009)</td>
+                  <td>(0.011)</td>
+                  <td>(0.012)</td>
+                </tr>
+                <tr>
+                  <td>Treatment    </td>
+                  <td>-0.011 </td>
+                  <td>0.008  </td>
+                  <td>0.007  </td>
+                  <td>0.008  </td>
+                </tr>
+                <tr>
+                  <td>             </td>
+                  <td>(0.001)</td>
+                  <td>(0.002)</td>
+                  <td>(0.002)</td>
+                  <td>(0.002)</td>
+                </tr>
+                <tr>
+                  <td>Score x Treat</td>
+                  <td>       </td>
+                  <td>       </td>
+                  <td>0.035  </td>
+                  <td>0.062  </td>
+                </tr>
+                <tr>
+                  <td>             </td>
+                  <td>       </td>
+                  <td>       </td>
+                  <td>(0.017)</td>
+                  <td>(0.025)</td>
+                </tr>
+                <tr>
+                  <td>Bandwidth    </td>
+                  <td>0.25   </td>
+                  <td>0.175  </td>
+                  <td>0.175  </td>
+                  <td>0.125  </td>
+                </tr>
+                <tr>
+                  <td>Num.Obs.     </td>
+                  <td>9913   </td>
+                  <td>3385   </td>
+                  <td>3385   </td>
+                  <td>3241   </td>
+                </tr>
+                <tr>
+                  <td>R2           </td>
+                  <td>0.053  </td>
+                  <td>0.008  </td>
+                  <td>0.009  </td>
+                  <td>0.012  </td>
+                </tr>
+        </tbody>
+      </table>
+    </div>
+<!-- hack to avoid NA insertion in last line -->
 </div>
 </div>
 </section>
@@ -663,12 +770,12 @@ F-statistic: 45.41 on 6 and 18979 DF,  p-value: &lt; 2.2e-16</code></pre>
 <section id="built-in-rd-packages" class="slide level2">
 <h2>Built-in RD packages</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>R Code</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="fu">library</span>(rdrobust)</span>
-<span id="cb9-2"><a href="#cb9-2"></a><span class="fu">rdplot</span>(<span class="at">y=</span>ma.rd1<span class="sc">$</span>mkt_share, <span class="at">x=</span>ma.rd1<span class="sc">$</span>score, <span class="at">binselect=</span><span class="st">"es"</span>,</span>
-<span id="cb9-3"><a href="#cb9-3"></a>       <span class="at">title=</span><span class="st">"RD Plot: Market Share"</span>, <span class="at">x.label=</span><span class="st">"Summary Score"</span>,</span>
-<span id="cb9-4"><a href="#cb9-4"></a>       <span class="at">y.label=</span><span class="st">"Market Share"</span>, <span class="at">masspoints=</span><span class="st">"off"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href=""></a><span class="fu">library</span>(rdrobust)</span>
+<span id="cb9-2"><a href=""></a><span class="fu">rdplot</span>(<span class="at">y=</span>ma.rd1<span class="sc">$</span>mkt_share, <span class="at">x=</span>ma.rd1<span class="sc">$</span>score, <span class="at">binselect=</span><span class="st">"es"</span>,</span>
+<span id="cb9-3"><a href=""></a>       <span class="at">title=</span><span class="st">"RD Plot: Market Share"</span>, <span class="at">x.label=</span><span class="st">"Summary Score"</span>,</span>
+<span id="cb9-4"><a href=""></a>       <span class="at">y.label=</span><span class="st">"Market Share"</span>, <span class="at">masspoints=</span><span class="st">"off"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 
 </div>
@@ -676,12 +783,12 @@ F-statistic: 45.41 on 6 and 18979 DF,  p-value: &lt; 2.2e-16</code></pre>
 <section id="estimates-from-rd-package" class="slide level2">
 <h2>Estimates from RD package</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>R Code</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>est1 <span class="ot">&lt;-</span> <span class="fu">rdrobust</span>(<span class="at">y=</span>ma.rd1<span class="sc">$</span>mkt_share, <span class="at">x=</span>ma.rd1<span class="sc">$</span>score, <span class="at">c=</span><span class="dv">0</span>,</span>
-<span id="cb10-2"><a href="#cb10-2"></a>                 <span class="at">h=</span><span class="fl">0.125</span>, <span class="at">p=</span><span class="dv">1</span>, <span class="at">kernel=</span><span class="st">"uniform"</span>, <span class="at">vce=</span><span class="st">"hc0"</span>,</span>
-<span id="cb10-3"><a href="#cb10-3"></a>                 <span class="at">masspoints=</span><span class="st">"off"</span>)</span>
-<span id="cb10-4"><a href="#cb10-4"></a><span class="fu">summary</span>(est1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href=""></a>est1 <span class="ot">&lt;-</span> <span class="fu">rdrobust</span>(<span class="at">y=</span>ma.rd1<span class="sc">$</span>mkt_share, <span class="at">x=</span>ma.rd1<span class="sc">$</span>score, <span class="at">c=</span><span class="dv">0</span>,</span>
+<span id="cb10-2"><a href=""></a>                 <span class="at">h=</span><span class="fl">0.125</span>, <span class="at">p=</span><span class="dv">1</span>, <span class="at">kernel=</span><span class="st">"uniform"</span>, <span class="at">vce=</span><span class="st">"hc0"</span>,</span>
+<span id="cb10-3"><a href=""></a>                 <span class="at">masspoints=</span><span class="st">"off"</span>)</span>
+<span id="cb10-4"><a href=""></a><span class="fu">summary</span>(est1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Sharp RD estimates using local polynomial regression.
@@ -711,12 +818,12 @@ rho (h/b)                     1.000        1.000
 <section id="optimal-bandwidth" class="slide level2">
 <h2>Optimal bandwidth</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>R Code</summary>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a>estopt <span class="ot">&lt;-</span> <span class="fu">rdrobust</span>(<span class="at">y=</span>ma.rd1<span class="sc">$</span>mkt_share, <span class="at">x=</span>ma.rd1<span class="sc">$</span>score, <span class="at">c=</span><span class="dv">0</span>,</span>
-<span id="cb12-2"><a href="#cb12-2"></a>                 <span class="at">p=</span><span class="dv">1</span>, <span class="at">kernel=</span><span class="st">"uniform"</span>, <span class="at">vce=</span><span class="st">"hc0"</span>,</span>
-<span id="cb12-3"><a href="#cb12-3"></a>                 <span class="at">masspoints=</span><span class="st">"off"</span>)</span>
-<span id="cb12-4"><a href="#cb12-4"></a><span class="fu">summary</span>(estopt)                 </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href=""></a>estopt <span class="ot">&lt;-</span> <span class="fu">rdrobust</span>(<span class="at">y=</span>ma.rd1<span class="sc">$</span>mkt_share, <span class="at">x=</span>ma.rd1<span class="sc">$</span>score, <span class="at">c=</span><span class="dv">0</span>,</span>
+<span id="cb12-2"><a href=""></a>                 <span class="at">p=</span><span class="dv">1</span>, <span class="at">kernel=</span><span class="st">"uniform"</span>, <span class="at">vce=</span><span class="st">"hc0"</span>,</span>
+<span id="cb12-3"><a href=""></a>                 <span class="at">masspoints=</span><span class="st">"off"</span>)</span>
+<span id="cb12-4"><a href=""></a><span class="fu">summary</span>(estopt)                 </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Sharp RD estimates using local polynomial regression.
@@ -746,22 +853,22 @@ rho (h/b)                     0.482        0.482
 <section id="estimates-for-other-rating-thresholds-2.25" class="slide level2">
 <h2>Estimates for other rating thresholds (2.25)</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>R Code</summary>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>ma.rd225 <span class="ot">&lt;-</span> ma.data.clean <span class="sc">%&gt;%</span></span>
-<span id="cb14-2"><a href="#cb14-2"></a>  <span class="fu">filter</span>(Star_Rating<span class="sc">==</span><span class="dv">2</span> <span class="sc">|</span> Star_Rating<span class="sc">==</span><span class="fl">2.5</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb14-3"><a href="#cb14-3"></a>  <span class="fu">mutate</span>(<span class="at">score =</span> raw_rating <span class="sc">-</span> <span class="fl">2.25</span>,</span>
-<span id="cb14-4"><a href="#cb14-4"></a>         <span class="at">treat =</span> (score<span class="sc">&gt;=</span><span class="dv">0</span>),</span>
-<span id="cb14-5"><a href="#cb14-5"></a>         <span class="at">window1 =</span> (score<span class="sc">&gt;=-</span>.<span class="dv">175</span> <span class="sc">&amp;</span> score<span class="sc">&lt;=</span>.<span class="dv">175</span>),</span>
-<span id="cb14-6"><a href="#cb14-6"></a>         <span class="at">window2 =</span> (score<span class="sc">&gt;=-</span>.<span class="dv">125</span> <span class="sc">&amp;</span> score<span class="sc">&lt;=</span>.<span class="dv">125</span>),</span>
-<span id="cb14-7"><a href="#cb14-7"></a>         <span class="at">mkt_share =</span> avg_enrollment<span class="sc">/</span>avg_eligibles,</span>
-<span id="cb14-8"><a href="#cb14-8"></a>         <span class="at">ln_share =</span> <span class="fu">log</span>(mkt_share),</span>
-<span id="cb14-9"><a href="#cb14-9"></a>         <span class="at">score_treat=</span>score<span class="sc">*</span>treat)</span>
-<span id="cb14-10"><a href="#cb14-10"></a></span>
-<span id="cb14-11"><a href="#cb14-11"></a>est225 <span class="ot">&lt;-</span> <span class="fu">rdrobust</span>(<span class="at">y=</span>ma.rd225<span class="sc">$</span>mkt_share, <span class="at">x=</span>ma.rd225<span class="sc">$</span>score, <span class="at">c=</span><span class="dv">0</span>,</span>
-<span id="cb14-12"><a href="#cb14-12"></a>                 <span class="at">h=</span><span class="fl">0.125</span>, <span class="at">p=</span><span class="dv">1</span>, <span class="at">kernel=</span><span class="st">"uniform"</span>, <span class="at">vce=</span><span class="st">"hc0"</span>,</span>
-<span id="cb14-13"><a href="#cb14-13"></a>                 <span class="at">masspoints=</span><span class="st">"off"</span>)</span>
-<span id="cb14-14"><a href="#cb14-14"></a><span class="fu">summary</span>(est225)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href=""></a>ma.rd225 <span class="ot">&lt;-</span> ma.data.clean <span class="sc">%&gt;%</span></span>
+<span id="cb14-2"><a href=""></a>  <span class="fu">filter</span>(Star_Rating<span class="sc">==</span><span class="dv">2</span> <span class="sc">|</span> Star_Rating<span class="sc">==</span><span class="fl">2.5</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb14-3"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">score =</span> raw_rating <span class="sc">-</span> <span class="fl">2.25</span>,</span>
+<span id="cb14-4"><a href=""></a>         <span class="at">treat =</span> (score<span class="sc">&gt;=</span><span class="dv">0</span>),</span>
+<span id="cb14-5"><a href=""></a>         <span class="at">window1 =</span> (score<span class="sc">&gt;=-</span>.<span class="dv">175</span> <span class="sc">&amp;</span> score<span class="sc">&lt;=</span>.<span class="dv">175</span>),</span>
+<span id="cb14-6"><a href=""></a>         <span class="at">window2 =</span> (score<span class="sc">&gt;=-</span>.<span class="dv">125</span> <span class="sc">&amp;</span> score<span class="sc">&lt;=</span>.<span class="dv">125</span>),</span>
+<span id="cb14-7"><a href=""></a>         <span class="at">mkt_share =</span> avg_enrollment<span class="sc">/</span>avg_eligibles,</span>
+<span id="cb14-8"><a href=""></a>         <span class="at">ln_share =</span> <span class="fu">log</span>(mkt_share),</span>
+<span id="cb14-9"><a href=""></a>         <span class="at">score_treat=</span>score<span class="sc">*</span>treat)</span>
+<span id="cb14-10"><a href=""></a></span>
+<span id="cb14-11"><a href=""></a>est225 <span class="ot">&lt;-</span> <span class="fu">rdrobust</span>(<span class="at">y=</span>ma.rd225<span class="sc">$</span>mkt_share, <span class="at">x=</span>ma.rd225<span class="sc">$</span>score, <span class="at">c=</span><span class="dv">0</span>,</span>
+<span id="cb14-12"><a href=""></a>                 <span class="at">h=</span><span class="fl">0.125</span>, <span class="at">p=</span><span class="dv">1</span>, <span class="at">kernel=</span><span class="st">"uniform"</span>, <span class="at">vce=</span><span class="st">"hc0"</span>,</span>
+<span id="cb14-13"><a href=""></a>                 <span class="at">masspoints=</span><span class="st">"off"</span>)</span>
+<span id="cb14-14"><a href=""></a><span class="fu">summary</span>(est225)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Sharp RD estimates using local polynomial regression.
@@ -791,23 +898,23 @@ rho (h/b)                     1.000        1.000
 <section id="estimates-for-other-rating-thresholds-2.75" class="slide level2">
 <h2>Estimates for other rating thresholds (2.75)</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>R Code</summary>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a>ma.rd275 <span class="ot">&lt;-</span> ma.data.clean <span class="sc">%&gt;%</span></span>
-<span id="cb16-2"><a href="#cb16-2"></a>  <span class="fu">filter</span>(Star_Rating<span class="sc">==</span><span class="fl">2.5</span> <span class="sc">|</span> Star_Rating<span class="sc">==</span><span class="dv">3</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb16-3"><a href="#cb16-3"></a>  <span class="fu">mutate</span>(<span class="at">score =</span> raw_rating <span class="sc">-</span> <span class="fl">2.75</span>,</span>
-<span id="cb16-4"><a href="#cb16-4"></a>         <span class="at">treat =</span> (score<span class="sc">&gt;=</span><span class="dv">0</span>),</span>
-<span id="cb16-5"><a href="#cb16-5"></a>         <span class="at">window1 =</span> (score<span class="sc">&gt;=-</span>.<span class="dv">175</span> <span class="sc">&amp;</span> score<span class="sc">&lt;=</span>.<span class="dv">175</span>),</span>
-<span id="cb16-6"><a href="#cb16-6"></a>         <span class="at">window2 =</span> (score<span class="sc">&gt;=-</span>.<span class="dv">125</span> <span class="sc">&amp;</span> score<span class="sc">&lt;=</span>.<span class="dv">125</span>),</span>
-<span id="cb16-7"><a href="#cb16-7"></a>         <span class="at">mkt_share =</span> avg_enrollment<span class="sc">/</span>avg_eligibles,</span>
-<span id="cb16-8"><a href="#cb16-8"></a>         <span class="at">ln_share =</span> <span class="fu">log</span>(mkt_share),</span>
-<span id="cb16-9"><a href="#cb16-9"></a>         <span class="at">score_treat=</span>score<span class="sc">*</span>treat)</span>
-<span id="cb16-10"><a href="#cb16-10"></a></span>
-<span id="cb16-11"><a href="#cb16-11"></a>est275 <span class="ot">&lt;-</span> <span class="fu">rdrobust</span>(<span class="at">y=</span>ma.rd275<span class="sc">$</span>mkt_share, <span class="at">x=</span>ma.rd275<span class="sc">$</span>score, <span class="at">c=</span><span class="dv">0</span>,</span>
-<span id="cb16-12"><a href="#cb16-12"></a>                 <span class="at">h=</span><span class="fl">0.125</span>, <span class="at">p=</span><span class="dv">1</span>, <span class="at">kernel=</span><span class="st">"uniform"</span>, <span class="at">vce=</span><span class="st">"hc0"</span>,</span>
-<span id="cb16-13"><a href="#cb16-13"></a>                 <span class="at">masspoints=</span><span class="st">"off"</span>)</span>
-<span id="cb16-14"><a href="#cb16-14"></a></span>
-<span id="cb16-15"><a href="#cb16-15"></a><span class="fu">summary</span>(est275)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href=""></a>ma.rd275 <span class="ot">&lt;-</span> ma.data.clean <span class="sc">%&gt;%</span></span>
+<span id="cb16-2"><a href=""></a>  <span class="fu">filter</span>(Star_Rating<span class="sc">==</span><span class="fl">2.5</span> <span class="sc">|</span> Star_Rating<span class="sc">==</span><span class="dv">3</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb16-3"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">score =</span> raw_rating <span class="sc">-</span> <span class="fl">2.75</span>,</span>
+<span id="cb16-4"><a href=""></a>         <span class="at">treat =</span> (score<span class="sc">&gt;=</span><span class="dv">0</span>),</span>
+<span id="cb16-5"><a href=""></a>         <span class="at">window1 =</span> (score<span class="sc">&gt;=-</span>.<span class="dv">175</span> <span class="sc">&amp;</span> score<span class="sc">&lt;=</span>.<span class="dv">175</span>),</span>
+<span id="cb16-6"><a href=""></a>         <span class="at">window2 =</span> (score<span class="sc">&gt;=-</span>.<span class="dv">125</span> <span class="sc">&amp;</span> score<span class="sc">&lt;=</span>.<span class="dv">125</span>),</span>
+<span id="cb16-7"><a href=""></a>         <span class="at">mkt_share =</span> avg_enrollment<span class="sc">/</span>avg_eligibles,</span>
+<span id="cb16-8"><a href=""></a>         <span class="at">ln_share =</span> <span class="fu">log</span>(mkt_share),</span>
+<span id="cb16-9"><a href=""></a>         <span class="at">score_treat=</span>score<span class="sc">*</span>treat)</span>
+<span id="cb16-10"><a href=""></a></span>
+<span id="cb16-11"><a href=""></a>est275 <span class="ot">&lt;-</span> <span class="fu">rdrobust</span>(<span class="at">y=</span>ma.rd275<span class="sc">$</span>mkt_share, <span class="at">x=</span>ma.rd275<span class="sc">$</span>score, <span class="at">c=</span><span class="dv">0</span>,</span>
+<span id="cb16-12"><a href=""></a>                 <span class="at">h=</span><span class="fl">0.125</span>, <span class="at">p=</span><span class="dv">1</span>, <span class="at">kernel=</span><span class="st">"uniform"</span>, <span class="at">vce=</span><span class="st">"hc0"</span>,</span>
+<span id="cb16-13"><a href=""></a>                 <span class="at">masspoints=</span><span class="st">"off"</span>)</span>
+<span id="cb16-14"><a href=""></a></span>
+<span id="cb16-15"><a href=""></a><span class="fu">summary</span>(est275)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Sharp RD estimates using local polynomial regression.
@@ -837,22 +944,22 @@ rho (h/b)                     1.000        1.000
 <section id="estimates-for-other-rating-thresholds-3.25" class="slide level2">
 <h2>Estimates for other rating thresholds (3.25)</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>R Code</summary>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a>ma.rd325 <span class="ot">&lt;-</span> ma.data.clean <span class="sc">%&gt;%</span></span>
-<span id="cb18-2"><a href="#cb18-2"></a>  <span class="fu">filter</span>(Star_Rating<span class="sc">==</span><span class="dv">3</span> <span class="sc">|</span> Star_Rating<span class="sc">==</span><span class="fl">3.5</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb18-3"><a href="#cb18-3"></a>  <span class="fu">mutate</span>(<span class="at">score =</span> raw_rating <span class="sc">-</span> <span class="fl">3.25</span>,</span>
-<span id="cb18-4"><a href="#cb18-4"></a>         <span class="at">treat =</span> (score<span class="sc">&gt;=</span><span class="dv">0</span>),</span>
-<span id="cb18-5"><a href="#cb18-5"></a>         <span class="at">window1 =</span> (score<span class="sc">&gt;=-</span>.<span class="dv">175</span> <span class="sc">&amp;</span> score<span class="sc">&lt;=</span>.<span class="dv">175</span>),</span>
-<span id="cb18-6"><a href="#cb18-6"></a>         <span class="at">window2 =</span> (score<span class="sc">&gt;=-</span>.<span class="dv">125</span> <span class="sc">&amp;</span> score<span class="sc">&lt;=</span>.<span class="dv">125</span>),</span>
-<span id="cb18-7"><a href="#cb18-7"></a>         <span class="at">mkt_share =</span> avg_enrollment<span class="sc">/</span>avg_eligibles,</span>
-<span id="cb18-8"><a href="#cb18-8"></a>         <span class="at">ln_share =</span> <span class="fu">log</span>(mkt_share),</span>
-<span id="cb18-9"><a href="#cb18-9"></a>         <span class="at">score_treat=</span>score<span class="sc">*</span>treat)</span>
-<span id="cb18-10"><a href="#cb18-10"></a></span>
-<span id="cb18-11"><a href="#cb18-11"></a>est325 <span class="ot">&lt;-</span> <span class="fu">rdrobust</span>(<span class="at">y=</span>ma.rd325<span class="sc">$</span>mkt_share, <span class="at">x=</span>ma.rd325<span class="sc">$</span>score, <span class="at">c=</span><span class="dv">0</span>,</span>
-<span id="cb18-12"><a href="#cb18-12"></a>                 <span class="at">h=</span><span class="fl">0.125</span>, <span class="at">p=</span><span class="dv">1</span>, <span class="at">kernel=</span><span class="st">"uniform"</span>, <span class="at">vce=</span><span class="st">"hc0"</span>,</span>
-<span id="cb18-13"><a href="#cb18-13"></a>                 <span class="at">masspoints=</span><span class="st">"off"</span>)</span>
-<span id="cb18-14"><a href="#cb18-14"></a><span class="fu">summary</span>(est325)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href=""></a>ma.rd325 <span class="ot">&lt;-</span> ma.data.clean <span class="sc">%&gt;%</span></span>
+<span id="cb18-2"><a href=""></a>  <span class="fu">filter</span>(Star_Rating<span class="sc">==</span><span class="dv">3</span> <span class="sc">|</span> Star_Rating<span class="sc">==</span><span class="fl">3.5</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb18-3"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">score =</span> raw_rating <span class="sc">-</span> <span class="fl">3.25</span>,</span>
+<span id="cb18-4"><a href=""></a>         <span class="at">treat =</span> (score<span class="sc">&gt;=</span><span class="dv">0</span>),</span>
+<span id="cb18-5"><a href=""></a>         <span class="at">window1 =</span> (score<span class="sc">&gt;=-</span>.<span class="dv">175</span> <span class="sc">&amp;</span> score<span class="sc">&lt;=</span>.<span class="dv">175</span>),</span>
+<span id="cb18-6"><a href=""></a>         <span class="at">window2 =</span> (score<span class="sc">&gt;=-</span>.<span class="dv">125</span> <span class="sc">&amp;</span> score<span class="sc">&lt;=</span>.<span class="dv">125</span>),</span>
+<span id="cb18-7"><a href=""></a>         <span class="at">mkt_share =</span> avg_enrollment<span class="sc">/</span>avg_eligibles,</span>
+<span id="cb18-8"><a href=""></a>         <span class="at">ln_share =</span> <span class="fu">log</span>(mkt_share),</span>
+<span id="cb18-9"><a href=""></a>         <span class="at">score_treat=</span>score<span class="sc">*</span>treat)</span>
+<span id="cb18-10"><a href=""></a></span>
+<span id="cb18-11"><a href=""></a>est325 <span class="ot">&lt;-</span> <span class="fu">rdrobust</span>(<span class="at">y=</span>ma.rd325<span class="sc">$</span>mkt_share, <span class="at">x=</span>ma.rd325<span class="sc">$</span>score, <span class="at">c=</span><span class="dv">0</span>,</span>
+<span id="cb18-12"><a href=""></a>                 <span class="at">h=</span><span class="fl">0.125</span>, <span class="at">p=</span><span class="dv">1</span>, <span class="at">kernel=</span><span class="st">"uniform"</span>, <span class="at">vce=</span><span class="st">"hc0"</span>,</span>
+<span id="cb18-13"><a href=""></a>                 <span class="at">masspoints=</span><span class="st">"off"</span>)</span>
+<span id="cb18-14"><a href=""></a><span class="fu">summary</span>(est325)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Sharp RD estimates using local polynomial regression.
@@ -882,22 +989,22 @@ rho (h/b)                     1.000        1.000
 <section id="estimates-for-other-rating-thresholds-3.75" class="slide level2">
 <h2>Estimates for other rating thresholds (3.75)</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>R Code</summary>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1"></a>ma.rd375 <span class="ot">&lt;-</span> ma.data.clean <span class="sc">%&gt;%</span></span>
-<span id="cb20-2"><a href="#cb20-2"></a>  <span class="fu">filter</span>(Star_Rating<span class="sc">==</span><span class="fl">3.5</span> <span class="sc">|</span> Star_Rating<span class="sc">==</span><span class="dv">4</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb20-3"><a href="#cb20-3"></a>  <span class="fu">mutate</span>(<span class="at">score =</span> raw_rating <span class="sc">-</span> <span class="fl">3.75</span>,</span>
-<span id="cb20-4"><a href="#cb20-4"></a>         <span class="at">treat =</span> (score<span class="sc">&gt;=</span><span class="dv">0</span>),</span>
-<span id="cb20-5"><a href="#cb20-5"></a>         <span class="at">window1 =</span> (score<span class="sc">&gt;=-</span>.<span class="dv">175</span> <span class="sc">&amp;</span> score<span class="sc">&lt;=</span>.<span class="dv">175</span>),</span>
-<span id="cb20-6"><a href="#cb20-6"></a>         <span class="at">window2 =</span> (score<span class="sc">&gt;=-</span>.<span class="dv">125</span> <span class="sc">&amp;</span> score<span class="sc">&lt;=</span>.<span class="dv">125</span>),</span>
-<span id="cb20-7"><a href="#cb20-7"></a>         <span class="at">mkt_share =</span> avg_enrollment<span class="sc">/</span>avg_eligibles,</span>
-<span id="cb20-8"><a href="#cb20-8"></a>         <span class="at">ln_share =</span> <span class="fu">log</span>(mkt_share),</span>
-<span id="cb20-9"><a href="#cb20-9"></a>         <span class="at">score_treat=</span>score<span class="sc">*</span>treat)</span>
-<span id="cb20-10"><a href="#cb20-10"></a></span>
-<span id="cb20-11"><a href="#cb20-11"></a>est375 <span class="ot">&lt;-</span> <span class="fu">rdrobust</span>(<span class="at">y=</span>ma.rd375<span class="sc">$</span>mkt_share, <span class="at">x=</span>ma.rd375<span class="sc">$</span>score, <span class="at">c=</span><span class="dv">0</span>,</span>
-<span id="cb20-12"><a href="#cb20-12"></a>                 <span class="at">h=</span><span class="fl">0.125</span>, <span class="at">p=</span><span class="dv">1</span>, <span class="at">kernel=</span><span class="st">"uniform"</span>, <span class="at">vce=</span><span class="st">"hc0"</span>,</span>
-<span id="cb20-13"><a href="#cb20-13"></a>                 <span class="at">masspoints=</span><span class="st">"off"</span>)</span>
-<span id="cb20-14"><a href="#cb20-14"></a><span class="fu">summary</span>(est375)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href=""></a>ma.rd375 <span class="ot">&lt;-</span> ma.data.clean <span class="sc">%&gt;%</span></span>
+<span id="cb20-2"><a href=""></a>  <span class="fu">filter</span>(Star_Rating<span class="sc">==</span><span class="fl">3.5</span> <span class="sc">|</span> Star_Rating<span class="sc">==</span><span class="dv">4</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb20-3"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">score =</span> raw_rating <span class="sc">-</span> <span class="fl">3.75</span>,</span>
+<span id="cb20-4"><a href=""></a>         <span class="at">treat =</span> (score<span class="sc">&gt;=</span><span class="dv">0</span>),</span>
+<span id="cb20-5"><a href=""></a>         <span class="at">window1 =</span> (score<span class="sc">&gt;=-</span>.<span class="dv">175</span> <span class="sc">&amp;</span> score<span class="sc">&lt;=</span>.<span class="dv">175</span>),</span>
+<span id="cb20-6"><a href=""></a>         <span class="at">window2 =</span> (score<span class="sc">&gt;=-</span>.<span class="dv">125</span> <span class="sc">&amp;</span> score<span class="sc">&lt;=</span>.<span class="dv">125</span>),</span>
+<span id="cb20-7"><a href=""></a>         <span class="at">mkt_share =</span> avg_enrollment<span class="sc">/</span>avg_eligibles,</span>
+<span id="cb20-8"><a href=""></a>         <span class="at">ln_share =</span> <span class="fu">log</span>(mkt_share),</span>
+<span id="cb20-9"><a href=""></a>         <span class="at">score_treat=</span>score<span class="sc">*</span>treat)</span>
+<span id="cb20-10"><a href=""></a></span>
+<span id="cb20-11"><a href=""></a>est375 <span class="ot">&lt;-</span> <span class="fu">rdrobust</span>(<span class="at">y=</span>ma.rd375<span class="sc">$</span>mkt_share, <span class="at">x=</span>ma.rd375<span class="sc">$</span>score, <span class="at">c=</span><span class="dv">0</span>,</span>
+<span id="cb20-12"><a href=""></a>                 <span class="at">h=</span><span class="fl">0.125</span>, <span class="at">p=</span><span class="dv">1</span>, <span class="at">kernel=</span><span class="st">"uniform"</span>, <span class="at">vce=</span><span class="st">"hc0"</span>,</span>
+<span id="cb20-13"><a href=""></a>                 <span class="at">masspoints=</span><span class="st">"off"</span>)</span>
+<span id="cb20-14"><a href=""></a><span class="fu">summary</span>(est375)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Sharp RD estimates using local polynomial regression.
@@ -931,24 +1038,28 @@ rho (h/b)                     1.000        1.000
 <section id="manipulation-of-the-running-variable-1" class="slide level2">
 <h2>Manipulation of the running variable</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>R Code</summary>
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1"></a>dens225 <span class="ot">&lt;-</span> <span class="fu">rddensity</span>(ma.rd225<span class="sc">$</span>score, <span class="at">c=</span><span class="dv">0</span>)</span>
-<span id="cb22-2"><a href="#cb22-2"></a><span class="fu">rdplotdensity</span>(dens225, ma.rd225<span class="sc">$</span>score)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href=""></a>dens225 <span class="ot">&lt;-</span> <span class="fu">rddensity</span>(ma.rd225<span class="sc">$</span>score, <span class="at">c=</span><span class="dv">0</span>)</span>
+<span id="cb22-2"><a href=""></a><span class="fu">rdplotdensity</span>(dens225, ma.rd225<span class="sc">$</span>score)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
+<div>
+<figure>
 <p><img data-src="03-rd4_files/figure-revealjs/unnamed-chunk-16-1.png" width="960"></p>
+</figure>
+</div>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$Estl
 Call: lpdensity
 
-Sample size                                      3335
+Sample size                                      3327
 Polynomial order for point estimation    (p=)    2
 Order of derivative estimated            (v=)    1
 Polynomial order for confidence interval (q=)    3
 Kernel function                                  triangular
-Scaling factor                                   0.3363599677159
+Scaling factor                                   0.335653753026634
 Bandwidth method                                 user provided
 
 Use summary(...) to show estimates.
@@ -961,7 +1072,7 @@ Polynomial order for point estimation    (p=)    2
 Order of derivative estimated            (v=)    1
 Polynomial order for confidence interval (q=)    3
 Kernel function                                  triangular
-Scaling factor                                   0.664346246973366
+Scaling factor                                   0.664447134786118
 Bandwidth method                                 user provided
 
 Use summary(...) to show estimates.
@@ -969,7 +1080,11 @@ Use summary(...) to show estimates.
 $Estplot</code></pre>
 </div>
 <div class="cell-output-display">
+<div>
+<figure>
 <p><img data-src="03-rd4_files/figure-revealjs/unnamed-chunk-16-2.png" width="960"></p>
+</figure>
+</div>
 </div>
 </div>
 </section>
@@ -1016,16 +1131,16 @@ Window Length / 2          &lt;c     &gt;=c    P&gt;|T|
 <section id="covariate-balance" class="slide level2">
 <h2>Covariate balance</h2>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>R Code</summary>
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a>match.dat <span class="ot">&lt;-</span> <span class="fu">matchit</span>(treat<span class="sc">~</span>premium_partc <span class="sc">+</span> ma_rate, </span>
-<span id="cb25-2"><a href="#cb25-2"></a>                     <span class="at">data=</span>ma.rd225 <span class="sc">%&gt;%</span> </span>
-<span id="cb25-3"><a href="#cb25-3"></a>                       <span class="fu">filter</span>(window2<span class="sc">==</span><span class="cn">TRUE</span>, </span>
-<span id="cb25-4"><a href="#cb25-4"></a>                              <span class="sc">!</span><span class="fu">is.na</span>(treat), </span>
-<span id="cb25-5"><a href="#cb25-5"></a>                              <span class="sc">!</span><span class="fu">is.na</span>(premium_partc), </span>
-<span id="cb25-6"><a href="#cb25-6"></a>                              <span class="sc">!</span><span class="fu">is.na</span>(ma_rate)),</span>
-<span id="cb25-7"><a href="#cb25-7"></a>                     <span class="at">method=</span><span class="cn">NULL</span>, <span class="at">distance=</span><span class="st">"mahalanobis"</span>)</span>
-<span id="cb25-8"><a href="#cb25-8"></a><span class="fu">love.plot</span>(match.dat, <span class="at">abs=</span><span class="cn">TRUE</span>)                     </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href=""></a>match.dat <span class="ot">&lt;-</span> <span class="fu">matchit</span>(treat<span class="sc">~</span>premium_partc <span class="sc">+</span> ma_rate, </span>
+<span id="cb25-2"><a href=""></a>                     <span class="at">data=</span>ma.rd225 <span class="sc">%&gt;%</span> </span>
+<span id="cb25-3"><a href=""></a>                       <span class="fu">filter</span>(window2<span class="sc">==</span><span class="cn">TRUE</span>, </span>
+<span id="cb25-4"><a href=""></a>                              <span class="sc">!</span><span class="fu">is.na</span>(treat), </span>
+<span id="cb25-5"><a href=""></a>                              <span class="sc">!</span><span class="fu">is.na</span>(premium_partc), </span>
+<span id="cb25-6"><a href=""></a>                              <span class="sc">!</span><span class="fu">is.na</span>(ma_rate)),</span>
+<span id="cb25-7"><a href=""></a>                     <span class="at">method=</span><span class="cn">NULL</span>, <span class="at">distance=</span><span class="st">"mahalanobis"</span>)</span>
+<span id="cb25-8"><a href=""></a><span class="fu">love.plot</span>(match.dat, <span class="at">abs=</span><span class="cn">TRUE</span>)                     </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 
 </div>
@@ -1037,8 +1152,10 @@ Window Length / 2          &lt;c     &gt;=c    P&gt;|T|
 <li>Assume random assignment between mass points</li>
 <li>Inference using Fisher’s exact test</li>
 </ul>
+<div class="quarto-auto-generated-content">
 <div class="footer footer-default">
 
+</div>
 </div>
 </section>
     </div>
@@ -1068,7 +1185,6 @@ Window Length / 2          &lt;c     &gt;=c    P&gt;|T|
       Reveal.initialize({
 'controlsAuto': true,
 'previewLinksAuto': true,
-'smaller': false,
 'pdfSeparateFragments': false,
 'autoAnimateEasing': "ease",
 'autoAnimateDuration': 1,
@@ -1255,42 +1371,80 @@ Window Length / 2          &lt;c     &gt;=c    P&gt;|T|
       });
     </script>
     
+
     <script>
+
       // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+
       // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+
       // slide changes (different for each slide format).
+
       (function () {
+
         // dispatch for htmlwidgets
+
         function fireSlideEnter() {
+
           const event = window.document.createEvent("Event");
+
           event.initEvent("slideenter", true, true);
+
           window.document.dispatchEvent(event);
+
         }
+
+    
 
         function fireSlideChanged(previousSlide, currentSlide) {
+
           fireSlideEnter();
 
+    
+
           // dispatch for shiny
+
           if (window.jQuery) {
+
             if (previousSlide) {
+
               window.jQuery(previousSlide).trigger("hidden");
+
             }
+
             if (currentSlide) {
+
               window.jQuery(currentSlide).trigger("shown");
+
             }
+
           }
+
         }
+
+    
 
         // hookup for slidy
+
         if (window.w3c_slidy) {
+
           window.w3c_slidy.add_observer(function (slide_num) {
+
             // slide_num starts at position 1
+
             fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+
           });
+
         }
 
+    
+
       })();
+
     </script>
+
+    
 
     <script id="quarto-html-after-body" type="application/javascript">
     window.document.addEventListener("DOMContentLoaded", function (event) {
@@ -1324,18 +1478,7 @@ Window Length / 2          &lt;c     &gt;=c    P&gt;|T|
         }
         return false;
       }
-      const clipboard = new window.ClipboardJS('.code-copy-button', {
-        text: function(trigger) {
-          const codeEl = trigger.previousElementSibling.cloneNode(true);
-          for (const childEl of codeEl.children) {
-            if (isCodeAnnotation(childEl)) {
-              childEl.remove();
-            }
-          }
-          return codeEl.innerText;
-        }
-      });
-      clipboard.on('success', function(e) {
+      const onCopySuccess = function(e) {
         // button target
         const button = e.trigger;
         // don't keep focus
@@ -1367,11 +1510,50 @@ Window Length / 2          &lt;c     &gt;=c    P&gt;|T|
         }, 1000);
         // clear code selection
         e.clearSelection();
+      }
+      const getTextToCopy = function(trigger) {
+          const codeEl = trigger.previousElementSibling.cloneNode(true);
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
+            }
+          }
+          return codeEl.innerText;
+      }
+      const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+        text: getTextToCopy
       });
-      function tippyHover(el, contentFn) {
+      clipboard.on('success', onCopySuccess);
+      if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+        // For code content inside modals, clipBoardJS needs to be initialized with a container option
+        // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+        const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+          text: getTextToCopy,
+          container: window.document.getElementById('quarto-embedded-source-code-modal')
+        });
+        clipboardModal.on('success', onCopySuccess);
+      }
+        var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+        var mailtoRegex = new RegExp(/^mailto:/);
+          var filterRegex = new RegExp('/' + window.location.host + '/');
+        var isInternal = (href) => {
+            return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+        }
+        // Inspect non-navigation links and adorn them if external
+     	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+        for (var i=0; i<links.length; i++) {
+          const link = links[i];
+          if (!isInternal(link.href)) {
+            // undo the damage that might have been done by quarto-nav.js in the case of
+            // links that we want to consider external
+            if (link.dataset.originalHref !== undefined) {
+              link.href = link.dataset.originalHref;
+            }
+          }
+        }
+      function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
         const config = {
           allowHTML: true,
-          content: contentFn,
           maxWidth: 500,
           delay: 100,
           arrow: false,
@@ -1381,8 +1563,17 @@ Window Length / 2          &lt;c     &gt;=c    P&gt;|T|
           interactive: true,
           interactiveBorder: 10,
           theme: 'light-border',
-          placement: 'bottom-start'
+          placement: 'bottom-start',
         };
+        if (contentFn) {
+          config.content = contentFn;
+        }
+        if (onTriggerFn) {
+          config.onTrigger = onTriggerFn;
+        }
+        if (onUntriggerFn) {
+          config.onUntrigger = onUntriggerFn;
+        }
           config['offset'] = [0,0];
           config['maxWidth'] = 700;
         window.tippy(el, config); 
@@ -1396,7 +1587,11 @@ Window Length / 2          &lt;c     &gt;=c    P&gt;|T|
           try { href = new URL(href).hash; } catch {}
           const id = href.replace(/^#\/?/, "");
           const note = window.document.getElementById(id);
-          return note.innerHTML;
+          if (note) {
+            return note.innerHTML;
+          } else {
+            return "";
+          }
         });
       }
       const findCites = (el) => {
@@ -1416,28 +1611,4 @@ Window Length / 2          &lt;c     &gt;=c    P&gt;|T|
         }
       };
       var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
-      for (var i=0; i<bibliorefs.length; i++) {
-        const ref = bibliorefs[i];
-        const citeInfo = findCites(ref);
-        if (citeInfo) {
-          tippyHover(citeInfo.el, function() {
-            var popup = window.document.createElement('div');
-            citeInfo.cites.forEach(function(cite) {
-              var citeDiv = window.document.createElement('div');
-              citeDiv.classList.add('hanging-indent');
-              citeDiv.classList.add('csl-entry');
-              var biblioDiv = window.document.getElementById('ref-' + cite);
-              if (biblioDiv) {
-                citeDiv.innerHTML = biblioDiv.innerHTML;
-              }
-              popup.appendChild(citeDiv);
-            });
-            return popup.innerHTML;
-          });
-        }
-      }
-    });
-    </script>
-    
-
-</body></html>
+      for (var i=0; i<bibliorefs.len
