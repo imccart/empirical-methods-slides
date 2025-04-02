@@ -346,11 +346,14 @@ summary(est375)
 ## Manipulation of the running variable
 
 ```{r}
+#| echo: false
+#| results: 'hide'
 #| code-fold: true
 #| code-summary: "R Code"
 
 dens225 <- rddensity(ma.rd225$score, c=0)
-rdplotdensity(dens225, ma.rd225$score)
+densplot <- rdplotdensity(dens225, ma.rd225$score)
+
 ```
 
 ---
